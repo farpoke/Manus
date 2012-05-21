@@ -11,8 +11,16 @@
 % Klassen baseras på article med A4 paper.
 \LoadClass[a4paper,10pt]{article}
 
-% Behöver några paket:
-\RequirePackage[T1]{fontenc} % För korrect hantering av unicode.
+% Använd paket för att testa om det är XeLaTeX som körs och ladda olika
+% sätt att hantera unicode beroende på.
+\RequirePackage{ifxetex}
+\ifxetex
+	\RequirePackage[T1]{fontenc}
+\else
+	\RequirePackage[utf8]{inputenc}
+\fi
+
+% Behöver några fler paket:
 \RequirePackage{ifthen} % För booleaner och \ifthenelse.
 \RequirePackage{makeidx} % För sakregister.
 \RequirePackage[usenames,dvipsnames]{xcolor} % För färger.
