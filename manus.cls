@@ -134,7 +134,7 @@
 	\stepcounter{scen}%
 	\subsection*{\hspace{\sl@numwidth}\thescen: #1}%
 	\addcontentsline{toc}{subsection}{\thescen: #1}%
-	\sammanfattning{#2}%
+	\scensammanfattning{#2}%
 	\vspace{1em}%
 }
 
@@ -142,24 +142,64 @@
 
 %%%%%%%%%% Sammanfattningar %%%%%%%%%%
 
-\newwrite\manus@sfout
-\immediate\openout\manus@sfout=\jobname.sf
-
-\newcommand\sammanfattning[1]{%
+\newcommand\scensammanfattning[1]{%
 	\ifthenelse{\boolean{sammanfattningar}}{%
 		\hbox{\hspace{\sl@namewidth}\parbox{\sl@linewidth}{#1}}%
 	}{}%
-	\immediate\write\manus@sfout{%
-		\detokenize{\paragraph}{\theakt, \thescen:} #1%
-	}%
+	\sf@nyscen{#1}
+}
+
+\newcounter{sf@räknare}
+\newcounter{sf@iter}
+\setcounter{sf@räknare}{0}
+\renewcommand\thesf@räknare{sf@\roman{sf@räknare}@}
+\renewcommand\thesf@iter{sf@\roman{sf@iter}@}
+
+\newcommand\sf@nyscen[1]{
+	\stepcounter{sf@räknare}
+	\expandafter\xdef\csname\thesf@räknare typ\endcsname{scen}
+	\expandafter\xdef\csname\thesf@räknare plats\endcsname{
+		\theakt, \thescen:}
+	\expandafter\xdef\csname\thesf@räknare text\endcsname{#1}
+}
+
+\newcommand\sf@nykuplett[2]{
+	\stepcounter{sf@räknare}
+	\begingroup
+	\def\rekv{}
+	\expandafter\xdef\csname\thesf@räknare typ\endcsname{kuplett}
+	\expandafter\xdef\csname\thesf@räknare namn\endcsname{#1}
+	\expandafter\xdef\csname\thesf@räknare beskrivning\endcsname{#2}
+	\endgroup
+}
+
+\newcommand\sf@skrivscen[2]{
+	\paragraph{#1} #2%
+}
+
+\newcommand\sf@skrivkuplett[2]{
+	\par\vspace{1em}%
+	\textcolor{kuplettcolor}{\MakeUppercase{#1}}\\%
+	#2%
 }
 
 \newcommand\sammanfattningslista{%
 	\section*{Sammanfattning}%
 	\addcontentsline{toc}{section}{Sammanfattning}%
-	
-	\immediate\closeout\manus@sfout%
-	\input{\jobname.sf}%
+	\setcounter{sf@iter}{0}
+	\loop\ifnum\value{sf@iter}<\value{sf@räknare}
+		\stepcounter{sf@iter}
+		\edef\sf@typ{\csname\thesf@iter typ\endcsname}
+		\ifthenelse{\equal{\sf@typ}{scen}}{
+			\sf@skrivscen
+				{\csname\thesf@iter plats\endcsname}
+				{\csname\thesf@iter text\endcsname}
+		}{
+			\sf@skrivkuplett
+				{\csname\thesf@iter namn\endcsname}
+				{\csname\thesf@iter beskrivning\endcsname}
+		}
+	\repeat
 }
 
 
@@ -189,9 +229,7 @@
 		\textcolor{kuplettcolor}{\MakeUppercase{\ktitel}}\\%
 		\kdeltagare%
 	}%
-	\immediate\write\manus@sfout{%
-		\detokenize{\kupletttitel}{\ktitel}%
-	}%
+	\sf@nykuplett{\ktitel}{\kbeskrivning}%
 	\enkelrad{%
 		Melodiförslag: \emph{\kmelodi}\\%
 		\texttt{Melodi:}\\%
@@ -199,14 +237,6 @@
 		Beskrivning: \emph{\kbeskrivning}%
 	}\vspace{1em}%
 	
-}
-
-\newcommand\kuplett@sf[2]{%
-}
-
-\newcommand\kupletttitel[1]{%
-	\par\vspace{1em}%
-	\textcolor{kuplettcolor}{\MakeUppercase{#1}}%
 }
 
 
