@@ -149,27 +149,27 @@
 	\sf@nyscen{#1}
 }
 
-\newcounter{sf@räknare}
+\newcounter{sf@raknare}
 \newcounter{sf@iter}
-\setcounter{sf@räknare}{0}
-\renewcommand\thesf@räknare{sf@\roman{sf@räknare}@}
+\setcounter{sf@raknare}{0}
+\renewcommand\thesf@raknare{sf@\roman{sf@raknare}@}
 \renewcommand\thesf@iter{sf@\roman{sf@iter}@}
 
 \newcommand\sf@nyscen[1]{
-	\stepcounter{sf@räknare}
-	\expandafter\xdef\csname\thesf@räknare typ\endcsname{scen}
-	\expandafter\xdef\csname\thesf@räknare plats\endcsname{
+	\stepcounter{sf@raknare}
+	\expandafter\xdef\csname\thesf@raknare typ\endcsname{scen}
+	\expandafter\xdef\csname\thesf@raknare plats\endcsname{
 		\theakt, \thescen:}
-	\expandafter\xdef\csname\thesf@räknare text\endcsname{#1}
+	\expandafter\xdef\csname\thesf@raknare text\endcsname{#1}
 }
 
 \newcommand\sf@nykuplett[2]{
-	\stepcounter{sf@räknare}
+	\stepcounter{sf@raknare}
 	\begingroup
 	\def\rekv{}
-	\expandafter\xdef\csname\thesf@räknare typ\endcsname{kuplett}
-	\expandafter\xdef\csname\thesf@räknare namn\endcsname{#1}
-	\expandafter\xdef\csname\thesf@räknare beskrivning\endcsname{#2}
+	\expandafter\xdef\csname\thesf@raknare typ\endcsname{kuplett}
+	\expandafter\xdef\csname\thesf@raknare namn\endcsname{#1}
+	\expandafter\xdef\csname\thesf@raknare beskrivning\endcsname{#2}
 	\endgroup
 }
 
@@ -187,7 +187,7 @@
 	\section*{Sammanfattning}%
 	\addcontentsline{toc}{section}{Sammanfattning}%
 	\setcounter{sf@iter}{0}
-	\loop\ifnum\value{sf@iter}<\value{sf@räknare}
+	\loop\ifnum\value{sf@iter}<\value{sf@raknare}
 		\stepcounter{sf@iter}
 		\edef\sf@typ{\csname\thesf@iter typ\endcsname}
 		\ifthenelse{\equal{\sf@typ}{scen}}{
