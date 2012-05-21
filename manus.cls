@@ -2,7 +2,7 @@
 % Version 2: Anton Mårtensson, anton.v.martensson@gmail.com
 
 \NeedsTeXFormat{LaTeX2e}[1994/06/01]
-\ProvidesClass{manusii}[2012/05/19]
+\ProvidesClass{manus}[2012/05/21]
 
 
 
@@ -40,7 +40,7 @@
 \manus@alternativ{sammanfattningar}
 
 % Hantera okända klassalternativ.
-\DeclareOption*{\typeout{! Klassen manusii känner inte igen \CurrentOption.}}
+\DeclareOption*{\typeout{! Dokumnetklassen Manus känner inte igen \CurrentOption.}}
 
 % Tolka givna alternativ.
 \ProcessOptions
@@ -120,7 +120,7 @@
 \newcounter{manus@rolliter}
 \setcounter{manus@roller}{0} % Inga karaktärer än.
 
-% Dessa räknare kommer användas innom \csname\endscname så definera
+% Dessa räknare kommer användas inom \csname\endscname så definera
 % om texten till något lämpligare.
 \renewcommand\themanus@roller{actor@\roman{manus@roller}@}
 \renewcommand\themanus@rolliter{actor@\roman{manus@rolliter}@}
@@ -194,10 +194,10 @@
 	\stepcounter{manus@roller}%
 	% Skapa kommando för att skriva ut en replik från karaktären.
 	\expandafter\newcommand\csname#1\endcsname[1]{%
-		\sl@line{#1}{##1}{#2}{true}}%
+		\manus@skrivrad{#1}{##1}{#2}{true}}%
 	% Skapa kommando för att skriva ut agerande från karaktären.
 	\expandafter\newcommand\csname#1gr\endcsname[1]{%
-		\sl@line{\tiny#1}{\textit{##1}}{#2}{true}}%
+		\manus@skrivrad{\tiny#1}{\textit{##1}}{#2}{true}}%
 	% Lägg till indikator.
 	\ifthenelse{\equal{#4}{true}}{%
 		% Skapa en ny boolean för att hålla reda på karaktärens status.
@@ -408,7 +408,7 @@
 
 %%%%%%%%%% Diverse kommandon %%%%%%%%%%
 
-\newcommand\allgr[1]{\sl@line{* * *}{\textit{#1}}{black}{true}}
+\newcommand\allgr[1]{\manus@skrivrad{* * *}{\textit{#1}}{black}{true}}
 \newcommand\berattare[1]{\enkelrad[true]{%
 	\tt%
 	\fontdimen2\font=0.5em%
@@ -421,7 +421,7 @@
 \newcommand{\citat}[1]{``#1''}
 \newcommand\comment[1]{}
 \newcommand\enkelrad[2][false]{%
-	\sl@line{}{#2}{black}{#1}%
+	\manus@skrivrad{}{#2}{black}{#1}%
 }
 \newcommand\gr[1]{\textit{#1}}
 \newcommand\rentext[1]{#1}
@@ -531,7 +531,7 @@
 %% sl@line{namn}{text}
 %
 % Huvudkommandot som skriver ut en repliksrad.
-\newcommand\sl@line[4]{%
+\newcommand\manus@skrivrad[4]{%
 	% Räkna ny rad.
 	\stepcounter{manus@radnummer}%
 	% Spara tillfälligt undan innehållet i en låda.
