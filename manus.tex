@@ -1,311 +1,398 @@
-\documentclass{article}
+\documentclass[a4paper,12pt]{article}
+
+%\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+
+\usepackage[pdftex, margin=3cm]{geometry}
 
 \usepackage{etex}
 \usepackage{xifthen}
-%\usepackage[utf8]{inputenc}
-\usepackage[T1]{fontenc}
 \usepackage[warn]{textcomp}
-\usepackage[a4paper, pdftex, margin=1.5in]{geometry}
-\usepackage{lmodern}
-%\usepackage{typetex}
-\usepackage{microtype}
-%\usepackage{xcolor}
 \usepackage{url}
 \usepackage[bottom,hang]{footmisc}
 \usepackage[babel]{csquotes}
 \usepackage[british,swedish]{babel}
 \usepackage[colorlinks]{hyperref}
-\usepackage{makeidx}
 \usepackage{datetime}
-\usepackage{fancyvrb}
-\usepackage[dvipsnames]{color}
-%\usepackage{listings}
+\usepackage[dvipsnames]{xcolor}
 
+\usepackage{fancyvrb}
+\DefineShortVerb{\|}
+
+\usepackage{listings}
+\lstset{
+	basicstyle=\small\ttfamily,
+	columns=flexible,
+	numberstyle=\tiny,
+	language=TeX,
+	keywordstyle=\bfseries,
+	morekeywords={documentclass,definecolor,nyroll,nyhjalproll,begin,gr,rekv,akt,scen,allgr,titel,deltagare,beskrivning,melodi,Namn,Namngr,Namnin,Namnut,Namnsub,Namnsubslut,rekvisitalista,kuplettlista,sammanfattningslista,statistiktabell}
+}
+
+\renewcommand\ttdefault{pcr}
+
+\usepackage{makeidx}
 \makeindex
-%\setcounter{secnumdepth}{-\maxdimen}
+
+\setcounter{secnumdepth}{1} 
 
 \newcommand*{\pack}{\textsf}
 
-\setcounter{secnumdepth}{3} 
-
-\newcommand{\C}[1]{\begingroup\color[named]{#1}\textbf{#1}\endgroup}
-
 \renewcommand{\dateseparator}{-}
-\newcommand{\todayiso}{\the\year \dateseparator \twodigit\month \dateseparator \twodigit\day}
-\DefineShortVerb{\|}
+\newcommand{\todayiso}{%
+	\the\year\dateseparator\twodigit\month\dateseparator\twodigit\day}
 
-\newcommand{\citat}[1]{``#1''}
+\newcommand\funnybone[1]{%
+	\raisebox{1em}[1em][0pt]{%
+		\makebox[\textwidth][r]{\large\it eller, ``#1''}%
+	}%
+}
 
-\title  {Att skriva manus med \pack{manus.cls}}
-\author {Cecilia Kjellman \\ cecilia.kjellman@gmail.com}
-\date{\todayiso}
+
 
 \begin{document}
 
+\title{Att skriva manus med \pack{manus.cls}}
+\author{%
+	Cecilia Kjellman, \texttt{cecilia.kjellman@gmail.com}\\%
+	Anton Mårtensson, \texttt{anton.v.martensson@gmail.com}}
+\date{\todayiso}
 \maketitle
 
-%\begin{abstract}
 
-%\end{abstract}
 
 \tableofcontents
+\newpage
+
+
+
+\section{Vad är \pack{manus.cls}?}
+
+\subsection{Kort svar}
+En dokumentklass till \LaTeX\ som är skriven med spex och andra scenframträdanden i tankarna.
+
+\subsection{Något längre svar}
+Klassen ger tillgång till ett antal kommandon som tillsammans ger möjlighet att skriva ett snyggt och lättläst manus. Vissa av dessa ger möjlighet till sådana flashiga funktioner som att skriva färgkodade repliker, indikatorer på vilka som är på scen, listor över rekvisita/kupletter/sammanfattningar, numrerade repliker och statistik för respektive roll. Andra är mer av estetisk natur, så som |\akt|. 
+
+\subsection{Kan jag använda klassen trots att jag inte kan \LaTeX?}
+Du behöver veta hur man kompilerar filer samt förstå syntaxen som presenteras i detta dokument. Ifall något skulle gå sönder så underlättar det om du har grundläggande felsökningserfarenhet.
+
+
+
+\section{Från början: Klassinställningar och preamble}
+Låt oss börja med en kort exempel-preamble:
+
+\begin{lstlisting}
+\documentclass{manus}
+	% <-- Ev. laddning av fler paket.
+	% Så som inputenc eller fontenc.
+\definecolor{rosa}{rgb}{1,0.5,0.5}
+\nyroll[rosa]{Bobby}
+\end{lstlisting}
+
+\noindent
+Nu är du redo att skriva ett manus om Bobby som kommer få alla sina repliker i rosa! Men låt oss först titta närmare på vad som faktiskt står ovan.
+
+\subsection{Ladda klassen}
+\index{documentclass@{\verb#\documentclass{manus}#}}
+På rad 1 ovan så anges att önskad dokumentklass är \pack{manus}, vilken bygger på dokumentklassen \pack{article}.
+
+För att ge direktiv till manusklassen kan extra klassalternativ anges på följande sätt:
+
+\begin{lstlisting}
+\documentclass[alternativlista]{manus}
+\end{lstlisting}
+
+\noindent
+där |alternativlista| är en komma-separerad lista med alternativ.
+
+\subsubsection{Alternativ: \texttt{svartvit}}
+\label{alt:svartvit}
+\index{svartvit@\texttt{svartvit}}
+Som standard är alla repliker samt kupletter markerade med färg. Kupletter med en egen kuplettfärg, och repliker efter vilken roll som skall framföra dem. Detta kanske inte är önskvärt om man skall skriva ut ett utkast på en skrivare utan färgkassett. Genom att då lägga till detta enda ord i källfilen kan man producera en svartvit version och lätt ändra tillbaka för när man skall fortsätta arbeta i färg på skärmen.
+
+\subsubsection{Alternativ: \texttt{sammanfattningar}}
+\label{alt:sammanfattningar}
+\index{sammanfattningar@\texttt{sammanfattningar}}
+När ny scen påbörjas med kommandot |\scen| (se nedan) kan en sammanfattning av scenen anges. I normala sparas den bara undan för att skrivas ut i slutet av dokumentet i sammanfattningslistan (se nedan). Men om detta klassalternativ ges så skrivs sammanfattningen även ut direkt efter scenrubriken.
+
+\subsection{Definiera karaktärer/roller}
+\funnybone{Våra tävlande är...}
+\label{sec:nyroll}
+\index{Definiera karaktärer}
+\index{nyroll@\verb#\nyroll#}
+\index{nyhjalproll@\verb#\nyhjalproll#}
+För att kunna använda manusfunktionaliteten behöver man definera vilka karaktärer som finns. Detta kan göras på fyra olika sätt:
+
+\begin{lstlisting}
+\nyroll{namn}            % Ny karaktär med svart text.
+\nyroll[färg]{namn}      % Ny karaktär med färgad text.
+\nyhjalproll{namn}       % Ny hjälpkaraktär med svart text.
+\nyhjalproll[färg]{namn} % Ny hjälpkaraktär med färgad text.
+\end{lstlisting}
+
+De första två varianterna definierar en ny karaktär och ger även denna en närvaroindikator som ritas ut i högermarginalen. Mer om denna indikator i avsnitt \ref{sec:narvaro}.
+
+De sista två varianterna definierar även de en ny karaktär, men inte \emph{inte} en närvaroindikator eller de kommandon som associeras med en sådan. Detta är användbart för småroller som till exempel en statist som bara finns med i en scen eller en berättare som inte finns på scen.
+
+\subsubsection{Färger}
+\label{sec:farger}
+\index{Färger}
+Om parametern färg inkluderas när en roll definieras kommer denna färg användas för repliker och agerande från denna karaktär samt för karaktärens närvaroindikator.
+
+Detta är frivilligt, och svart kommer tilldelas som karaktärsfärg om inget annat anges. Undertecknad tycker dock att svart är en tråkig färg.
+
+Värdet på färgparametern skall vara en färg enligt paketet \pack{xcolor}, som är det paket som \pack{manus.cls} använder för färgläggning. För enkel användning finns ett antal fördefinierade färger som listas i appendix \ref{app:farger}, men man kan även definiera egna färger eller ange en blandning av färger enligt \pack{xcolor}:s format. För detaljer se \pack{xcolor}:s dokumentation, som enklast fås genom att köra ``|texdoc xcolor|'' i en terminal eller genom att googla ``xcolor''.
+
+
 
 \newpage
 
-\section{Vad är \pack{manus.cls}?} % Alt. vad är manus.cls?
-\paragraph{Kort svar} En dokumentklass till \LaTeX\ som är skriven med spex och andra scenframträdanden i tankarna.
-\subsection{Något längre svar}
-Klassen ger tillgång till ett antal kommandon som tillsammans ger möjlighet att skriva ett snyggt och lättläst manus. Vissa av dessa ger möjlighet till sådana flashiga funktioner så som att skriva färgkodade repliker, indikatorer på vilka som är på scen, listor över rekvisita/kupletter/sammanfattningar, numrerade repliker och statistik för respektive roll. Andra är mer av estetisk natur, så som |\akt|. 
+\section{Manus}
+Början på ett exempelmanus:
 
-\paragraph{Kan jag använda klassen trots att jag inte kan \LaTeX?}
-Du behöver veta hur man kompilerar filer samt förstå syntaxen som presenteras i detta dokument. Ifall något skulle gå sönder så underlättar det om du har grundläggande felsökningserfarenhet.
-
-\section{Från början: Klassinställningar och preamble} %Förklara hur ett minimalistiskt manus-preamble kan se ut, möjliga parametrar till klassen, färg och roller.
-Låt oss börja med en kort exempel-preamble:
-\begin{Verbatim}[commentchar=!, commandchars=\#\(\),numbers=left,numberblanklines=false]
-\#textbf(documentclass){manus} #label(klass)
-      %Ev. fler paket. Så som \usepackage{inputenc}
-\#textbf(definecolor){rosa}{rgb}{1,0.5,0.5}
-\#textbf(nyroll)[rosa]{Bobby}
-\end{Verbatim}
-Nu är du redo att skriva ett manus om Bobby som kommer få alla sina repliker i rosa! Men låt oss först titta närmare på vad som faktiskt står ovan.
-
-\subsection{Ladda klassen}\index{documentclass@{\verb#\documentclass{manus}#}}
-På rad \ref{klass} ovan så anges att önskad dokumentklass är \pack{manus}, vilken bygger på dokumentklassen \pack{article}. Klassen tillåter två alternativa parametrar: \texttt{svartvit} samt \texttt{inut}. Vilka av dessa som skall användas anges följande alternativa sätt:
-\begin{Verbatim}[commentchar=!, commandchars=\#\(\),numberblanklines=false, firstnumber=1]
-\#textbf(documentclass){manus}
-\#textbf(documentclass)[svartvit]{manus}
-\#textbf(documentclass)[inut]{manus}
-\end{Verbatim}
-
-\subsubsection{Alternativ: svartvit}\index{svartvit@\texttt{svartvit}}\label{uSvartvit}
-Som standard är alla repliker samt kupletter markerade med färg. Kupletter med en egen kuplettfärg, och repliker efter vilken roll som skall framföra dem. Detta kanske inte är önskvärt om man skall skriva ut ett utkast på en skrivare utan färgkassett. Genom att då lägga till detta enda ord i källfilen kan man producera en svartvit version och lätt ändra tillbaka för när man skall fortsätta arbeta i färg på skärmen. Den svartvita versionen av klassen är dock väldigt lite testad.
-
-\subsubsection{Alternativ: inut}\index{inut@\texttt{inut}}\label{uInut}
-Gör det möjligt att få färgmarkering på vilka som befinner sig på scen löpande jämsides replikerna. Utan detta är kommandona som förklaras i \ref{uVemInne} verkningslösa. De kommer inte ge något felmeddelande men heller ingen effekt. Detta alternativ är inte förenligt med \texttt{svartvit}. Är båda alternativen angivna kommer \texttt{svartvit} ha prioritet och texten kommer visas utan färgmarkeringar för vilka som är inne på scen.
-
-\subsection{Definiera karaktärer/roller}\index{Definiera karaktärer}\index{nyroll@\verb#\nyroll#}\label{uDefRoll}
-\begin{Verbatim}[commentchar=!, commandchars=\#\(\),numbers=left,numberblanklines=false, firstnumber=3]
-\#textbf(nyroll)[färgnamn]{Namn}
-\end{Verbatim}
-Detta är ett mycket viktigt kommando! Här definieras vilka karaktärer som man kan använda när man skriver repliker på formen \verb#\Namn{replik}#\index{namn@\verb#\Namn#} så som till exempel: \verb#\Bobby{Detta är vad som sägs.}#. 
-
-\paragraph{färgnamn} är de färger som diskuteras i \ref{udeffarg}. Detta argument är frivilligt, och svart kommer tilldelas som karaktärsfärg om inget annat anges. Undertecknad tycker dock att svart är en tråkig färg.
-
-\subsection{Frivilligt men vackert: Färger}\label{udeffarg}\index{Färg}
-Detta är bara en kort förklaring till |\definecolor| och fördefinierade färger som är en del utav paketet \pack{color}, vilken \pack{manus.cls} nyttjar till färgsättning. Är du redan bekant med kommandot, är redan bekväm med de redan definierade färgerna eller har valt att skriva dokumentet helt utan färg\footnote{Vilket undertecknad är emot, men se \ref{uSvartvit} för detta.} så kan detta avsnitt hoppas över.
-
-\subsubsection{Fördefinerade färgnamn}\index{Färg!Redan namnade}
-
-\C{GreenYellow},
-\C{Yellow},
-\C{Goldenrod},
-\C{Dandelion},
-\C{Apricot},
-\C{Peach},
-\C{Melon},
-\C{YellowOrange},
-\C{Orange},
-\C{BurntOrange},
-\C{Bittersweet},
-\C{RedOrange},
-\C{Mahogany},
-\C{Maroon},
-\C{BrickRed},
-\C{Red},
-\C{OrangeRed},
-\C{RubineRed},
-\C{WildStrawberry},
-\C{Salmon},
-\C{CarnationPink},
-\C{Magenta},
-\C{VioletRed},
-\C{Rhodamine},
-\C{Mulberry},
-\C{RedViolet},
-\C{Fuchsia},
-\C{Lavender},
-\C{Thistle},
-\C{Orchid},
-\C{DarkOrchid},
-\C{Purple},
-\C{Plum},
-\C{Violet},
-\C{RoyalPurple},
-\C{BlueViolet},
-\C{Periwinkle},
-\C{CadetBlue},
-\C{CornflowerBlue},
-\C{MidnightBlue},
-\C{NavyBlue},
-\C{RoyalBlue},
-\C{Blue},
-\C{Cerulean},
-\C{Cyan},
-\C{ProcessBlue},
-\C{SkyBlue},
-\C{Turquoise},
-\C{TealBlue},
-\C{Aquamarine},
-\C{BlueGreen},
-\C{Emerald},
-\C{JungleGreen},
-\C{SeaGreen},
-\C{Green},
-\C{ForestGreen},
-\C{PineGreen},
-\C{LimeGreen},
-\C{YellowGreen},
-\C{SpringGreen},
-\C{OliveGreen},
-\C{RawSienna},
-\C{Sepia},
-\C{Brown},
-\C{Tan},
-\C{Gray},
-\C{Black},
-(White)
-
-
-
-\subsubsection{Definiera egna färger}\index{definecolor@\verb#\definecolor#}\index{Färg!Definiera egna}
-\begin{Verbatim}[commentchar=!, commandchars=\#\(\),numbers=left,numberblanklines=false, firstnumber=2]
-\#textbf(definecolor){färgnamn}{färgtyp}{färgspec}
-\end{Verbatim}
-
-\paragraph{färgnamn} är det namn som färgen kommer refereras till, se t.ex. \ref{uDefRoll}. 
-
-\paragraph{färgtyp} anger hur man vill ange färgen. Giltiga är listade i tabell \ref{colortable}.
-
-\paragraph{färgspec} så som det anges i tabell \ref{colortable}.
-
-\begin{table}
-\label{colortable}
-\caption{Tabell över vilka färgtyper som är godkända och hur dessa anges.}
-\index{Färg!Definiera egna}
-\begin{tabular}{p{0.1\textwidth} p{0.5\textwidth} p{0.1\textwidth} }
-\textbf{Färgtyp} &	\textbf{Färgspec} &	\textbf{Exempel} \\ 
-gray 	 &	Ett värde mellan 0 (svart) och 1 (vitt)& 	\verb#\definecolor{light-gray}{gray}{0.95}#\\
-rgb &	Tre nr. för röd, grön, blå mellan 0 och 1. &	\verb#\definecolor{orange}{rgb}{1,0.5,0}#\\
-RGB &	Tre nr. för röd, grön, blå mellan 0 och 255. &	\verb#\definecolor{orange}{RGB}{255,127,0}#\\
-HTML &	Sex hexadecimalsiffror på formen RRGGBB.& 	\verb#\definecolor{orange}{HTML}{FF7F00}#\\
-cmyk &	4 värden för cyan,magenta,gul,svart &	\verb#\definecolor{orange}{cmyk}{0,0.5,1,0}#\\
-
-\end{tabular}
-\end{table}
-
-\section{Manus, vems replik är det egentligen?} % Formulera om rubrik senare?
-%Repliker, replikgr, kupletter, berattare, 
-\index{Repliker}
-\begin{Verbatim}[commentchar=!, commandchars=\#\(\),numbers=left,numberblanklines=false,firstnumber=5]
+\begin{lstlisting}
 \begin{document}
-	%Ev. andra sidor så som titelsida, innehållsförteckning, persongalleri
-\#textbf(Bobby){Detta säger jag, och se här \#textbf(gr){gör något} vad jag gör.} 
-\#textbf(Bobbygr){Bobby gör något.} 
-\#textbf(Bobby){Här säger jag något igen.}
-\end{Verbatim}
+	% <-- Ev. andra sidor så som titelsida, innehåll, etc.
+\akt
+\scen{Bobby pratar}{
+	Bobby pratar lite, gör något och pratar lite till.
+}
+\Bobby{Detta säger jag, och se här \gr{gör något} vad jag gör.}
+\Bobbygr{Bobby gör något.}
+\Bobby{Här säger jag något igen.}
+\end{lstlisting}
 
-Se där, nu har vi skrivit två repliker! Allmänna formen för att skriva repliker är:
-\index{Namn@\verb#\Namn#}\index{Namngr@\verb#\Namngr#}
-\begin{Verbatim}[commentchar=!, commandchars=\#\(\),numberblanklines=false]
-\#textbf(Namn){} 
-\#textbf(Namngr){} 
-\end{Verbatim}
-
-där \citat{Namn} är tidigare definierad i |\nyroll| (se \ref{uDefRoll}). Finessen med |\Namngr| är att kunna skriva längre mängd text för att beskriva att någon gör något. För att markera samma sak mitt i en replik används |\gr|. Ifall flera roller är involverade är |\allgr{}|\index{allgr@\verb#\allgr#} rätt kommando.
-
-
-\subsection{Kupletter}\index{Kuplett}
-Kupletter anges på formen:
-\begin{Verbatim}[commentchar=!, commandchars=\#\(\),numberblanklines=false]
-\begin{kuplett}
-	\#textbf(titel){}
-	\#textbf(deltagare){}
-	\#textbf(beskrivning){}
-	\#textbf(melodi){}
-\end{kuplett} 
-\end{Verbatim}
-
-Där samtliga värden (|\titel| osv...) är frivilliga. 
 
 
 \subsection{Akter och scener}
-\index{akt@\verb#\akt#}\index{scen@\verb#\scen#}
-\begin{Verbatim}[commentchar=!, commandchars=\#\(\),numberblanklines=false]
-\#textbf(akt)[Första scennumrering] 
-\#textbf(scen){Titel}{Sammanfattning}
-\end{Verbatim}
+\funnybone{Nu får scengruppen jobba!}
+\index{akt@\verb#\akt#}%
+\index{scen@\verb#\scen#}%
+Ett manus är indelat i akter och scener, och dessa inleds med följande två kommandon:
 
-\paragraph{Första scennumrering} är frivillig att ange och anger var numreringen av scenerna skall börja. Detta är användbart eftersom vissa akter har scen 0, andra inte. Om inte första scennumrering anges antas att numreringen skall börja på 1.
+\begin{lstlisting}
+\akt[Första scennummer]
+\scen{Titel}{Sammanfattning}
+\end{lstlisting}
+
+\paragraph{Första scennummer} är frivilligt att ange och anger var numreringen av scenerna skall börja. Detta är användbart eftersom vissa akter har en scen 0, andra inte. Om detta inte anges antas att numreringen skall börja på 1.
 
 \paragraph{Titel} är titel för scenen.
 
-\paragraph{Sammanfattning} är sammanfattning för scenen. Denna används för att generera sammanfattning utav hela manuset, se \ref{uSammanfattning}.
+\paragraph{Sammanfattning} är sammanfattning för scenen. Denna används för att generera sammanfattning utav hela manuset (se \ref{subsec:sammanfattning}). Om klassalternativet |sammanfattningar| har angetts skrivs sammanfattningen även ut direkt efter scentiteln.
 
 
-\subsection{Inut, vem där?}\index{inut@\texttt{inut}}\label{uVemInne}
-\index{Namnin@\verb#\Namnin#}\index{Namnut@\verb#\Namnut#}
-\begin{Verbatim}[commentchar=!, commandchars=\#\(\),numberblanklines=false]
-\#textbf(Namnin) 
-\#textbf(Namnut)
-\end{Verbatim}
-Dessa kommandon har bara verkan ifall alternativet \texttt{inut} är valt, se \ref{uInut}. När |\Bobbyin| skrivs in kommer Bobby markeras som inne på scen genom markering i marginalen. Ifall man inte anger när en karaktär är inne på scen så kommer rollstatistiken (se \ref{uRollstatistik}) att vara felaktig i kolumnen \citat{närvaro}.
 
-\subsection{Rekvisita}\index{Rekvisita}
+\subsection{Repliker och agerande}
+\index{Repliker}
+\index{Agerande}
+\funnybone{Vems replik är det egentligen?}
+Den allmänna formen för att skriva repliker är:
+\index{Namn@\verb#\Namn#}
+\index{Namngr@\verb#\Namngr#}
+\begin{lstlisting}
+\Namn{}
+\Namngr{}
+\end{lstlisting}
+där ``Namn'' är tidigare definierad i |\nyroll| (se \ref{sec:nyroll}).
+
+Finessen med |\Namngr| är att kunna skriva längre mängd text för att beskriva att någon gör något. För att markera samma sak mitt i en replik används |\gr|. Ifall flera roller är involverade är |\allgr{}|\index{allgr@\verb#\allgr#} rätt kommando.
+
+
+
+\subsection{Scennärvaro}
+\label{sec:narvaro}
+\index{Namnin@\verb#\Namnin#}
+\index{Namnut@\verb#\Namnut#}
+\funnybone{Knack, knack. Vem där?}
+\funnybone{Var tusan kom han ifrån?}
+De karaktärer som definierats med kommandot |\nyroll| får en närvaroindikator i högermarginalen som visar om karaktären är på scen eller inte samt om denna är i subspel eller inte.
+
+Denna indikator kontrolleras med följande fyra kommandon:
+\begin{lstlisting}
+\Namnin
+\Namnut
+\Namnsub
+\Namnsubslut
+\end{lstlisting}
+
+Till exempel: när |\Bobbyin| skrivs kommer Bobby markeras som inne på scen och närvaroindikatorn för Bobby kommer visas i marginalen. När Bobby sedan skall av scen skriver man |\Bobbyut|.
+
+Om Bobby skall vara på scen men i subspel skrivs |\Bobbysub|, vilket gör att Bobbys närvaroindikator blir streckad. När Bobby är klar med vad han än höll på med och återigen skall agera stort skrivs |\Bobbysubslut|.
+
+
+
+\subsection{Kupletter}
+\index{Kuplett}
+\funnybone{Allsång på Scenen}
+Kupletter anges på formen:
+\begin{lstlisting}
+\begin{kuplett}
+	\titel{...}
+	\deltagare{...}
+	\beskrivning{...}
+	\melodi{...}
+\end{kuplett}
+\end{lstlisting}
+där samtliga kommandon (|\titel| osv...) är frivilliga. Detta skriver ut en ny kuplett i manus och lägger även till samma kuplett i innehållsförteckningen och sammanfattningslistan.
+
+
+
+\subsection{Rekvisita}
+\index{Rekvisita}
 \index{rekv@\verb#\rekv#}
-\begin{Verbatim}[commentchar=!, commandchars=\#\(\),numberblanklines=false]
-\#textbf(rekv){}
-\end{Verbatim}
+\funnybone{Mer jobb åt scengruppen!}
+När rekvisita refereras till i manus skall den markeras med följande kommando:
 
-Markerar något som rekvisita i manus. Används även för listan över rekvisita, se \ref{uSakregister}.
+\begin{lstlisting}
+\rekv{rekvisita}
+\end{lstlisting}
 
-
-\subsection{Övrigt}
-\index{Berättare@\verb#\berattare#}
-\begin{Verbatim}[commentchar=!, commandchars=\#\(\),numberblanklines=false]
-\#textbf(berattare){} 
-\end{Verbatim}
-För att berätta något som händer som inte angår någon karaktär direkt. Så som hur kulisserna ser ut eller vilken rekvisita som står på scen. Rekvisita som nämns här kommer markeras annorlunda i listan över rekvisita, se \ref{uSakregister}.
+Detta markerar rekvisita-texten och indexerar även densamma i sakregistret.
 
 
-\section{Listor} %alla listor
+
+\section{Slut på manus}
 \index{Listor}
-\subsection{Kuplettlista}\index{Kuplettlista@\verb#\kuplettlista#}
-\begin{Verbatim}[commentchar=!, commandchars=\#\(\),numberblanklines=false]
-\#textbf(kuplettlista) 
-\end{Verbatim}
+\index{Slut}
+\funnybone{Manusgruppen somnade}
+Efter sista akten kan man tänkas vilja ha med lite finurliga listor som berättar saker om manuset.
+\begin{lstlisting}
+\rekvisitalista
+\kuplettlista
+\sammanfattningslista
+\statistiktabell
+\end{document}
+\end{lstlisting}
+
+\paragraph{\tt\bfseries\textbackslash kuplettlista}
+\index{Kuplettlista}
+\index{kuplettlista@\verb#\kuplettlista#}
+\addcontentsline{toc}{subsection}{Kuplettlista}
 Skriver ut en lista över alla kupletter som finns nämnda så långt.
 
-\subsection{Rekvisitalista}\index{Rekvisitalista}\index{printindex@\verb#\printindex#}\label{uSakregister}
-\begin{Verbatim}[commentchar=!, commandchars=\#\(\),numberblanklines=false]
-\#textbf(printindex) 
-\end{Verbatim}
+\paragraph{\tt\bfseries\textbackslash rekvisitalista}
+\index{Rekvisitalista}
+\index{rekvisitalista@\verb#\rekvisitalista#}
+\addcontentsline{toc}{subsection}{Rekvisitalista}
 Skriver ut en lista över all rekvisita som finns nämnd så långt. Lista är indelad efter akt. Rekvisita som är nämnd i |\berattare| är markerad ty den borde vara rekvisita som skall ligga framme i början av akten.
 
-\subsection{Sammanfattning}\index{Sammanfattning}\index{sammanfattningslista@\verb#\sammanfattningslista#}\label{uSammanfattning}
-\begin{Verbatim}[commentchar=!, commandchars=\#\(\),numberblanklines=false]
-\#textbf(sammanfattningslista) 
-\end{Verbatim}
-
+\paragraph{\tt\bfseries\textbackslash sammanfattningslista}
+\index{Sammanfattningslista}
+\index{sammanfattningslista@\verb#\sammanfattningslista#}
+\addcontentsline{toc}{subsection}{Sammanfattningslista}
 Skriver ut en sammanfattning som består utav den sammanfattning som angetts intill varje scen.
 
-\subsection{Rollstatistik}\index{Rollstatistik}\index{statistiklist@\verb#\statistiklist#}\label{uRollstatistik}
-\begin{Verbatim}[commentchar=!, commandchars=\#\(\),numberblanklines=false]
-\#textbf(statistiklist) 
-\end{Verbatim}
+\paragraph{\tt\bfseries\textbackslash statistiktabell}
+\index{Statistiktabell}
+\index{statistiktabell@\verb#\statistiktabell#}
+\addcontentsline{toc}{subsection}{Statistiktabell}
+Skriver ut statistik för varje definierad karaktär men inte för hjälpkaraktärer, dvs. de som definierats via |\nyroll| men inte via |\nyhjalproll|.
 
-Skriver ut statistik för varje definierad karaktär (dvs. definierad via |\nyroll|).
 
-\section{Små hjälpmedel}
-\subsection{Kommentera mitt i en rad}\index{comment@\verb#\comment#}
-\begin{Verbatim}[commentchar=!, commandchars=\#\(\),numberblanklines=false]
-\#textbf(comment){} 
-\end{Verbatim}
-Ifall man utav någon anledning inte vill kommentera ut resten utav en rad på det sedvanliga sättet med \%. Detta kommando kommenterar bara bort det som befinner sig inom måsvingarna vilket kan göra koden mer svårläst.
 
-\section{Exempel}
+\section{Övriga hjälpmedel}
+\funnybone{Ingenjörsmässiga lösningar på problem}
+För att hjälpa manusskrivanded finns även några extra kommandon:
+
+\paragraph{\tt\bfseries\textbackslash berattare\{...\}}
+\index{berattare@\verb#\berattare#}
+Detta kommandot finns för att berätta något som händer som inte angår någon karaktär direkt. Så som hur kulisserna ser ut eller vilken rekvisita som står på scen. Rekvisita som nämns här kommer markeras annorlunda i listan över rekvisita, se \ref{sec:sakregister}. Notera även att detta inte är samma sak som att ha en berättar-roll med repliker.
+
+\paragraph{\tt\bfseries\textbackslash comment\{...\}}
+\index{comment@\verb#\comment#}
+Detta kommando finns ifall man utav någon anledning inte vill kommentera ut resten av en rad med det på \TeX\ sedvanliga sättet med \%. Detta kommando tar helt enkelt bara bort det som befinner sig inom måsvingarna, och kan göra koden mer svårläst.
+
+
+
+%\section{Exempel}
+
+
 
 \appendix
+
+
+
+\section{Fördefinerade färger}
+\index{Färger!Fördefinerade}
+\label{app:farger}
+\parbox{\textwidth}{\raggedright%
+\fboxsep=0pt%
+\renewcommand{\C}[1]{\makebox[0.3\textwidth][l]{%
+	\fbox{\color{#1}\rule{1em}{1em}}\ %
+	\textcolor{#1}{\textbf{#1}}%
+}}
+\C{GreenYellow}
+\C{Yellow}
+\C{Goldenrod}
+\C{Dandelion}
+\C{Apricot}
+\C{Peach}
+\C{Melon}
+\C{YellowOrange}
+\C{Orange}
+\C{BurntOrange}
+\C{Bittersweet}
+\C{RedOrange}
+\C{Mahogany}
+\C{Maroon}
+\C{BrickRed}
+\C{Red}
+\C{OrangeRed}
+\C{RubineRed}
+\C{WildStrawberry}
+\C{Salmon}
+\C{CarnationPink}
+\C{Magenta}
+\C{VioletRed}
+\C{Rhodamine}
+\C{Mulberry}
+\C{RedViolet}
+\C{Fuchsia}
+\C{Lavender}
+\C{Thistle}
+\C{Orchid}
+\C{DarkOrchid}
+\C{Purple}
+\C{Plum}
+\C{Violet}
+\C{RoyalPurple}
+\C{BlueViolet}
+\C{Periwinkle}
+\C{CadetBlue}
+\C{CornflowerBlue}
+\C{MidnightBlue}
+\C{NavyBlue}
+\C{RoyalBlue}
+\C{Blue}
+\C{Cerulean}
+\C{Cyan}
+\C{ProcessBlue}
+\C{SkyBlue}
+\C{Turquoise}
+\C{TealBlue}
+\C{Aquamarine}
+\C{BlueGreen}
+\C{Emerald}
+\C{JungleGreen}
+\C{SeaGreen}
+\C{Green}
+\C{ForestGreen}
+\C{PineGreen}
+\C{LimeGreen}
+\C{YellowGreen}
+\C{SpringGreen}
+\C{OliveGreen}
+\C{RawSienna}
+\C{Sepia}
+\C{Brown}
+\C{Tan}
+\C{Gray}
+\C{Black}
+\fbox{\color{white}\rule{1em}{1em}}\ \textbf{(White)}
+}
+
 
 
 \section{Överkurs}
@@ -317,29 +404,9 @@ Ifall man utav någon anledning inte vill kommentera ut resten utav en rad på d
 %\paragraph{Rollnamn som innehåller åäö}
 
 
-\section{Bakåtkompabilitet}
-%akt
-
-%Det gamla sättet att markera via |\utmed{Namn}|\index{utmed@\verb#\utmed#} respektive |\inmed{Namn}|\index{inmed@\verb#\inmed#} fungerar fortfarande och ändringen från detta är enbart kosmetisk.
-
-%Ifall någon till äventyrs har använt det gamla sättet att skriva kupletter på så fungerar detta också.
-
 
 \printindex
 
-%
-%\begin{texcode}
-%  \cmd[syntax,3]{newtest}{command}[$n$]{test expression}
-%\end{texcode}
-%
 
-%\medskip
-
-%\tex{\cmd{ifthenelse}\{\cmd{isnamedefined}\{@foo\}\}\{\TRUE\}\{\FALSE\}}
-%\ifthenelse{\isnamedefined{@foo}}{\TRUE}{\FALSE}
-
-%\tex{\cmd{ifthenelse}\{\cmd{isnamedefined}\{@for\}\}\{\TRUE\}\{\FALSE\}}
-%\ifthenelse{\isnamedefined{@for}}{\TRUE}{\FALSE}
-%\end{list}
 
 \end{document}
