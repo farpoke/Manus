@@ -27,6 +27,7 @@
 \RequirePackage[usenames,dvipsnames]{xcolor} % För färger.
 \RequirePackage{tikz} % För indikatoreffekter. Måste vara efter xcolor.
 %\RequirePackage{pgf}
+\RequirePackage{float}
 
 % Lite klassalternativ...
 \newcommand\manus@alternativ[1]{%
@@ -254,6 +255,64 @@
 		\setlength{\sl@maxnamewd}{\wd\manus@namn@tmpbox}%
 	\fi%
 }
+
+%%%%%%%%%% Test av karaktärsbeskrivningsmiljö %%%%%%%%%%
+%
+%% \begin{rollbeskrivning}
+%
+% En miljö för att beskriva karaktärer.
+%
+%% \namn{Namn}             : Ange namnet för rollen.
+%% \bild{bild}     : Bild på karaktären.
+%% \beskrivning{beskrivning} : Ange beskrivning för denna karaktär.
+%% \ner{Förflyttning nedåt}           :Ange förflyttning nedåt
+%% \hoger{Förflyttning höger}		: Ange förflyttning i sidled
+%
+%% \end{rollbeskrivning}
+%
+\newsavebox{\bildbox}%
+\newboolean{skrivitRollbeskrivningRedan}%
+\setboolean{skrivitRollbeskrivningRedan}{false}%
+%
+\newfloat{rollbeskrivningfloat}{h}{rollnamn}%[outer counter]
+\floatname{rollbeskrivningfloat}{}
+%
+\newenvironment{rollbeskrivning}{%
+	% Deklarera kommandon för rollbeskrivning.
+	\newcommand{\namn}[1]{\def\knamn{##1}}%
+	\newcommand{\bild}[1]{\def\kbild{##1}}%
+	\newcommand{\beskrivning}[1]{\def\kbeskrivning{##1}}%
+	\newcommand{\ner}[1]{\def\kner{##1}}%
+	\newcommand{\hoger}[1]{\def\khoger{##1}}%
+	% Sätt alla värden till tomrum.
+	\namn{\ }%
+	\bild{\ }%
+	\beskrivning{\ }%
+	\ner{}%
+	\hoger{}%
+}{%
+%Skriv ut rubrik om första karaktären
+\ifthenelse{\NOT\boolean{skrivitRollbeskrivningRedan}}{
+	\section*{\Large Karaktärsbeskrivningar}%
+	\addcontentsline{toc}{section}{%
+		Karaktärsbeskrivningar
+	}%
+}{}%
+
+%\savebox{\bildbox}{\includegraphics[height=0.5\textheight]{phlong}}
+%\wd\bildbox
+%\begin{tabular}{p{0.7\textwidth} p{0.5\textwidth}}
+%\vspace{0em}\begin{tabular}{p{0.7\textwidth}}\large{\knamn}
+%\\
+\begin{rollbeskrivningfloat}
+\caption{\kbeskrivning}
+ %\end{tabular} & 
+ \includegraphics[height=0.5\textheight]{phlong}\\
+ \end{rollbeskrivningfloat}
+  %\end{tabular} 
+}%
+
+%\FloatBarrier \usepackage[section]{placeins}
 
 
 
