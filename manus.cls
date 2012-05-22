@@ -23,8 +23,10 @@
 % Behöver några fler paket:
 \RequirePackage{ifthen} % För booleaner och \ifthenelse.
 \RequirePackage{makeidx} % För sakregister.
+\RequirePackage{rotating}
 \RequirePackage[usenames,dvipsnames]{xcolor} % För färger.
 \RequirePackage{tikz} % För indikatoreffekter. Måste vara efter xcolor.
+%\RequirePackage{pgf}
 
 % Lite klassalternativ...
 \newcommand\manus@alternativ[1]{%
@@ -63,6 +65,7 @@
 \newlength{\manus@indbredd} % Bredd på varje indikator.
 \newlength{\manus@radavstand} % Extra avstånd mellan varje repliksrad.
 \newlength{\manus@kolavstand} % Avstånd mellan kolumner.
+\newlength{\manus@stat@kolbredd} % Bredden på kolumner i statistiktabellen.
 
 % Sätt några defaultvärden.
 \setlength{\manus@numbredd}{3em}
@@ -71,14 +74,18 @@
 \setlength{\manus@indbredd}{10pt}
 \setlength{\manus@radavstand}{5pt}
 \setlength{\manus@kolavstand}{1em}
+\setlength{\manus@stat@kolbredd}{3.2em}
 
-% manus@beraknabredd : Räkna ut lämplig bredd på repliksinnehåll.
+%% manus@beraknabredd
+% Räkna ut lämplig bredd på repliksinnehåll.
 \newcommand\manus@beraknabredd{%	
 	\setlength{\manus@textbredd}{\textwidth}%
 	\addtolength{\manus@textbredd}{-\manus@namnbredd}%
 }
 
-% indikatorbredd{bredd} : Ändra bredden på indikatorerna.
+%% indikatorbredd{bredd}
+%
+% Ändra bredden på indikatorerna.
 \newcommand\indikatorbredd[1]{%
 	\setlength{\manus@indbredd}{#1}%
 	\manus@beraknabredd%
@@ -102,6 +109,9 @@
 \newlength{\manus@randtmp}
 \newlength{\manus@randskift}
 \setlength{\manus@randskift}{0pt}
+
+% Hjälplängd för statistikberäkning.
+\newlength{\manus@stat@tmp}
 
 
 
@@ -152,6 +162,16 @@
 % Räknare för beräkning av antal rander för subspelsindikatorer.
 \newcounter{manus@randantal}
 
+% Räkna statistikrader.
+\newcounter{manus@stats}
+\newcounter{manus@statiter}
+\setcounter{manus@stats}{0} % Inga än.
+
+% Dessa räknare kommer användas innom \csname\endscname så definera
+% om texten till något lämpligare.
+\renewcommand\themanus@stats{stats@\roman{manus@stats}@}
+\renewcommand\themanus@statiter{stats@\roman{manus@statiter}@}
+
 
 
 %%%%%%%%%% Karaktärer %%%%%%%%%%
@@ -194,29 +214,39 @@
 	\stepcounter{manus@roller}%
 	% Skapa kommando för att skriva ut en replik från karaktären.
 	\expandafter\newcommand\csname#1\endcsname[1]{%
-		\manus@skrivrad{#1}{##1}{#2}{true}}%
+		\manus@skrivrad{#1}{##1}{#2}{true}%
+		% Räkna raden till statistiken.
+		\ifthenelse{\equal{#4}{true}}{\stepcounter{#1@stat@repliker}}{}%
+		\manus@raknastats%
+	}%
 	% Skapa kommando för att skriva ut agerande från karaktären.
 	\expandafter\newcommand\csname#1gr\endcsname[1]{%
-		\manus@skrivrad{\tiny#1}{\textit{##1}}{#2}{true}}%
+		\manus@skrivrad{\tiny#1}{\textit{##1}}{#2}{true}%
+		% Räkna raden till statistiken.
+		\ifthenelse{\equal{#4}{true}}{\stepcounter{#1@stat@agerande}}{}%
+		\manus@raknastats%
+	}%
 	% Lägg till indikator.
 	\ifthenelse{\equal{#4}{true}}{%
 		% Skapa en ny boolean för att hålla reda på karaktärens status.
-		\newboolean{#1in}%
-		\setboolean{#1in}{false}%
-		\newboolean{#1sub}%
-		\setboolean{#1sub}{false}%
+		\newboolean{#1@in}%
+		\setboolean{#1@in}{false}%
+		\newboolean{#1@sub}%
+		\setboolean{#1@sub}{false}%
 		% Lägg till indikator.
-		\manus@nyind{#1in}{#1sub}{#3}%
+		\manus@nyind{#1@in}{#1@sub}{#3}%
+		% Lägg till statistik.
+		\manus@nystat{#1}{#1@in}{#1@sub}%
 		% Skapa kommandon för att kalla in/ut karaktären.
 		\expandafter\newcommand\csname#1in\endcsname{%
-			\setboolean{#1in}{true}%
-			\setboolean{#1sub}{false}}%
+			\setboolean{#1@in}{true}%
+			\setboolean{#1@sub}{false}}%
 		\expandafter\newcommand\csname#1ut\endcsname{%
-			\setboolean{#1in}{false}}%
+			\setboolean{#1@in}{false}}%
 		\expandafter\newcommand\csname#1sub\endcsname{%
-			\setboolean{#1sub}{true}}%
+			\setboolean{#1@sub}{true}}%
 		\expandafter\newcommand\csname#1subslut\endcsname{%
-			\setboolean{#1sub}{false}}%
+			\setboolean{#1@sub}{false}}%
 	}{}%
 	% Räkna ut största namnbredd.
 	\savebox{\manus@namn@tmpbox}{#1\hspace{\manus@kolavstand}}%
@@ -381,6 +411,8 @@
 		Deltagare: \emph{\kdeltagare}\\%
 		Beskrivning: \emph{\kbeskrivning}%
 	}\vspace{1em}%
+	% Räkna kuplettstatistik.
+	\manus@raknakuplett%
 }
 
 
@@ -408,7 +440,10 @@
 
 %%%%%%%%%% Diverse kommandon %%%%%%%%%%
 
-\newcommand\allgr[1]{\manus@skrivrad{* * *}{\textit{#1}}{black}{true}}
+\newcommand\allgr[1]{%
+	\manus@skrivrad{* * *}{\textit{#1}}{black}{true}%
+	\manus@raknastats%
+}
 \newcommand\berattare[1]{\enkelrad[true]{%
 	\tt%
 	\fontdimen2\font=0.5em%
@@ -512,6 +547,174 @@
 			\manus@ritaind{white}{false}%
 		}%
 	\repeat%
+}
+
+
+
+%%%%%%%%%% Statistik %%%%%%%%%%
+
+%% \manus@nystat{namn}{ind}{sub}
+%
+% Skapa nya räknare och längder från det givna basnamnet för att räkna
+% statistik.
+\newcommand\manus@nystat[3]{%
+	% Räkna upp statistik.
+	\stepcounter{manus@stats}%
+	% Spara namn och booleaner för statistiken.
+	\expandafter\gdef\csname\themanus@stats @namn\endcsname{#1}%
+	\expandafter\gdef\csname\themanus@stats @ind\endcsname{#2}%
+	\expandafter\gdef\csname\themanus@stats @sub\endcsname{#3}%
+	% Skapa räknare för statistik.
+	\newcounter{#1@stat@repliker}%
+	\newcounter{#1@stat@agerande}%
+	\newcounter{#1@stat@kupletter}%
+	\newcounter{#1@stat@narvaro}%
+	\newcounter{#1@stat@subspel}%
+	% Skapa längder för statistik.
+	\expandafter\newdimen\csname#1@stat@narvaro\endcsname%
+	\expandafter\newdimen\csname#1@stat@subspel\endcsname%
+	% Sätt alla värden till noll.
+	\setcounter{#1@stat@repliker}{0}%
+	\setcounter{#1@stat@kupletter}{0}%
+	\setcounter{#1@stat@agerande}{0}%
+	\setcounter{#1@stat@narvaro}{0}%
+	\setcounter{#1@stat@subspel}{0}%
+	\setlength{\csname#1@stat@narvaro\endcsname}{0pt}%
+	\setlength{\csname#1@stat@subspel\endcsname}{0pt}%
+}
+
+%% \manus@raknastats
+%
+% Räkna statistik.
+\newcommand\manus@raknastats{%
+	\setcounter{manus@statiter}{0}%
+	\loop\ifnum\value{manus@statiter}<\value{manus@stats}%
+		\stepcounter{manus@statiter}%
+		\edef\stat@name{\csname\themanus@statiter @namn\endcsname @stat}%
+		\edef\stat@ind{\csname\themanus@statiter @ind\endcsname}%
+		\edef\stat@sub{\csname\themanus@statiter @sub\endcsname}%
+		\ifthenelse{\boolean{\stat@ind}}{%
+			\ifthenelse{\boolean{\stat@sub}}{%
+				\stepcounter{\stat@name @subspel}%
+				\addtolength%
+					{\csname\stat@name @subspel\endcsname}%
+					{\manus@indhojd}%
+			}{%
+				\stepcounter{\stat@name @narvaro}%
+				\addtolength%
+					{\csname\stat@name @narvaro\endcsname}%
+					{\manus@indhojd}%
+			}%
+		}{}%
+	\repeat%
+}
+
+%% \manus@raknakuplett
+%
+% Räkna kuplettstatistik.
+\newcommand\manus@raknakuplett{%
+	\setcounter{manus@statiter}{0}%
+	\loop\ifnum\value{manus@statiter}<\value{manus@stats}%
+		\stepcounter{manus@statiter}%
+		\edef\stat@name{\csname\themanus@statiter @namn\endcsname @stat}%
+		\edef\stat@ind{\csname\themanus@statiter @ind\endcsname}%
+		\ifthenelse{\boolean{\stat@ind}}{%
+			\stepcounter{\stat@name @kupletter}%
+		}{}%
+	\repeat%
+}
+
+%% \statistiktabell
+%
+% Skriv ut en tabell med statistik för roller.
+\newcommand\statistiktabell{%
+	\newpage%
+	\section*{Statistik}%
+	\addcontentsline{toc}{section}{Statistik}%
+	\vbox%
+	\bgroup%
+	\newcommand\kol@titel[1]{\hbox to \manus@stat@kolbredd{\hfil%
+		\begin{rotate}{30}##1\end{rotate}%
+	\hfil}}%
+	\newcommand\stat@kol[1]{%
+		\vbox to \baselineskip{\vfil%
+			\hbox to \manus@stat@kolbredd{\hfil##1\hfil}}}%
+	\renewcommand\vline{%
+		\kern -0.5pt%
+		\raisebox{-3pt}[\baselineskip][0pt]{\rule{1pt}{\baselineskip}}%
+		\kern -0.5pt%
+	}%
+	\vspace{3em}%
+	\hbox{\bf%
+		\hspace{1.2\manus@namnbredd}%
+		\kol@titel{Repliker}%
+		\kol@titel{Agerande}%
+		\kol@titel{Total}%
+		\kol@titel{Kupletter}%
+		\kol@titel{Närvaro}%
+		\kol@titel{Subspel}%
+		\kol@titel{Total}%
+		\kol@titel{Närvaro ({\small $\approx$cm})}%
+		\kol@titel{Subspel ({\small $\approx$cm})}%
+		\kol@titel{Total ({\small $\approx$cm})}%
+	}%
+	\setcounter{manus@statiter}{0}%
+	\loop\ifnum\value{manus@statiter}<\value{manus@stats}%
+		\stepcounter{manus@statiter}%
+		\edef\stat@name{\csname\themanus@statiter @namn\endcsname @stat}%
+		\hbox{%
+			\vbox to \baselineskip{\vfil\hbox to 1.2\manus@namnbredd{%
+				\textbf{\csname\themanus@statiter @namn\endcsname}%
+			\hfil}}%
+			\vline%
+			\stat@kol{\number\value{\stat@name @repliker}}%
+			\stat@kol{\number\value{\stat@name @agerande}}%
+			\stat@kol{%
+				\number\numexpr%
+					\value{\stat@name @repliker}+%
+					\value{\stat@name @agerande}%
+			}%
+			\vline%
+			\stat@kol{\number\value{\stat@name @kupletter}}%
+			\vline%
+			\stat@kol{\number\value{\stat@name @narvaro}}%
+			\stat@kol{\number\value{\stat@name @subspel}}%
+			\stat@kol{%
+				\number\numexpr%
+					\value{\stat@name @narvaro}+%
+					\value{\stat@name @subspel}%
+			}%
+			\vline%
+			\stat@kol{%
+				\setlength%
+					{\manus@stat@tmp}%
+					{\csname\stat@name @narvaro\endcsname}%
+				\pgfmathtruncatemacro\stat@cm%
+					{round(0.0351459804*\manus@stat@tmp)}%
+				\stat@cm%
+			}%
+			\stat@kol{%
+				\setlength%
+					{\manus@stat@tmp}%
+					{\csname\stat@name @subspel\endcsname}%
+				\pgfmathtruncatemacro\stat@cm%
+					{round(0.0351459804*\manus@stat@tmp)}%
+				\stat@cm%
+			}%
+			\stat@kol{%
+				\setlength%
+					{\manus@stat@tmp}%
+					{\csname\stat@name @narvaro\endcsname}%
+				\addtolength%
+					{\manus@stat@tmp}%
+					{\csname\stat@name @subspel\endcsname}%
+				\pgfmathtruncatemacro\stat@cm%
+					{round(0.0351459804*\manus@stat@tmp)}%
+				\stat@cm%
+			}%
+		}%
+	\repeat%
+	\egroup%
 }
 
 
