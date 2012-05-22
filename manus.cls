@@ -432,6 +432,7 @@
 % innehållsförteckningen.
 \let\oldprintindex\printindex
 \renewcommand\printindex{%
+	\newpage%
 	\addcontentsline{toc}{section}{\indexname}%
 	\oldprintindex%
 }
