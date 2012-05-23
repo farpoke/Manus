@@ -24,6 +24,7 @@
 \RequirePackage{array} % För rollbeskrivningar.
 \RequirePackage{ifthen} % För booleaner och \ifthenelse.
 \RequirePackage{makeidx} % För sakregister.
+\RequirePackage{needspace} % För bättre sidbrytning.
 \RequirePackage{rotating} % För rubriker till statistiktabellen.
 \RequirePackage[usenames,dvipsnames]{xcolor} % För färger.
 \RequirePackage{tikz} % För indikatoreffekter. Måste vara efter xcolor.
@@ -357,6 +358,7 @@
 % Börja på en ny scen.
 \newcommand{\scen}[2]{%
 	\vspace{1em}%
+	\needspace{10\baselineskip}%
 	\stepcounter{scen}%
 	\subsection*{\hspace{\manus@numbredd}\thescen: #1}%
 	\addcontentsline{toc}{subsection}{\thescen: #1}%
