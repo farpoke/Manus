@@ -503,13 +503,13 @@
 \makeindex
 \renewcommand\indexname{Sakregister}% Svenska, tack.
 
-% Definera om \printindex så att det sakregistret inkluderas i
-% innehållsförteckningen.
-\let\oldprintindex\printindex
-\renewcommand\printindex{%
+%% \rekvisitalista
+%
+% Skriv ut en fin rekvisitalista.
+\newcommand\rekvisitalista{%
 	\newpage%
 	\addcontentsline{toc}{section}{\indexname}%
-	\oldprintindex%
+	\printindex%
 }
 
 
