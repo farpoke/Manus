@@ -21,13 +21,12 @@
 \fi
 
 % Behöver några fler paket:
+\RequirePackage{array} % För rollbeskrivningar.
 \RequirePackage{ifthen} % För booleaner och \ifthenelse.
 \RequirePackage{makeidx} % För sakregister.
-\RequirePackage{rotating}
+\RequirePackage{rotating} % För rubriker till statistiktabellen.
 \RequirePackage[usenames,dvipsnames]{xcolor} % För färger.
 \RequirePackage{tikz} % För indikatoreffekter. Måste vara efter xcolor.
-%\RequirePackage{pgf}
-\RequirePackage{array}
 
 % Lite klassalternativ...
 \newcommand\manus@alternativ[1]{%
@@ -256,6 +255,8 @@
 	\fi%
 }
 
+
+
 %%%%%%%%%% Test av karaktärsbeskrivningsmiljö %%%%%%%%%%
 %
 %% \begin{rollbeskrivning}
@@ -331,6 +332,8 @@
 			\end{tabular}%
 	}%
 }%
+
+
 
 %%%%%%%%%% Sektionering %%%%%%%%%%
 
@@ -488,6 +491,30 @@
 	}\vspace{1em}%
 	% Räkna kuplettstatistik.
 	\manus@raknakuplett%
+}
+
+%% \kuplettlista
+%
+% Kuplettlistan skriver ut en lista med kupletter. Egentligen bara en
+% variant av sammanfattningslistan.
+\newcommand\kuplettlista{%
+	% Ny sektion på ny sida för listan.
+	\newpage%
+	\section*{Kupletter}%
+	\addcontentsline{toc}{section}{Kupletter}%
+	% Loopa över alla sparade sammanfattningar.
+	\setcounter{manus@sfiter}{0}%
+	\loop\ifnum\value{manus@sfiter}<\value{manus@sfraknare}%
+		\stepcounter{manus@sfiter}%
+		% Skriv ut kupletter.
+		\ifthenelse{\equal{\csname\themanus@sfiter typ\endcsname}%
+					{kuplett}}{%
+			\par\vspace{1em}%
+			\textcolor{kuplettfarg}{\MakeUppercase{%
+				\csname\themanus@sfiter namn\endcsname}}\\%
+			\csname\themanus@sfiter beskrivning\endcsname%
+		}{}%
+	\repeat%
 }
 
 
