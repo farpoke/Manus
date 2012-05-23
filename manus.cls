@@ -277,6 +277,8 @@
 \setlength{\rollbildhojd}{0.5\textheight}
 \newlength{\rollbeskrivningsflytt}
 \setlength{\rollbeskrivningsflytt}{-0.5\textheight}
+\newlength{\beskrivningsbredd}
+%
 %
 \newenvironment{rollbeskrivning}{%
 	% Deklarera kommandon för rollbeskrivning.
@@ -295,27 +297,33 @@
 
 }{%
 	%Skriv ut rubrik om första karaktären
-	\ifthenelse{\theskrivnaRollBeskrivningar=0}{
-		\section*{\Huge Karaktärsbeskrivningar}%
+	\ifthenelse{\theskrivnaRollBeskrivningar=0}{%
+		\section*{\Huge Spexkaraktärer}%
 		\addcontentsline{toc}{section}{Karaktärsbeskrivningar}%
 	}{}%
-	\stepcounter{skrivnaRollBeskrivningar}
+	\stepcounter{skrivnaRollBeskrivningar}%
 %
+	\savebox{\bildbox}{\includegraphics[height=\rollbildhojd]{\kbild}}%
+	\setlength{\beskrivningsbredd}{\textwidth}%
+	\addtolength{\beskrivningsbredd}{-\wd\bildbox}%
+	%\the
 	%Vilket håll skall det ligga åt?
 	\ifthenelse{\isodd{\theskrivnaRollBeskrivningar}}{%
 			%\vspace{\kner}\hspace{\khoger}%
-			\begin{tabular}{m{0.7\textwidth} c}%
-				\vspace{\rollbeskrivningsflytt}\begin{tabular}{m{0.7\textwidth}}%
-					{\large\textbf\knamn}\\
+			\begin{tabular}{m{\beskrivningsbredd} c}%
+				\vspace{\rollbeskrivningsflytt}\begin{tabular}{m{\beskrivningsbredd}}%
+					{\large\textbf\knamn}\\%
 					\kbeskrivning%
-				\end{tabular}&  
+				\end{tabular}&%
+				%\fbox{\vbox to \ht\bildbox{\hbox to \wd\bildbox{%
 				\includegraphics[height=\rollbildhojd]{\kbild}%\\
+				%\hfil}\vfil}}%
 			\end{tabular}%
 	}{%
 			%\vspace{\kner}\hspace{\khoger}%
-			\begin{tabular}{c m{0.7\textwidth}}%
-				\includegraphics[height=\rollbildhojd]{\kbild}& %
-				\vspace{\rollbeskrivningsflytt}\begin{tabular}{m{0.7\textwidth}}%
+			\begin{tabular}{c m{\beskrivningsbredd}}%
+				\includegraphics[height=\rollbildhojd]{\kbild}&%
+				\vspace{\rollbeskrivningsflytt}\begin{tabular}{m{\beskrivningsbredd}}%
 					{\large\textbf\knamn}\\%
 					\kbeskrivning%
 				\end{tabular}%\\
