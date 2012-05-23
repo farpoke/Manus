@@ -27,7 +27,7 @@
 \RequirePackage[usenames,dvipsnames]{xcolor} % För färger.
 \RequirePackage{tikz} % För indikatoreffekter. Måste vara efter xcolor.
 %\RequirePackage{pgf}
-\RequirePackage{float}
+\RequirePackage{array}
 
 % Lite klassalternativ...
 \newcommand\manus@alternativ[1]{%
@@ -271,11 +271,12 @@
 %% \end{rollbeskrivning}
 %
 \newsavebox{\bildbox}%
-\newboolean{skrivitRollbeskrivningRedan}%
-\setboolean{skrivitRollbeskrivningRedan}{false}%
+\newcounter{skrivnaRollBeskrivningar}%
 %
-\newfloat{rollbeskrivningfloat}{h}{rollnamn}%[outer counter]
-\floatname{rollbeskrivningfloat}{}
+\newlength{\rollbildhojd}
+\setlength{\rollbildhojd}{0.5\textheight}
+\newlength{\rollbeskrivningsflytt}
+\setlength{\rollbeskrivningsflytt}{-0.5\textheight}
 %
 \newenvironment{rollbeskrivning}{%
 	% Deklarera kommandon för rollbeskrivning.
@@ -286,35 +287,41 @@
 	\newcommand{\hoger}[1]{\def\khoger{##1}}%
 	% Sätt alla värden till tomrum.
 	\namn{\ }%
-	\bild{\ }%
+	\bild{placeholder}%
 	\beskrivning{\ }%
-	\ner{}%
-	\hoger{}%
+	\ner{0px}%
+	\hoger{opx}%
+	
+
 }{%
-%Skriv ut rubrik om första karaktären
-\ifthenelse{\NOT\boolean{skrivitRollbeskrivningRedan}}{
-	\section*{\Large Karaktärsbeskrivningar}%
-	\addcontentsline{toc}{section}{%
-		Karaktärsbeskrivningar
+	%Skriv ut rubrik om första karaktären
+	\ifthenelse{\theskrivnaRollBeskrivningar=0}{
+		\section*{\Huge Karaktärsbeskrivningar}%
+		\addcontentsline{toc}{section}{Karaktärsbeskrivningar}%
+	}{}%
+	\stepcounter{skrivnaRollBeskrivningar}
+%
+	%Vilket håll skall det ligga åt?
+	\ifthenelse{\isodd{\theskrivnaRollBeskrivningar}}{%
+			%\vspace{\kner}\hspace{\khoger}%
+			\begin{tabular}{m{0.7\textwidth} c}%
+				\vspace{\rollbeskrivningsflytt}\begin{tabular}{m{0.7\textwidth}}%
+					{\large\textbf\knamn}\\
+					\kbeskrivning%
+				\end{tabular}&  
+				\includegraphics[height=\rollbildhojd]{\kbild}%\\
+			\end{tabular}%
+	}{%
+			%\vspace{\kner}\hspace{\khoger}%
+			\begin{tabular}{c m{0.7\textwidth}}%
+				\includegraphics[height=\rollbildhojd]{\kbild}& %
+				\vspace{\rollbeskrivningsflytt}\begin{tabular}{m{0.7\textwidth}}%
+					{\large\textbf\knamn}\\%
+					\kbeskrivning%
+				\end{tabular}%\\
+			\end{tabular}%
 	}%
-}{}%
-
-%\savebox{\bildbox}{\includegraphics[height=0.5\textheight]{phlong}}
-%\wd\bildbox
-%\begin{tabular}{p{0.7\textwidth} p{0.5\textwidth}}
-%\vspace{0em}\begin{tabular}{p{0.7\textwidth}}\large{\knamn}
-%\\
-\begin{rollbeskrivningfloat}
-\caption{\kbeskrivning}
- %\end{tabular} & 
- \includegraphics[height=0.5\textheight]{phlong}\\
- \end{rollbeskrivningfloat}
-  %\end{tabular} 
 }%
-
-%\FloatBarrier \usepackage[section]{placeins}
-
-
 
 %%%%%%%%%% Sektionering %%%%%%%%%%
 
