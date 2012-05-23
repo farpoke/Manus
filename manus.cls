@@ -321,6 +321,7 @@
 			\end{tabular}%
 	}{%
 			%\vspace{\kner}\hspace{\khoger}%
+			%\vspace{-0.15\textheight}
 			\begin{tabular}{c m{\beskrivningsbredd}}%
 				\includegraphics[height=\rollbildhojd]{\kbild}&%
 				\vspace{\rollbeskrivningsflytt}\begin{tabular}{m{\beskrivningsbredd}}%
