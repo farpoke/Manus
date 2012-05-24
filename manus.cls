@@ -746,7 +746,7 @@
 			\hbox to \manus@stat@kolbredd{\hfil##1\hfil}}}%
 	\renewcommand\vline{%
 		\kern -0.5pt%
-		\raisebox{-3pt}[\baselineskip][0pt]{\rule{1pt}{\baselineskip}}%
+		\rule{1pt}{\baselineskip}%
 		\kern -0.5pt%
 	}%
 	\vspace{3em}%
@@ -769,7 +769,9 @@
 		\edef\stat@name{\csname\themanus@statiter @namn\endcsname @stat}%
 		\hbox{%
 			\vbox to \baselineskip{\vfil\hbox to 1.2\manus@namnbredd{%
-				\textbf{\csname\themanus@statiter @namn\endcsname}%
+				\raisebox{0pt}[\baselineskip][0pt]{%
+					\textbf{\csname\themanus@statiter @namn\endcsname}%
+				}%
 			\hfil}}%
 			\vline%
 			\stat@kol{\number\value{\stat@name @repliker}}%
