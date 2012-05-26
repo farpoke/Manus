@@ -215,14 +215,14 @@
 	\stepcounter{manus@roller}%
 	% Skapa kommando för att skriva ut en replik från karaktären.
 	\expandafter\newcommand\csname#1\endcsname[1]{%
-		\manus@skrivrad{#1}{##1}{#2}{true}%
+		\manus@skrivrad{#1}{\bfseries{##1}}{#2}{true}%
 		% Räkna raden till statistiken.
 		\ifthenelse{\equal{#4}{true}}{\stepcounter{#1@stat@repliker}}{}%
 		\manus@raknastats%
 	}%
 	% Skapa kommando för att skriva ut agerande från karaktären.
 	\expandafter\newcommand\csname#1gr\endcsname[1]{%
-		\manus@skrivrad{\tiny#1}{\textit{##1}}{#2}{true}%
+		\manus@skrivrad{\tiny#1}{\bfseries{\textit{##1}}}{#2}{true}%
 		% Räkna raden till statistiken.
 		\ifthenelse{\equal{#4}{true}}{\stepcounter{#1@stat@agerande}}{}%
 		\manus@raknastats%
@@ -517,7 +517,7 @@
 %%%%%%%%%% Diverse kommandon %%%%%%%%%%
 
 \newcommand\allgr[1]{%
-	\manus@skrivrad{* * *}{\textit{#1}}{black}{true}%
+	\manus@skrivrad{* * *}{\bfseries{\textit{#1}}}{black}{true}%
 	\manus@raknastats%
 }
 \newcommand\berattare[1]{\enkelrad[true]{%
