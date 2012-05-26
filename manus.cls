@@ -534,7 +534,7 @@
 
 % Använd makeindex för saklista.
 \makeindex
-\renewcommand\indexname{Sakregister \\ {\small Sorterad i ordningen de uppträder} \\ {\small Rekvista: Repliknummer, sidnummer}}% Svenska, tack.
+\renewcommand\indexname{Sakregister \\ {\footnotesize  Sorterad i ordningen de uppträder} \\ {\footnotesize  Rekvista: Repliknummer, sidnummer}}% Svenska, tack.
 % Förklaring av sortering
 
 %% \rekvisitalista
