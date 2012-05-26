@@ -530,11 +530,12 @@
 %% \rekv{rekvisita}
 %
 % Markera och indexera rekvisita.
-\newcommand\rekv[1]{\fbox{#1}\index{\theakt!#1}}
+\newcommand\rekv[1]{\fbox{#1}\index{\themanus@radnummer @#1: \themanus@radnummer}}%
 
 % Använd makeindex för saklista.
 \makeindex
-\renewcommand\indexname{Sakregister}% Svenska, tack.
+\renewcommand\indexname{Sakregister \\ {\small Sorterad i ordningen de uppträder} \\ {\small Rekvista: Repliknummer, sidnummer}}% Svenska, tack.
+% Förklaring av sortering
 
 %% \rekvisitalista
 %
