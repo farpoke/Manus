@@ -563,7 +563,7 @@
 \newcommand\enkelrad[2][false]{%
 	\manus@skrivrad{}{#2}{black}{#1}%
 }
-\newcommand\gr[1]{\textit{#1}}
+\newcommand\gr[1]{[\textit{#1}]}
 \newcommand\rentext[1]{#1}
 
 
