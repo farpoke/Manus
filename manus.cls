@@ -242,16 +242,12 @@
 		\expandafter\newcommand\csname#1in\endcsname{%
 			\setboolean{#1@in}{true}%
 			\setboolean{#1@sub}{false}%
-			\csname#1gr\endcsname{#1 kommer in på scen.}
-			}%
+			\@ifstar{}{%
+			\csname#1gr\endcsname{#1 kommer in på scen.}}}%
 		\expandafter\newcommand\csname#1ut\endcsname{%
 			\setboolean{#1@in}{false}%
-			\csname#1gr\endcsname{#1 går av scen.}}%
-		\expandafter\newcommand\csname#1in*\endcsname{%
-			\setboolean{#1@in}{true}%
-			\setboolean{#1@sub}{false}}%
-		\expandafter\newcommand\csname#1ut*\endcsname{%
-			\setboolean{#1@in}{false}}%
+			\@ifstar{}{%
+			\csname#1gr\endcsname{#1 går av scen.}}}%
 		\expandafter\newcommand\csname#1sub\endcsname{%
 			\setboolean{#1@sub}{true}}%
 		\expandafter\newcommand\csname#1subslut\endcsname{%
