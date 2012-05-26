@@ -241,8 +241,16 @@
 		% Skapa kommandon för att kalla in/ut karaktären.
 		\expandafter\newcommand\csname#1in\endcsname{%
 			\setboolean{#1@in}{true}%
-			\setboolean{#1@sub}{false}}%
+			\setboolean{#1@sub}{false}%
+			\csname#1gr\endcsname{#1 kommer in på scen.}
+			}%
 		\expandafter\newcommand\csname#1ut\endcsname{%
+			\setboolean{#1@in}{false}%
+			\csname#1gr\endcsname{#1 går av scen.}}%
+		\expandafter\newcommand\csname#1in*\endcsname{%
+			\setboolean{#1@in}{true}%
+			\setboolean{#1@sub}{false}}%
+		\expandafter\newcommand\csname#1ut*\endcsname{%
 			\setboolean{#1@in}{false}}%
 		\expandafter\newcommand\csname#1sub\endcsname{%
 			\setboolean{#1@sub}{true}}%
@@ -258,7 +266,7 @@
 
 
 
-%%%%%%%%%% Test av karaktärsbeskrivningsmiljö %%%%%%%%%%
+%%%%%%%%%% Karaktärsbeskrivningsmiljö 
 %
 %% \begin{rollbeskrivning}
 %
