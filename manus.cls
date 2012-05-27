@@ -542,7 +542,7 @@
 % Skriv ut en fin rekvisitalista.
 \newcommand\rekvisitalista{%
 	\newpage%
-	\addcontentsline{toc}{section}{\indexname}%
+	\addcontentsline{toc}{section}{Sakregister}%
 	\printindex%
 }
 
