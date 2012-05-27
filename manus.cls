@@ -404,7 +404,7 @@
 %% \manus@sfnykuplett{namn}{beskrivning}
 %
 % Lägg till en kuplettsammanfattning i sammanfattningslistan.
-\newcommand\manus@sfnykuplett[2]{%
+\newcommand\manus@sfnykuplett[3]{%
 	\stepcounter{manus@sfraknare}% Räkna upp ny sammanfattning.
 	% Spara sammanfattning av typ "kuplett"
 	\expandafter\xdef\csname\themanus@sfraknare typ\endcsname{kuplett}%
@@ -413,6 +413,7 @@
 	\begingroup% Ta temporärt bort \rekv kommandot så att beskrivningen
 	\def\rekv{}% inte går sönder.
 	\expandafter\xdef\csname\themanus@sfraknare beskrivning\endcsname{#2}%
+	\expandafter\xdef\csname\themanus@sfraknare deltagare\endcsname{#3}%
 	\endgroup%
 }
 
@@ -439,6 +440,7 @@
 			\par\vspace{1em}%
 			\textcolor{kuplettfarg}{\MakeUppercase{%
 				\csname\themanus@sfiter namn\endcsname}}\\%
+				\emph{\csname\themanus@sfiter deltagare\endcsname}\\%
 			\csname\themanus@sfiter beskrivning\endcsname%
 		}%
 	\repeat%
@@ -477,6 +479,20 @@
 	\deltagare{\ }%
 	\beskrivning{\ }%
 	\melodi{\ }%
+	
+	% Antar att alla inne är deltagare om inget annat är sagt
+	\deltagare{
+		\setcounter{manus@statiter}{0}%
+		\loop\ifnum\value{manus@statiter}<\value{manus@stats}%
+			\stepcounter{manus@statiter}%
+			\edef\stat@name{\csname\themanus@statiter @namn\endcsname @stat}%
+			\edef\stat@ind{\csname\themanus@statiter @ind\endcsname}%
+			\edef\stat@sub{\csname\themanus@statiter @sub\endcsname}%
+			\ifthenelse{\boolean{\stat@ind}}{%
+				\csname\themanus@statiter @namn\endcsname\ 
+			}{}%
+		\repeat%
+	}
 }{%
 	% Lägg till ny subsection för kupletten.
 	\subsection*{\hspace{\manus@numbredd}\Large\textcolor{kuplettfarg}{%
@@ -484,10 +500,10 @@
 	}}%
 	\addcontentsline{toc}{subsubsection}{%
 		\textcolor{kuplettfarg}{\MakeUppercase{\ktitel}}\\%
-		\kdeltagare%
+		Deltagare: \emph{\kdeltagare}%
 	}%
 	% Lägg till kuplettbeskrivning i sammanfattningslistan.
-	\manus@sfnykuplett{\ktitel}{\kbeskrivning}%
+	\manus@sfnykuplett{\ktitel}{\kbeskrivning}{\kdeltagare}%
 	% Skriv ut information om kupletten.
 	\enkelrad{%
 		Melodiförslag: \emph{\kmelodi}\\%
@@ -518,6 +534,7 @@
 			\par\vspace{1em}%
 			\textcolor{kuplettfarg}{\MakeUppercase{%
 				\csname\themanus@sfiter namn\endcsname}}\\%
+				\emph{\csname\themanus@sfiter deltagare\endcsname}\\%
 			\csname\themanus@sfiter beskrivning\endcsname%
 		}{}%
 	\repeat%
