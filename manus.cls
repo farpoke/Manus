@@ -469,30 +469,30 @@
 \newenvironment{kuplett}{%
 	% Deklarera kommandon för kuplettinformation.
 	\newcommand{\titel}[1]{\def\ktitel{##1}}%
-	\newcommand{\deltagare}[1]{\def\kdeltagare{##1}}%
+	\newcommand{\deltagare}[1]{\edef\kdeltagare{##1}}%
 	\newcommand{\beskrivning}[1]{%
 		\def\kbeskrivning{##1}%
 	}%
 	\newcommand{\melodi}[1]{\def\kmelodi{##1}}%
 	% Sätt alla värden till tomrum.
-	\titel{\ }%
-	\deltagare{\ }%
-	\beskrivning{\ }%
-	\melodi{\ }%
-	
+	\titel{}%
+	\deltagare{}%
+	\beskrivning{}%
+	\melodi{}%
 	% Antar att alla inne är deltagare om inget annat är sagt
-	\deltagare{
-		\setcounter{manus@statiter}{0}%
-		\loop\ifnum\value{manus@statiter}<\value{manus@stats}%
-			\stepcounter{manus@statiter}%
-			\edef\stat@name{\csname\themanus@statiter @namn\endcsname @stat}%
-			\edef\stat@ind{\csname\themanus@statiter @ind\endcsname}%
-			\edef\stat@sub{\csname\themanus@statiter @sub\endcsname}%
-			\ifthenelse{\boolean{\stat@ind}}{%
-				\csname\themanus@statiter @namn\endcsname\ 
-			}{}%
-		\repeat%
-	}
+	\setcounter{manus@statiter}{0}%
+	\loop\ifnum\value{manus@statiter}<\value{manus@stats}%
+		\stepcounter{manus@statiter}%
+		\edef\stat@name{\csname\themanus@statiter @namn\endcsname @stat}%
+		\edef\stat@ind{\csname\themanus@statiter @ind\endcsname}%
+		\edef\stat@sub{\csname\themanus@statiter @sub\endcsname}%
+		\ifthenelse{\boolean{\stat@ind}}{%
+			\deltagare{%
+				\kdeltagare%
+				\csname\themanus@statiter @namn\endcsname\ %
+			}%
+		}{}%
+	\repeat%
 }{%
 	% Lägg till ny subsection för kupletten.
 	\subsection*{\hspace{\manus@numbredd}\Large\textcolor{kuplettfarg}{%
