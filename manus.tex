@@ -1,7 +1,11 @@
 \documentclass[a4paper,12pt]{article}
 
-\usepackage[utf8]{inputenc}
-%\usepackage[T1]{fontenc}
+\usepackage{ifxetex}
+\ifxetex
+	\RequirePackage[T1]{fontenc}
+\else
+	\RequirePackage[utf8]{inputenc}
+\fi
 
 \usepackage[pdftex, margin=3cm]{geometry}
 
