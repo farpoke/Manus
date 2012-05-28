@@ -547,11 +547,27 @@
 %% \rekv{rekvisita}
 %
 % Markera och indexera rekvisita.
-\newcommand\rekv[1]{\fbox{#1}\index{\themanus@radnummer @#1: \themanus@radnummer}}%
+\newcommand\rekv[1]{%
+	\fbox{#1}%
+	\manus@indexrekv{#1}%
+}
+
+%% \manus@indexrekv{rekvisita}
+%
+% Indexera rekvisita
+\newcommand\manus@indexrekv[1]{%
+	\index{%
+		\vspace{10pt}\textbf{\theakt}!%
+		\themanus@radnummer @%
+		#1: \themanus@radnummer|textit}%
+}
 
 % Använd makeindex för saklista.
 \makeindex
-\renewcommand\indexname{Sakregister \\ {\footnotesize  Sorterad i ordningen de uppträder} \\ {\footnotesize  Rekvista: Repliknummer, sidnummer}}% Svenska, tack.
+\renewcommand\indexname{%
+	Sakregister\\% Svenska, tack.
+	{\normalsize Sorterad i ordningen de uppträder}\\%
+	{\normalfont\normalsize Rekvista: repliknummer, \textit{sidnummer}}}%
 % Förklaring av sortering
 
 %% \rekvisitalista
@@ -578,7 +594,13 @@
 	\fontdimen4\font=0.2em%
 	\fontdimen7\font=0.1em%
 	\hyphenchar\font=`\-%
+	\begingroup%
+	\renewcommand\rekv[1]{%
+		\fbox{##1}%
+		\manus@indexrekv{##1 (B)}%
+	}%
 	#1%
+	\endgroup%
 }}
 \newcommand{\citat}[1]{``#1''}
 \newcommand\comment[1]{}
@@ -881,7 +903,9 @@
 		\hspace{-\manus@numbredd}%
 		\vbox to \manus@radstorlek{\hbox to \manus@numbredd{%
 			\hfil% För högerjustering.
-			\manus@hjalpavstand\themanus@radnummer\manus@hjalpavstand%
+			\manus@hjalpavstand%
+			\themanus@radnummer%
+			\manus@hjalpavstand%
 			\hspace{\manus@kolavstand}%
 		}\vfil}%
 		% Namn:
