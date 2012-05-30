@@ -217,7 +217,10 @@
 	\expandafter\newcommand\csname#1\endcsname[1]{%
 		\manus@skrivrad{#1}{\bfseries{##1}}{#2}{true}%
 		% Räkna raden till statistiken.
-		\ifthenelse{\equal{#4}{true}}{\stepcounter{#1@stat@repliker}}{}%
+		\ifthenelse{\equal{#4}{true}}{%
+			\stepcounter{#1@stat@repliker}%
+			\addtolength{\csname#1@stat@repliker\endcsname}{\manus@indhojd}%
+		}{}%
 		\manus@raknastats%
 	}%
 	% Skapa kommando för att skriva ut agerande från karaktären.
@@ -237,7 +240,7 @@
 		% Lägg till indikator.
 		\manus@nyind{#1@in}{#1@sub}{#3}%
 		% Lägg till statistik.
-		\manus@nystat{#1}{#1@in}{#1@sub}%
+		\manus@nystat{#1}{#1@in}{#1@sub}{#2}%
 		% Skapa kommandon för att kalla in/ut karaktären.
 		\expandafter\newcommand\csname#1in\endcsname{%
 			\setboolean{#1@in}{true}%
@@ -345,14 +348,22 @@
 % Svenska, tack.
 \renewcommand\contentsname{Innehåll}
 
+% Identifiera första akten.
+\newif\ifforstaakten
+\forstaaktentrue
+
 %% \akt[första-scen-nummer]
 %
 % Börja en ny akt, på ny sida, eventuellt med givet nummer till första scen.
 \newcommand\akt[1][1]{%
+	% Räkna aktstatistik för den avslutade akten.
+	\ifforstaakten\forstaaktenfalse\else\manus@aktstatistik\fi%
+	% Påbörja den nya akten.
 	\newpage%
 	\stepcounter{akt}%
 	\section*{\hspace{\manus@numbredd}\theakt}%
 	\addcontentsline{toc}{section}{\theakt}%
+	% Sätt scenräknaren så att den första scenen får önskat värde.
 	\setcounter{scen}{#1}%
 	\addtocounter{scen}{-1}%
 }
@@ -702,17 +713,18 @@
 
 %%%%%%%%%% Statistik %%%%%%%%%%
 
-%% \manus@nystat{namn}{ind}{sub}
+%% \manus@nystat{namn}{ind}{sub}{färg}
 %
 % Skapa nya räknare och längder från det givna basnamnet för att räkna
-% statistik.
-\newcommand\manus@nystat[3]{%
+% statistik. I statistiktabellen skrivs namnet ut med den angivna färgen.
+\newcommand\manus@nystat[4]{%
 	% Räkna upp statistik.
 	\stepcounter{manus@stats}%
-	% Spara namn och booleaner för statistiken.
+	% Spara parametrar för statistiken.
 	\expandafter\gdef\csname\themanus@stats @namn\endcsname{#1}%
 	\expandafter\gdef\csname\themanus@stats @ind\endcsname{#2}%
 	\expandafter\gdef\csname\themanus@stats @sub\endcsname{#3}%
+	\expandafter\gdef\csname\themanus@stats @color\endcsname{#4}%
 	% Skapa räknare för statistik.
 	\newcounter{#1@stat@repliker}%
 	\newcounter{#1@stat@agerande}%
@@ -720,6 +732,7 @@
 	\newcounter{#1@stat@narvaro}%
 	\newcounter{#1@stat@subspel}%
 	% Skapa längder för statistik.
+	\expandafter\newdimen\csname#1@stat@repliker\endcsname%
 	\expandafter\newdimen\csname#1@stat@narvaro\endcsname%
 	\expandafter\newdimen\csname#1@stat@subspel\endcsname%
 	% Sätt alla värden till noll.
@@ -728,6 +741,7 @@
 	\setcounter{#1@stat@agerande}{0}%
 	\setcounter{#1@stat@narvaro}{0}%
 	\setcounter{#1@stat@subspel}{0}%
+	\setlength{\csname#1@stat@repliker\endcsname}{0pt}%
 	\setlength{\csname#1@stat@narvaro\endcsname}{0pt}%
 	\setlength{\csname#1@stat@subspel\endcsname}{0pt}%
 }
@@ -773,6 +787,8 @@
 	\repeat%
 }
 
+\newcommand\manus@aktstatistik{}
+
 %% \statistiktabell
 %
 % Skriv ut en tabell med statistik för roller.
@@ -790,7 +806,7 @@
 			\hbox to \manus@stat@kolbredd{\hfil##1\hfil}}}%
 	\renewcommand\vline{%
 		\kern -0.5pt%
-		\rule{1pt}{\baselineskip}%
+		\raisebox{-3pt}[0pt][0pt]{\rule{1pt}{\baselineskip}}%
 		\kern -0.5pt%
 	}%
 	\vspace{3em}%
@@ -803,6 +819,7 @@
 		\kol@titel{Närvaro}%
 		\kol@titel{Subspel}%
 		\kol@titel{Total}%
+		\kol@titel{Repliker ({\small $\approx$cm})}%
 		\kol@titel{Närvaro ({\small $\approx$cm})}%
 		\kol@titel{Subspel ({\small $\approx$cm})}%
 		\kol@titel{Total ({\small $\approx$cm})}%
@@ -810,36 +827,46 @@
 	\setcounter{manus@statiter}{0}%
 	\loop\ifnum\value{manus@statiter}<\value{manus@stats}%
 		\stepcounter{manus@statiter}%
-		\edef\stat@name{\csname\themanus@statiter @namn\endcsname @stat}%
+		\edef\@name{\csname\themanus@statiter @namn\endcsname}%
+		\edef\@color{\csname\themanus@statiter @color\endcsname}%
 		\hbox{%
 			\vbox to \baselineskip{\vfil\hbox to 1.2\manus@namnbredd{%
 				\raisebox{0pt}[\baselineskip][0pt]{%
-					\textbf{\csname\themanus@statiter @namn\endcsname}%
+					\textbf{\textcolor{\@color}{\@name}}%
 				}%
 			\hfil}}%
 			\vline%
-			\stat@kol{\number\value{\stat@name @repliker}}%
-			\stat@kol{\number\value{\stat@name @agerande}}%
+			\stat@kol{\number\value{\@name @stat@repliker}}%
+			\stat@kol{\number\value{\@name @stat@agerande}}%
 			\stat@kol{%
 				\number\numexpr%
-					\value{\stat@name @repliker}+%
-					\value{\stat@name @agerande}%
+					\value{\@name @stat@repliker}+%
+					\value{\@name @stat@agerande}%
 			}%
 			\vline%
-			\stat@kol{\number\value{\stat@name @kupletter}}%
+			\stat@kol{\number\value{\@name @stat@kupletter}}%
 			\vline%
-			\stat@kol{\number\value{\stat@name @narvaro}}%
-			\stat@kol{\number\value{\stat@name @subspel}}%
+			\stat@kol{\number\value{\@name @stat@narvaro}}%
+			\stat@kol{\number\value{\@name @stat@subspel}}%
 			\stat@kol{%
 				\number\numexpr%
-					\value{\stat@name @narvaro}+%
-					\value{\stat@name @subspel}%
+					\value{\@name @stat@narvaro}+%
+					\value{\@name @stat@subspel}%
 			}%
 			\vline%
 			\stat@kol{%
 				\setlength%
 					{\manus@stat@tmp}%
-					{\csname\stat@name @narvaro\endcsname}%
+					{\csname\@name @stat@repliker\endcsname}%
+				\pgfmathtruncatemacro\stat@cm%
+					{round(0.0351459804*\manus@stat@tmp)}%
+				\stat@cm%
+			}%
+			\vline%
+			\stat@kol{%
+				\setlength%
+					{\manus@stat@tmp}%
+					{\csname\@name @stat@narvaro\endcsname}%
 				\pgfmathtruncatemacro\stat@cm%
 					{round(0.0351459804*\manus@stat@tmp)}%
 				\stat@cm%
@@ -847,7 +874,7 @@
 			\stat@kol{%
 				\setlength%
 					{\manus@stat@tmp}%
-					{\csname\stat@name @subspel\endcsname}%
+					{\csname\@name @stat@subspel\endcsname}%
 				\pgfmathtruncatemacro\stat@cm%
 					{round(0.0351459804*\manus@stat@tmp)}%
 				\stat@cm%
@@ -855,10 +882,10 @@
 			\stat@kol{%
 				\setlength%
 					{\manus@stat@tmp}%
-					{\csname\stat@name @narvaro\endcsname}%
+					{\csname\@name @stat@narvaro\endcsname}%
 				\addtolength%
 					{\manus@stat@tmp}%
-					{\csname\stat@name @subspel\endcsname}%
+					{\csname\@name @stat@subspel\endcsname}%
 				\pgfmathtruncatemacro\stat@cm%
 					{round(0.0351459804*\manus@stat@tmp)}%
 				\stat@cm%
