@@ -218,9 +218,13 @@
 % Skapa, faktiskt, en ny karaktär. Om parameter #4 är true skapas även en
 % indikator med den givna färgen, annars inte.
 \newcommand\manus@nyroll[5]{%
+	% Spara utskriftsnamn på lägligt ställe. Detta utnyttjas för att kunna ändra
+	% utskriftsnamnet på en karaktär mitt i manus. Statistiken håller sig till
+	% orginalnamn.
+	\expandafter\gdef\csname#1@namn\endcsname{#2}%
 	% Skapa kommando för att skriva ut en replik från karaktären.
 	\expandafter\newcommand\csname#1\endcsname[1]{%
-		\manus@skrivrad{#2}{\bfseries{##1}}{#3}{true}%
+		\manus@skrivrad{\csname#1@namn\endcsname}{\bfseries{##1}}{#3}{true}%
 		% Räkna raden till statistiken.
 		\ifthenelse{\equal{#5}{true}}{%
 			\stepcounter{#1@stat@repliker}%
@@ -230,7 +234,8 @@
 	}%
 	% Skapa kommando för att skriva ut agerande från karaktären.
 	\expandafter\newcommand\csname#1gr\endcsname[1]{%
-		\manus@skrivrad{\tiny#2}{\bfseries{\textit{##1}}}{#3}{true}%
+		\manus@skrivrad{\tiny\csname#1@namn\endcsname}%
+			{\bfseries{\textit{##1}}}{#3}{true}%
 		% Räkna raden till statistiken.
 		\ifthenelse{\equal{#5}{true}}{\stepcounter{#1@stat@agerande}}{}%
 		\manus@raknastats%
@@ -266,6 +271,14 @@
 	\ifdim\wd\manus@namn@tmpbox>\sl@maxnamewd%
 		\setlength{\sl@maxnamewd}{\wd\manus@namn@tmpbox}%
 	\fi%
+}
+
+%% \namnbyte{kommandonamn}{utskriftsnamn}
+%
+% Ändra utskriftsnamnet för karaktären med det angivna kommandonamnet till det
+% angivna, nya, utskriftsnamnet.
+\newcommand\namnbyte[2]{%
+	\expandafter\gdef\csname#1@namn\endcsname{#2}%
 }
 
 
