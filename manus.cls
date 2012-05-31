@@ -126,52 +126,34 @@
 \newcounter{scen}[akt]
 \renewcommand\thescen{Scen \arabic{scen}}
 
-% Räknare för antalet karaktärer, samt en hjälpräknare för loopar.
-\newcounter{manus@roller}
-\newcounter{manus@rolliter}
-\setcounter{manus@roller}{0} % Inga karaktärer än.
-
-% Dessa räknare kommer användas inom \csname\endscname så definera
-% om texten till något lämpligare.
-\renewcommand\themanus@roller{actor@\roman{manus@roller}@}
-\renewcommand\themanus@rolliter{actor@\roman{manus@rolliter}@}
-
-% Räknare för antalet indikatorer, samt en hjälpräknare för loopar.
-\newcounter{manus@indikatorer}
-\newcounter{manus@inditer}
-\setcounter{manus@indikatorer}{0} % Inga indikatorer än.
-
-% Dessa räknare kommer användas innom \csname\endscname så definera
-% om texten till något lämpligare.
-\renewcommand\themanus@indikatorer{indicator@\roman{manus@indikatorer}@}
-\renewcommand\themanus@inditer{indicator@\roman{manus@inditer}@}
-
 % Räkna repliknummer.
 \newcounter{manus@radnummer}
 \setcounter{manus@radnummer}{0}
 
-% Räkna sammanfattningar.
-\newcounter{manus@sfraknare}
-\newcounter{manus@sfiter}
-\setcounter{manus@sfraknare}{0} % Inga sammanfattningar än.
-
-% Dessa räknare kommer användas innom \csname\endscname så definera
-% om texten till något lämpligare.
-\renewcommand\themanus@sfraknare{manus@sf\roman{manus@sfraknare}@}
-\renewcommand\themanus@sfiter{manus@sf\roman{manus@sfiter}@}
-
 % Räknare för beräkning av antal rander för subspelsindikatorer.
 \newcounter{manus@randantal}
 
-% Räkna statistikrader.
-\newcounter{manus@stats}
-\newcounter{manus@statiter}
-\setcounter{manus@stats}{0} % Inga än.
 
-% Dessa räknare kommer användas innom \csname\endscname så definera
-% om texten till något lämpligare.
-\renewcommand\themanus@stats{stats@\roman{manus@stats}@}
-\renewcommand\themanus@statiter{stats@\roman{manus@statiter}@}
+
+%%%%%%%%%% Dirty Tricks á la Knuth %%%%%%%%%%
+
+% Temporär sparning av tokenlistor.
+\newtoks\tmp@toks@a
+\newtoks\tmp@toks@b
+
+%% \NewList\namn
+%
+% Gör \namn till en ny, tom, lista.
+\def\NewList#1{\let#1\empty}
+
+%% \Append<stuff>\To\lista
+%
+% Lägger <stuff> till slutet av \lista.
+\def\Append#1\To#2{%
+	\tmp@toks@a={\\{#1}}%
+	\tmp@toks@b=\expandafter{#2}%
+	\xdef#2{\the\tmp@toks@b\the\tmp@toks@a}%
+}
 
 
 
@@ -211,8 +193,6 @@
 % Skapa, faktiskt, en ny karaktär. Om parameter #4 är true skapas även en
 % indikator med den givna färgen, annars inte.
 \newcommand\manus@nyroll[4]{%
-	% Räkna upp antalet karaktärer.
-	\stepcounter{manus@roller}%
 	% Skapa kommando för att skriva ut en replik från karaktären.
 	\expandafter\newcommand\csname#1\endcsname[1]{%
 		\manus@skrivrad{#1}{\bfseries{##1}}{#2}{true}%
@@ -399,33 +379,29 @@
 	\manus@sfnyscen{#1}%
 }
 
+% Skapa en ny lista för sammanfattningsinformation.
+\NewList\manus@sammanfattningar
+
 %% \manus@sfnyscen{sammanfattning}
 %
 % Lägg till en scensammanfattning i sammanfattningslistan.
 \newcommand\manus@sfnyscen[1]{%
-	\stepcounter{manus@sfraknare}% Räkna upp ny sammanfattning.
 	% Spara sammanfattning av typ "scen".
-	\expandafter\xdef\csname\themanus@sfraknare typ\endcsname{scen}%
-	% Spara plats och text för scen.
-	\expandafter\xdef\csname\themanus@sfraknare plats\endcsname{%
-		\theakt, \thescen:}%
-	\expandafter\xdef\csname\themanus@sfraknare text\endcsname{#1}%
+	\Append\scen\To\manus@sammanfattningar%
+	\edef\tmp{\theakt, \thescen:}% Expandera akt- och scennummer.
+	\expandafter\Append\tmp\To\manus@sammanfattningar%
+	\Append#1\To\manus@sammanfattningar%
 }
 
 %% \manus@sfnykuplett{namn}{beskrivning}
 %
 % Lägg till en kuplettsammanfattning i sammanfattningslistan.
 \newcommand\manus@sfnykuplett[3]{%
-	\stepcounter{manus@sfraknare}% Räkna upp ny sammanfattning.
 	% Spara sammanfattning av typ "kuplett"
-	\expandafter\xdef\csname\themanus@sfraknare typ\endcsname{kuplett}%
-	% Spara namn och beskrivning på kuplett.
-	\expandafter\xdef\csname\themanus@sfraknare namn\endcsname{#1}%
-	\begingroup% Ta temporärt bort \rekv kommandot så att beskrivningen
-	\def\rekv{}% inte går sönder.
-	\expandafter\xdef\csname\themanus@sfraknare beskrivning\endcsname{#2}%
-	\expandafter\xdef\csname\themanus@sfraknare deltagare\endcsname{#3}%
-	\endgroup%
+	\Append\kuplett\To\manus@sammanfattningar%
+	\expandafter\Append#1\To\manus@sammanfattningar%
+	\expandafter\Append#2\To\manus@sammanfattningar%
+	\expandafter\Append#3\To\manus@sammanfattningar%
 }
 
 %% \sammanfattningslista
@@ -436,25 +412,21 @@
 	\newpage%
 	\section*{Sammanfattning}%
 	\addcontentsline{toc}{section}{Sammanfattning}%
-	% Loopa över alla sparade sammanfattningar.
-	\setcounter{manus@sfiter}{0}%
-	\loop\ifnum\value{manus@sfiter}<\value{manus@sfraknare}%
-		\stepcounter{manus@sfiter}%
-		% Skriv ut scen- eller kuplettsammanfattning beroende på...
-		\ifthenelse{\equal{\csname\themanus@sfiter typ\endcsname}{scen}}{%
-			% Scen:
-			\paragraph{%
-				\csname\themanus@sfiter plats\endcsname}%
-			\csname\themanus@sfiter text\endcsname%
-		}{%
-			% Kuplett:
+	% Skiv ut alla sammanfattningar.
+	\begingroup%
+	\let\newline\\%
+	\def\\##1{##1}%
+	\def\scen\\##1\\##2{%
+		\paragraph{##1} ##2%
+	}%
+	\def\kuplett\\##1\\##2\\##3{%
 			\par\vspace{1em}%
-			\textcolor{kuplettfarg}{\MakeUppercase{%
-				\csname\themanus@sfiter namn\endcsname}}\\%
-				\emph{\csname\themanus@sfiter deltagare\endcsname}\\%
-			\csname\themanus@sfiter beskrivning\endcsname%
-		}%
-	\repeat%
+			\textcolor{kuplettfarg}{\MakeUppercase{##1}}\newline%
+			\emph{##3}\newline%
+			##2%
+	}%
+	\manus@sammanfattningar%
+	\endgroup%
 }
 
 
@@ -480,7 +452,7 @@
 \newenvironment{kuplett}{%
 	% Deklarera kommandon för kuplettinformation.
 	\newcommand{\titel}[1]{\def\ktitel{##1}}%
-	\newcommand{\deltagare}[1]{\edef\kdeltagare{##1}}%
+	\newcommand{\deltagare}[1]{\xdef\kdeltagare{##1}}%
 	\newcommand{\beskrivning}[1]{%
 		\def\kbeskrivning{##1}%
 	}%
@@ -490,20 +462,19 @@
 	\deltagare{}%
 	\beskrivning{}%
 	\melodi{}%
-	% Antar att alla inne är deltagare om inget annat är sagt
-	\setcounter{manus@statiter}{0}%
-	\loop\ifnum\value{manus@statiter}<\value{manus@stats}%
-		\stepcounter{manus@statiter}%
-		\edef\stat@name{\csname\themanus@statiter @namn\endcsname @stat}%
-		\edef\stat@ind{\csname\themanus@statiter @ind\endcsname}%
-		\edef\stat@sub{\csname\themanus@statiter @sub\endcsname}%
-		\ifthenelse{\boolean{\stat@ind}}{%
-			\deltagare{%
-				\kdeltagare%
-				\csname\themanus@statiter @namn\endcsname\ %
-			}%
+	% Om deltagare inte specificeras antags alla som är på scen delta.
+	\begingroup%
+	\def\\##1\\##2\\##3\\##4{% \\{namn}\\{ind}\\{sub}\\{färg}
+		\ifthenelse{\boolean{##2}}{%
+			\ifx\kdeltagare\empty%
+				\deltagare{##1}%
+			\else%
+				\deltagare{\kdeltagare, ##1}%
+			\fi%
 		}{}%
-	\repeat%
+	}%
+	\manus@statistik%
+	\endgroup%
 }{%
 	% Lägg till ny subsection för kupletten.
 	\subsection*{\hspace{\manus@numbredd}\Large\textcolor{kuplettfarg}{%
@@ -535,20 +506,19 @@
 	\newpage%
 	\section*{Kupletter}%
 	\addcontentsline{toc}{section}{Kupletter}%
-	% Loopa över alla sparade sammanfattningar.
-	\setcounter{manus@sfiter}{0}%
-	\loop\ifnum\value{manus@sfiter}<\value{manus@sfraknare}%
-		\stepcounter{manus@sfiter}%
-		% Skriv ut kupletter.
-		\ifthenelse{\equal{\csname\themanus@sfiter typ\endcsname}%
-					{kuplett}}{%
+	% Skiv ut alla kupletter.
+	\begingroup%
+	\let\newline\\%
+	\def\\##1{##1}%
+	\def\scen\\##1\\##2{}%
+	\def\kuplett\\##1\\##2\\##3{%
 			\par\vspace{1em}%
-			\textcolor{kuplettfarg}{\MakeUppercase{%
-				\csname\themanus@sfiter namn\endcsname}}\\%
-				\emph{\csname\themanus@sfiter deltagare\endcsname}\\%
-			\csname\themanus@sfiter beskrivning\endcsname%
-		}{}%
-	\repeat%
+			\textcolor{kuplettfarg}{\MakeUppercase{##1}}\newline%
+			\emph{##3}\newline%
+			##2%
+	}%
+	\manus@sammanfattningar%
+	\endgroup%
 }
 
 
@@ -625,20 +595,19 @@
 
 %%%%%%%%%% Indikatorer %%%%%%%%%%
 
+% Skapa en ny lista med indikatorinformation.
+\NewList\manus@indikatorer
+
 %% \manus@nyind{ind}{sub}{färg}
 %
 % Lägg till en ny indikator för de angivna booleanerna och den anvigna
 % färgen. ind skall vara namnet på den boolean som styr närvaro, sub skall
 % vara namnet på den boolean som styr subspelsindikatorn.
 \newcommand\manus@nyind[3]{%
-	% Räkna upp indikatorn och spara angivna parametrar.
-	\stepcounter{manus@indikatorer}%
-	\expandafter\newcommand\csname\themanus@indikatorer ind\endcsname{%
-		#1}%
-	\expandafter\newcommand\csname\themanus@indikatorer sub\endcsname{%
-		#2}%
-	\expandafter\newcommand\csname\themanus@indikatorer color\endcsname{%
-		#3}%
+	% Spara parametrarna i indikatorlistan.
+	\Append#1\To\manus@indikatorer%
+	\Append#2\To\manus@indikatorer%
+	\Append#3\To\manus@indikatorer%
 }
 
 %% \manus@ritaind{färg}{overlay}
@@ -693,38 +662,34 @@
 \newcommand\manus@ritainds{%
 	% Räkna först ut värden för eventuella ränder.
 	\manus@raknarander%
-	% Loopa!
-	\setcounter{manus@inditer}{0}%
-	\loop\ifnum\value{manus@inditer}<\value{manus@indikatorer}%
-		\stepcounter{manus@inditer}%
-		\ifthenelse{\boolean{\csname\themanus@inditer ind\endcsname}}{%
-			% Närvarande; rita ut indikator och möjligen ränder.
-			\manus@ritaind%
-				{\csname\themanus@inditer color\endcsname}%
-				{\csname\themanus@inditer sub\endcsname}%
-		}{%
-			% Skriv ut en vit indikator vid frånvaro.
-			\manus@ritaind{white}{false}%
-		}%
-	\repeat%
+	% Rita ut indikatorer.
+	\begingroup%
+	\def\\##1\\##2\\##3{%
+		\ifthenelse{\boolean{##1}}%
+			{\manus@ritaind{##3}{##2}}% På scen.
+			{\manus@ritaind{white}{false}}% Av scen.
+	}%
+	\manus@indikatorer%
+	\endgroup%
 }
 
 
 
 %%%%%%%%%% Statistik %%%%%%%%%%
 
+% Skapa en ny lista för statistikinformation.
+\NewList\manus@statistik
+
 %% \manus@nystat{namn}{ind}{sub}{färg}
 %
 % Skapa nya räknare och längder från det givna basnamnet för att räkna
 % statistik. I statistiktabellen skrivs namnet ut med den angivna färgen.
 \newcommand\manus@nystat[4]{%
-	% Räkna upp statistik.
-	\stepcounter{manus@stats}%
 	% Spara parametrar för statistiken.
-	\expandafter\gdef\csname\themanus@stats @namn\endcsname{#1}%
-	\expandafter\gdef\csname\themanus@stats @ind\endcsname{#2}%
-	\expandafter\gdef\csname\themanus@stats @sub\endcsname{#3}%
-	\expandafter\gdef\csname\themanus@stats @color\endcsname{#4}%
+	\Append#1\To\manus@statistik%
+	\Append#2\To\manus@statistik%
+	\Append#3\To\manus@statistik%
+	\Append#4\To\manus@statistik%
 	% Skapa räknare för statistik.
 	\newcounter{#1@stat@repliker}%
 	\newcounter{#1@stat@agerande}%
@@ -750,41 +715,39 @@
 %
 % Räkna statistik.
 \newcommand\manus@raknastats{%
-	\setcounter{manus@statiter}{0}%
-	\loop\ifnum\value{manus@statiter}<\value{manus@stats}%
-		\stepcounter{manus@statiter}%
-		\edef\stat@name{\csname\themanus@statiter @namn\endcsname @stat}%
-		\edef\stat@ind{\csname\themanus@statiter @ind\endcsname}%
-		\edef\stat@sub{\csname\themanus@statiter @sub\endcsname}%
-		\ifthenelse{\boolean{\stat@ind}}{%
-			\ifthenelse{\boolean{\stat@sub}}{%
-				\stepcounter{\stat@name @subspel}%
-				\addtolength%
-					{\csname\stat@name @subspel\endcsname}%
+	\begingroup%
+	\def\\##1\\##2\\##3\\##4{%
+		\ifthenelse{\boolean{##2}}{%
+			\ifthenelse{\boolean{##3}}{%
+				\stepcounter{##1@stat@subspel}%
+				\global\addtolength%
+					{\csname##1@stat@subspel\endcsname}%
 					{\manus@indhojd}%
 			}{%
-				\stepcounter{\stat@name @narvaro}%
-				\addtolength%
-					{\csname\stat@name @narvaro\endcsname}%
+				\stepcounter{##1@stat@narvaro}%
+				\global\addtolength%
+					{\csname##1@stat@narvaro\endcsname}%
 					{\manus@indhojd}%
 			}%
 		}{}%
-	\repeat%
+	}%
+	\manus@statistik%
+	\endgroup%
 }
 
 %% \manus@raknakuplett
 %
 % Räkna kuplettstatistik.
 \newcommand\manus@raknakuplett{%
-	\setcounter{manus@statiter}{0}%
-	\loop\ifnum\value{manus@statiter}<\value{manus@stats}%
-		\stepcounter{manus@statiter}%
-		\edef\stat@name{\csname\themanus@statiter @namn\endcsname @stat}%
-		\edef\stat@ind{\csname\themanus@statiter @ind\endcsname}%
-		\ifthenelse{\boolean{\stat@ind}}{%
-			\stepcounter{\stat@name @kupletter}%
-		}{}%
-	\repeat%
+	%\setcounter{manus@statiter}{0}%
+	%\loop\ifnum\value{manus@statiter}<\value{manus@stats}%
+	%	\stepcounter{manus@statiter}%
+	%	\edef\stat@name{\csname\themanus@statiter @namn\endcsname @stat}%
+	%	\edef\stat@ind{\csname\themanus@statiter @ind\endcsname}%
+	%	\ifthenelse{\boolean{\stat@ind}}{%
+	%		\stepcounter{\stat@name @kupletter}%
+	%	}{}%
+	%\repeat%
 }
 
 \newcommand\manus@aktstatistik{}
@@ -824,40 +787,36 @@
 		\kol@titel{Subspel ({\small $\approx$cm})}%
 		\kol@titel{Total ({\small $\approx$cm})}%
 	}%
-	\setcounter{manus@statiter}{0}%
-	\loop\ifnum\value{manus@statiter}<\value{manus@stats}%
-		\stepcounter{manus@statiter}%
-		\edef\@name{\csname\themanus@statiter @namn\endcsname}%
-		\edef\@color{\csname\themanus@statiter @color\endcsname}%
+	\def\\##1\\##2\\##3\\##4{
 		\hbox{%
 			\vbox to \baselineskip{\vfil\hbox to 1.2\manus@namnbredd{%
 				\raisebox{0pt}[\baselineskip][0pt]{%
-					\textbf{\textcolor{\@color}{\@name}}%
+					\textbf{\textcolor{##4}{##1}}%
 				}%
 			\hfil}}%
 			\vline%
-			\stat@kol{\number\value{\@name @stat@repliker}}%
-			\stat@kol{\number\value{\@name @stat@agerande}}%
+			\stat@kol{\number\value{##1@stat@repliker}}%
+			\stat@kol{\number\value{##1@stat@agerande}}%
 			\stat@kol{%
 				\number\numexpr%
-					\value{\@name @stat@repliker}+%
-					\value{\@name @stat@agerande}%
+					\value{##1@stat@repliker}+%
+					\value{##1@stat@agerande}%
 			}%
 			\vline%
-			\stat@kol{\number\value{\@name @stat@kupletter}}%
+			\stat@kol{\number\value{##1@stat@kupletter}}%
 			\vline%
-			\stat@kol{\number\value{\@name @stat@narvaro}}%
-			\stat@kol{\number\value{\@name @stat@subspel}}%
+			\stat@kol{\number\value{##1@stat@narvaro}}%
+			\stat@kol{\number\value{##1@stat@subspel}}%
 			\stat@kol{%
 				\number\numexpr%
-					\value{\@name @stat@narvaro}+%
-					\value{\@name @stat@subspel}%
+					\value{##1@stat@narvaro}+%
+					\value{##1@stat@subspel}%
 			}%
 			\vline%
 			\stat@kol{%
 				\setlength%
 					{\manus@stat@tmp}%
-					{\csname\@name @stat@repliker\endcsname}%
+					{\csname##1@stat@repliker\endcsname}%
 				\pgfmathtruncatemacro\stat@cm%
 					{round(0.0351459804*\manus@stat@tmp)}%
 				\stat@cm%
@@ -866,7 +825,7 @@
 			\stat@kol{%
 				\setlength%
 					{\manus@stat@tmp}%
-					{\csname\@name @stat@narvaro\endcsname}%
+					{\csname##1@stat@narvaro\endcsname}%
 				\pgfmathtruncatemacro\stat@cm%
 					{round(0.0351459804*\manus@stat@tmp)}%
 				\stat@cm%
@@ -874,7 +833,7 @@
 			\stat@kol{%
 				\setlength%
 					{\manus@stat@tmp}%
-					{\csname\@name @stat@subspel\endcsname}%
+					{\csname##1@stat@subspel\endcsname}%
 				\pgfmathtruncatemacro\stat@cm%
 					{round(0.0351459804*\manus@stat@tmp)}%
 				\stat@cm%
@@ -882,16 +841,17 @@
 			\stat@kol{%
 				\setlength%
 					{\manus@stat@tmp}%
-					{\csname\@name @stat@narvaro\endcsname}%
+					{\csname##1@stat@narvaro\endcsname}%
 				\addtolength%
 					{\manus@stat@tmp}%
-					{\csname\@name @stat@subspel\endcsname}%
+					{\csname##1@stat@subspel\endcsname}%
 				\pgfmathtruncatemacro\stat@cm%
 					{round(0.0351459804*\manus@stat@tmp)}%
 				\stat@cm%
 			}%
 		}%
-	\repeat%
+	}%
+	\manus@statistik%
 	\egroup%
 }
 
@@ -953,8 +913,6 @@
 			\raisebox{\manus@indskift}[0pt][0pt]{%
 				\hspace{\manus@kolavstand}%
 				\manus@ritainds%
-				\hspace{-\value{manus@indikatorer}\manus@indbredd}%
-				\hspace{-\manus@kolavstand}%
 			}%
 		}{}%
 	}%
