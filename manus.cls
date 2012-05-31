@@ -159,45 +159,70 @@
 
 %%%%%%%%%% Karaktärer %%%%%%%%%%
 
-%% \nyroll[färg]{namn}
+% Lite TeX-magi för att hantera valfria argument vid rollskapande.
+% Ny roll skapas genom syntaxen \nyroll[färg]{namn}[utskriftsnamn]
 %
-% Skapa en karaktär.
-\newcommand\nyroll[2][black]{%
+\def\nyroll{\@ifnextchar[\nyroll@ii\nyroll@i}
+\def\nyroll@i#1{\nyroll@ii[black]{#1}}% Defaultfärg är svart.
+\def\nyroll@ii[#1]#2{%
+	\@ifnextchar[%
+		{\nyroll@iii[#1]{#2}}%
+		{\nyroll@iii[#1]{#2}[#2]}% Defaultutskriftsnamn är kommandonamnet.
+}
+\def\nyroll@iii[#1]#2[#3]{\@nyroll{#1}{#2}{#3}}% Komplett anrop.
+
+%% \@nyroll{färg}{kommandonamn}{utskriftsnamn}
+%
+% Skapa en karaktär. Kommandon, räknare etc. får namn utefter kommandonamnet
+% men det som skrivs ut är utskriftsnamnet.
+\newcommand\@nyroll[3]{%
 	\ifthenelse{\boolean{svartvit}}{%
 		% Svartvitt: karaktären får svart text och vit indikator.
-		\manus@nyroll{#2}{black}{white}{true}%
+		\manus@nyroll{#2}{#3}{black}{white}{true}%
 	}{%
 		% Ej svartvitt: karaktären får matchande text och indikator.
-		\manus@nyroll{#2}{#1}{#1}{true}%
+		\manus@nyroll{#2}{#3}{#1}{#1}{true}%
 	}%
 }
 
-%% \nyhjalproll[färg]{namn}
+% Lite TeX-magi för att hantera valfria argument vid hjälprollskapande.
+% Ny hjälproll skapas genom syntaxen \nyhjalproll[färg]{namn}[utskriftsnamn]
 %
-% Skapa en ny "karaktär", utan indikator.
-\newcommand\nyhjalproll[2][black]{%
+\def\nyhjalproll{\@ifnextchar[\nyhjalproll@ii\nyhjalproll@i}
+\def\nyhjalproll@i#1{\nyhjalproll@ii[black]{#1}}% Defaultfärg är svart.
+\def\nyhjalproll@ii[#1]#2{%
+	\@ifnextchar[%
+		{\nyhjalproll@iii[#1]{#2}}%
+		{\nyhjalproll@iii[#1]{#2}[#2]}% Defaultutskriftsnamn är kommandonamnet.
+}
+\def\nyhjalproll@iii[#1]#2[#3]{\@nyhjalproll{#1}{#2}{#3}}% Komplett anrop.
+
+%% \nyhjalproll{färg}{namn}{utskriftsnamn}
+%
+% Skapa en ny "karaktär", utan indikator. Se \@nyroll.
+\newcommand\@nyhjalproll[3]{%
 	\ifthenelse{\boolean{svartvit}}{%
 		% Svartvitt: karaktären får svart text och vit indikator.
-		\manus@nyroll{#2}{black}{white}{false}%
+		\manus@nyroll{#2}{#3}{black}{white}{false}%
 	}{%
 		% Ej svartvitt: karaktären får matchande text och indikator.
-		\manus@nyroll{#2}{#1}{#1}{false}%
+		\manus@nyroll{#2}{#3}{#1}{#1}{false}%
 	}%
 }
 
 % Temporär låda för beräkning av namnbredd.
 \newsavebox{\manus@namn@tmpbox}
 
-%% \manus@nyroll{namn}{textfärg}{indikatorfärg}{indikator?}
+%% \manus@nyroll{kommandonamn}{utskriftsnamn}{textfärg}{indikatorfärg}{indikator?}
 %
 % Skapa, faktiskt, en ny karaktär. Om parameter #4 är true skapas även en
 % indikator med den givna färgen, annars inte.
-\newcommand\manus@nyroll[4]{%
+\newcommand\manus@nyroll[5]{%
 	% Skapa kommando för att skriva ut en replik från karaktären.
 	\expandafter\newcommand\csname#1\endcsname[1]{%
-		\manus@skrivrad{#1}{\bfseries{##1}}{#2}{true}%
+		\manus@skrivrad{#2}{\bfseries{##1}}{#3}{true}%
 		% Räkna raden till statistiken.
-		\ifthenelse{\equal{#4}{true}}{%
+		\ifthenelse{\equal{#5}{true}}{%
 			\stepcounter{#1@stat@repliker}%
 			\addtolength{\csname#1@stat@repliker\endcsname}{\manus@indhojd}%
 		}{}%
@@ -205,22 +230,22 @@
 	}%
 	% Skapa kommando för att skriva ut agerande från karaktären.
 	\expandafter\newcommand\csname#1gr\endcsname[1]{%
-		\manus@skrivrad{\tiny#1}{\bfseries{\textit{##1}}}{#2}{true}%
+		\manus@skrivrad{\tiny#2}{\bfseries{\textit{##1}}}{#3}{true}%
 		% Räkna raden till statistiken.
-		\ifthenelse{\equal{#4}{true}}{\stepcounter{#1@stat@agerande}}{}%
+		\ifthenelse{\equal{#5}{true}}{\stepcounter{#1@stat@agerande}}{}%
 		\manus@raknastats%
 	}%
 	% Lägg till indikator.
-	\ifthenelse{\equal{#4}{true}}{%
+	\ifthenelse{\equal{#5}{true}}{%
 		% Skapa en ny boolean för att hålla reda på karaktärens status.
 		\newboolean{#1@in}%
 		\setboolean{#1@in}{false}%
 		\newboolean{#1@sub}%
 		\setboolean{#1@sub}{false}%
 		% Lägg till indikator.
-		\manus@nyind{#1@in}{#1@sub}{#3}%
+		\manus@nyind{#1@in}{#1@sub}{#4}%
 		% Lägg till statistik.
-		\manus@nystat{#1}{#1@in}{#1@sub}{#2}%
+		\manus@nystat{#1}{#2}{#1@in}{#1@sub}{#3}%
 		% Skapa kommandon för att kalla in/ut karaktären.
 		\expandafter\newcommand\csname#1in\endcsname{%
 			\setboolean{#1@in}{true}%
@@ -237,7 +262,7 @@
 			\setboolean{#1@sub}{false}}%
 	}{}%
 	% Räkna ut största namnbredd.
-	\savebox{\manus@namn@tmpbox}{#1\hspace{\manus@kolavstand}}%
+	\savebox{\manus@namn@tmpbox}{#2\hspace{\manus@kolavstand}}%
 	\ifdim\wd\manus@namn@tmpbox>\sl@maxnamewd%
 		\setlength{\sl@maxnamewd}{\wd\manus@namn@tmpbox}%
 	\fi%
@@ -464,12 +489,12 @@
 	\melodi{}%
 	% Om deltagare inte specificeras antags alla som är på scen delta.
 	\begingroup%
-	\def\\##1\\##2\\##3\\##4{% \\{namn}\\{ind}\\{sub}\\{färg}
-		\ifthenelse{\boolean{##2}}{%
+	\def\\##1\\##2\\##3\\##4\\##5{% \\{namn}\\{utskriftnamn}\\{ind}\\{sub}\\{färg}
+		\ifthenelse{\boolean{##3}}{%
 			\ifx\kdeltagare\empty%
-				\deltagare{##1}%
+				\deltagare{##2}%
 			\else%
-				\deltagare{\kdeltagare, ##1}%
+				\deltagare{\kdeltagare, ##2}%
 			\fi%
 		}{}%
 	}%
@@ -680,16 +705,17 @@
 % Skapa en ny lista för statistikinformation.
 \NewList\manus@statistik
 
-%% \manus@nystat{namn}{ind}{sub}{färg}
+%% \manus@nystat{namn}{utskriftsnamn}{ind}{sub}{färg}
 %
 % Skapa nya räknare och längder från det givna basnamnet för att räkna
 % statistik. I statistiktabellen skrivs namnet ut med den angivna färgen.
-\newcommand\manus@nystat[4]{%
+\newcommand\manus@nystat[5]{%
 	% Spara parametrar för statistiken.
 	\Append#1\To\manus@statistik%
 	\Append#2\To\manus@statistik%
 	\Append#3\To\manus@statistik%
 	\Append#4\To\manus@statistik%
+	\Append#5\To\manus@statistik%
 	% Skapa räknare för statistik.
 	\newcounter{#1@stat@repliker}%
 	\newcounter{#1@stat@agerande}%
@@ -716,9 +742,9 @@
 % Räkna statistik.
 \newcommand\manus@raknastats{%
 	\begingroup%
-	\def\\##1\\##2\\##3\\##4{%
-		\ifthenelse{\boolean{##2}}{%
-			\ifthenelse{\boolean{##3}}{%
+	\def\\##1\\##2\\##3\\##4\\##5{%
+		\ifthenelse{\boolean{##3}}{%
+			\ifthenelse{\boolean{##4}}{%
 				\stepcounter{##1@stat@subspel}%
 				\global\addtolength%
 					{\csname##1@stat@subspel\endcsname}%
@@ -787,11 +813,11 @@
 		\kol@titel{Subspel ({\small $\approx$cm})}%
 		\kol@titel{Total ({\small $\approx$cm})}%
 	}%
-	\def\\##1\\##2\\##3\\##4{
+	\def\\##1\\##2\\##3\\##4\\##5{
 		\hbox{%
 			\vbox to \baselineskip{\vfil\hbox to 1.2\manus@namnbredd{%
 				\raisebox{0pt}[\baselineskip][0pt]{%
-					\textbf{\textcolor{##4}{##1}}%
+					\textbf{\textcolor{##5}{##2}}%
 				}%
 			\hfil}}%
 			\vline%
