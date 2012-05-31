@@ -765,15 +765,14 @@
 %
 % Räkna kuplettstatistik.
 \newcommand\manus@raknakuplett{%
-	%\setcounter{manus@statiter}{0}%
-	%\loop\ifnum\value{manus@statiter}<\value{manus@stats}%
-	%	\stepcounter{manus@statiter}%
-	%	\edef\stat@name{\csname\themanus@statiter @namn\endcsname @stat}%
-	%	\edef\stat@ind{\csname\themanus@statiter @ind\endcsname}%
-	%	\ifthenelse{\boolean{\stat@ind}}{%
-	%		\stepcounter{\stat@name @kupletter}%
-	%	}{}%
-	%\repeat%
+	\begingroup%
+	\def\\##1\\##2\\##3\\##4\\##5{% \\{namn}\\{utskriftnamn}\\{ind}\\{sub}\\{färg}
+		\ifthenelse{\boolean{##3}}{%
+			\stepcounter{##1@stat@kupletter}%
+		}{}%
+	}%
+	\manus@statistik%
+	\endgroup%
 }
 
 \newcommand\manus@aktstatistik{}
