@@ -42,6 +42,9 @@
 % Ett klassalternativ för scensammanfattningar.
 \manus@alternativ{sammanfattningar}
 
+% Ett klassalternativ för statistikgrafer.
+\manus@alternativ{grafer}
+
 % Hantera okända klassalternativ.
 \DeclareOption*{\typeout{! Dokumnetklassen Manus känner inte igen \CurrentOption.}}
 
@@ -842,7 +845,7 @@
 		\kol@titel{Total ({\small $\approx$cm})}%
 	}%
 	% Skriv ut statistikrader.
-	\def\\##1\\##2\\##3\\##4\\##5{
+	\def\\##1\\##2\\##3\\##4\\##5{% \\{namn}\\{utskriftnamn}\\{ind}\\{sub}\\{färg}
 		\hbox{%
 			\vbox to \baselineskip{\vfil\hbox to 1.2\manus@namnbredd{%
 				\raisebox{0pt}[\baselineskip][0pt]{%
@@ -929,6 +932,41 @@
 	}%
 	\manus@akter%
 	\endgroup%
+	% Lägg till statistikgrafer om klassalternativet är satt.
+	\ifthenelse{\boolean{grafer}}{\vspace{3em}\manus@grafer}{}%
+}
+
+
+
+%%%%%%%%%% Grafer %%%%%%%%%%
+
+\newcommand\manus@grafer{
+	\subsection*{Grafer}
+	\begingroup
+	\let\replik@stats\empty
+	\def\\##1\\##2\\##3\\##4\\##5{% \\{namn}\\{utskriftnamn}\\{ind}\\{sub}\\{färg}
+		\tmp@toks@a=\expandafter{\replik@stats}
+		\tmp@toks@b={\\{##2}\\{\arabic{##1@stat@repliker}}\\{##5}}
+		\edef\replik@stats{\the\tmp@toks@a\the\tmp@toks@b}
+	}
+	\manus@statistik
+	\newcounter{tmp@total}
+	\newcounter{tmp@count}
+	\def\\##1\\##2\\##3{\addtocounter{tmp@total}{##2}}
+	\replik@stats
+	\def\\##1\\##2\\##3{
+		\pgfmathparse{360*\value{tmp@count}/\value{tmp@total}}
+		\let\angle@a=\pgfmathresult
+		\addtocounter{tmp@count}{##2}
+		\pgfmathparse{360*\value{tmp@count}/\value{tmp@total}}
+		\let\angle@b=\pgfmathresult
+		\pgfmathparse{(\angle@a+\angle@b)/2}
+		\let\angle@c=\pgfmathresult
+		\draw[fill=##3] (0,0) -- (\angle@a:1) arc (\angle@a:\angle@b:1) -- cycle;
+		\node at (\angle@c:1.5) {##1};
+	}
+	\begin{tikzpicture}\replik@stats\end{tikzpicture}
+	\endgroup
 }
 
 
