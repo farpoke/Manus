@@ -940,20 +940,30 @@
 
 %%%%%%%%%% Grafer %%%%%%%%%%
 
-\newcommand\manus@grafer{
-	\subsection*{Grafer}
-	\begingroup
-	\let\replik@stats\empty
+\newcommand\manus@graf@repliker[1]{\value{#1@stat@repliker}}
+\newcommand\manus@graf@total[1]{%
+	\numexpr\value{#1@stat@repliker}+\value{#1@stat@agerande}\relax}
+\newcommand\manus@graf@kupletter[1]{\value{#1@stat@kupletter}}
+
+\newcommand\manus@graf@repliker@l[1]{\csname#1@stat@repliker\endcsname}
+\newcommand\manus@graf@narvaro@l[1]{\csname#1@stat@narvaro\endcsname}
+\newcommand\manus@graf@subspel@l[1]{\csname#1@stat@subspel\endcsname}
+\newcommand\manus@graf@total@l[1]{%
+	\dimexpr\csname#1@stat@narvaro\endcsname+\csname#1@stat@subspel\endcsname\relax}
+
+\newcommand\manus@graf@num[2]{
+	\begingroup%
+	\let\graf@stats\empty%
 	\def\\##1\\##2\\##3\\##4\\##5{% \\{namn}\\{utskriftnamn}\\{ind}\\{sub}\\{färg}
-		\tmp@toks@a=\expandafter{\replik@stats}
-		\tmp@toks@b={\\{##2}\\{\arabic{##1@stat@repliker}}\\{##5}}
-		\edef\replik@stats{\the\tmp@toks@a\the\tmp@toks@b}
-	}
-	\manus@statistik
-	\newcounter{tmp@total}
-	\newcounter{tmp@count}
-	\def\\##1\\##2\\##3{\addtocounter{tmp@total}{##2}}
-	\replik@stats
+		\tmp@toks@a=\expandafter{\graf@stats}%
+		\tmp@toks@b={\\{##2}\\{#2{##1}}\\{##5}}%
+		\edef\graf@stats{\the\tmp@toks@a\the\tmp@toks@b}%
+	}%
+	\manus@statistik%
+	\newcount\c@tmp@total%
+	\newcount\c@tmp@count%
+	\def\\##1\\##2\\##3{\addtocounter{tmp@total}{##2}}%
+	\graf@stats%
 	\def\\##1\\##2\\##3{
 		\pgfmathparse{360*\value{tmp@count}/\value{tmp@total}}
 		\let\angle@a=\pgfmathresult
@@ -963,10 +973,62 @@
 		\pgfmathparse{(\angle@a+\angle@b)/2}
 		\let\angle@c=\pgfmathresult
 		\draw[fill=##3] (0,0) -- (\angle@a:1) arc (\angle@a:\angle@b:1) -- cycle;
-		\node at (\angle@c:1.5) {##1};
-	}
-	\begin{tikzpicture}\replik@stats\end{tikzpicture}
-	\endgroup
+		\node[label=\angle@c:##1,inner sep=0pt,outer sep=0pt] at (\angle@c:1) {};
+	}%
+	\fbox{\vbox{%
+		\hbox{\bf#1}\vspace{5pt}%
+		\hbox{\begin{tikzpicture}\graf@stats\end{tikzpicture}}%
+	}}%
+	\endgroup%
+}
+
+\newcommand\manus@graf@dim[2]{
+	\begingroup%
+	\let\graf@stats\empty%
+	\def\\##1\\##2\\##3\\##4\\##5{% \\{namn}\\{utskriftnamn}\\{ind}\\{sub}\\{färg}
+		\tmp@toks@a=\expandafter{\graf@stats}%
+		\tmp@toks@b={\\{##2}\\{#2{##1}}\\{##5}}%
+		\edef\graf@stats{\the\tmp@toks@a\the\tmp@toks@b}%
+	}%
+	\manus@statistik%
+	\newdimen\l@tmp
+	\newdimen\l@tmp@total%
+	\newdimen\l@tmp@count%
+	\def\\##1\\##2\\##3{%
+		\l@tmp=##2%
+		\addtolength{\l@tmp@total}{0.001\l@tmp}%
+	}%
+	\graf@stats%
+	\def\\##1\\##2\\##3{
+		\pgfmathparse{360*\l@tmp@count/\l@tmp@total}
+		\let\angle@a=\pgfmathresult
+		\l@tmp=##2
+		\addtolength{\l@tmp@count}{0.001\l@tmp}
+		\pgfmathparse{360*\l@tmp@count/\l@tmp@total}
+		\let\angle@b=\pgfmathresult
+		\pgfmathparse{(\angle@a+\angle@b)/2}
+		\let\angle@c=\pgfmathresult
+		\draw[fill=##3] (0,0) -- (\angle@a:1) arc (\angle@a:\angle@b:1) -- cycle;
+		\node[label=\angle@c:##1,inner sep=0pt,outer sep=0pt] at (\angle@c:1) {};
+	}%
+	\fbox{\vbox{%
+		\hbox{\bf#1}\vspace{5pt}%
+		\hbox{\begin{tikzpicture}\graf@stats\end{tikzpicture}}%
+	}}%
+	\endgroup%
+}
+
+\newcommand\manus@grafer{%
+	\par
+	\manus@graf@num{Repliker}{\manus@graf@repliker}
+	\manus@graf@num{Repliker+Agerande}{\manus@graf@total}
+	\manus@graf@num{Kupletter}{\manus@graf@kupletter}
+	\par\vspace{8pt}
+	\manus@graf@dim{Repliker (cm)}{\manus@graf@repliker@l}
+	\manus@graf@dim{Närvaro (cm)}{\manus@graf@narvaro@l}
+	\par\vspace{8pt}
+	\manus@graf@dim{Subspel (cm)}{\manus@graf@subspel@l}
+	\manus@graf@dim{Närvaro+Subspel (cm)}{\manus@graf@total@l}
 }
 
 
