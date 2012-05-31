@@ -114,6 +114,10 @@
 % Hjälplängd för statistikberäkning.
 \newlength{\manus@stat@tmp}
 
+% Statistiklängd för aktlängd.
+\newlength{\manus@aktlangd}
+\setlength{\manus@aktlangd}{0pt}
+
 
 
 %%%%%%%%%% Räknare %%%%%%%%%%
@@ -366,16 +370,13 @@
 % Svenska, tack.
 \renewcommand\contentsname{Innehåll}
 
-% Identifiera första akten.
-\newif\ifforstaakten
-\forstaaktentrue
-
 %% \akt[första-scen-nummer]
 %
 % Börja en ny akt, på ny sida, eventuellt med givet nummer till första scen.
 \newcommand\akt[1][1]{%
 	% Räkna aktstatistik för den avslutade akten.
-	\ifforstaakten\forstaaktenfalse\else\manus@aktstatistik\fi%
+	\manus@aktstatistik%
+	\setlength{\manus@aktlangd}{0pt}%
 	% Påbörja den nya akten.
 	\newpage%
 	\stepcounter{akt}%
@@ -788,12 +789,26 @@
 	\endgroup%
 }
 
-\newcommand\manus@aktstatistik{}
+% Skapa en ny lista med lite aktstatistik.
+\NewList\manus@akter
+
+%% \manus@aktstatistik
+%
+%% Lägg till nuvarande akten i aktstatistiken om aktens längd är positiv.
+\newcommand\manus@aktstatistik{\ifdim\manus@aktlangd>0pt%
+	\edef\tmp{\theakt}
+	\expandafter\Append\tmp\To\manus@akter%
+	\edef\tmp{\the\manus@aktlangd}%
+	\expandafter\Append\tmp\To\manus@akter%
+\fi}
 
 %% \statistiktabell
 %
 % Skriv ut en tabell med statistik för roller.
 \newcommand\statistiktabell{%
+	% Räkna statistik för sista akten.
+	\manus@aktstatistik%
+	% Påbörja statistiksektion på ny sida.
 	\newpage%
 	\section*{Statistik}%
 	\addcontentsline{toc}{section}{Statistik}%
@@ -810,6 +825,7 @@
 		\raisebox{-3pt}[0pt][0pt]{\rule{1pt}{\baselineskip}}%
 		\kern -0.5pt%
 	}%
+	% Skriv ut titelrad.
 	\vspace{3em}%
 	\hbox{\bf%
 		\hspace{1.2\manus@namnbredd}%
@@ -825,6 +841,7 @@
 		\kol@titel{Subspel ({\small $\approx$cm})}%
 		\kol@titel{Total ({\small $\approx$cm})}%
 	}%
+	% Skriv ut statistikrader.
 	\def\\##1\\##2\\##3\\##4\\##5{
 		\hbox{%
 			\vbox to \baselineskip{\vfil\hbox to 1.2\manus@namnbredd{%
@@ -890,7 +907,28 @@
 		}%
 	}%
 	\manus@statistik%
-	\egroup%
+	\egroup% Slut på statistiktabell
+	% Lägg till lite aktstatistik.
+	\vspace{3em}%
+	\begingroup%
+	% Räkna ut totallängden.
+	\newdimen\tmp@langd%
+	\def\\##1\\##2{\addtolength{\tmp@langd}{##2}}%
+	\manus@akter%
+	% Räkna ut en skalfaktor för att passa akterna horizontellt.
+	\pgfmathparse{(\textwidth-2*(\fboxrule+\fboxsep)*\value{akt})/\tmp@langd}%
+	% Rita ut lådor med information, med storlek motsvarande akternas längd.
+	\def\\##1\\##2{%
+		\tmp@langd=##2%
+		\tmp@langd=\pgfmathresult\tmp@langd%
+		\pgfmathtruncatemacro\stat@cm{round(0.0351459804*##2)}%
+		\fbox{\parbox{\tmp@langd}{%
+			\textbf{##1}\\%
+			\stat@cm\ cm%%
+		}}%
+	}%
+	\manus@akter%
+	\endgroup%
 }
 
 
@@ -955,6 +993,7 @@
 		}{}%
 	}%
 	\vspace{\manus@radavstand}% Extra radavstånd.
+	\addtolength{\manus@aktlangd}{\manus@indhojd}% Lägg till höjden till aktlängden.
 }
 
 
