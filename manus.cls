@@ -263,11 +263,11 @@
 			\setboolean{#1@in}{true}%
 			\setboolean{#1@sub}{false}%
 			\@ifstar{}{%
-			\csname#1gr\endcsname{#1 kommer in på scen.}}}%
+			\csname#1gr\endcsname{\csname#1@namn\endcsname\ kommer in på scen.}}}%
 		\expandafter\newcommand\csname#1ut\endcsname{%
 			\setboolean{#1@in}{false}%
 			\@ifstar{}{%
-			\csname#1gr\endcsname{#1 går av scen.}}}%
+			\csname#1gr\endcsname{\csname#1@namn\endcsname\ går av scen.}}}%
 		\expandafter\newcommand\csname#1sub\endcsname{%
 			\setboolean{#1@sub}{true}}%
 		\expandafter\newcommand\csname#1subslut\endcsname{%
