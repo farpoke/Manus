@@ -120,6 +120,11 @@ Som standard är alla repliker samt kupletter markerade med färg. Kupletter med
 \index{sammanfattningar@\texttt{sammanfattningar}}
 När ny scen påbörjas med kommandot |\scen| (se nedan) kan en sammanfattning av scenen anges. I normala fall sparas den bara undan för att skrivas ut i slutet av dokumentet i sammanfattningslistan (se nedan). Men om detta klassalternativ ges så skrivs sammanfattningen även ut direkt efter scenrubriken.
 
+\subsubsection{Alternativ: \texttt{grafer}}
+\label{alt:grafer}
+\index{grafer@\texttt{grafer}}
+Detta alternativ gör att statistiktabellen (se avsnitt \ref{sec:statistik}) följs av diverse illustrativa grafer. Denna funktionalitet är ännu experimentell, men fungerande.
+
 \subsection{Definiera karaktärer/roller}
 \label{sec:nyroll}
 \index{Definiera karaktärer}
@@ -334,11 +339,11 @@ Skriver ut en lista över all rekvisita som finns nämnd så långt. Lista är i
 Skriver ut en sammanfattning som består utav de sammanfattningar som angetts till varje scen samt de kupletter som finns.
 
 \subsection*{Statistik}
-
 \paragraph{\tt\bfseries\textbackslash statistiktabell}
 \index{Statistiktabell}
 \index{statistiktabell@\verb#\statistiktabell#}
 \addcontentsline{toc}{subsection}{Statistiktabell}
+\label{sec:statistik}
 Skriver ut statistik för varje definierad karaktär men inte för hjälpkaraktärer, dvs de som skapats via |\nyroll| men inte via |\nyhjalproll|.
 
 Inkluderat i statistiken är
@@ -350,6 +355,8 @@ Inkluderat i statistiken är
 	\item[subspel] --- antal repliker då karaktären är på scen i subspel
 \end{description}
 samt några totaler och även längduppskattning av några av ovanstående värden. Dvs det finns för repliker, närvaro och subspel även uträknat ungeför hur många centimeter papper dessa värden motsvarar i manus. Dessa värden är avrundade men bör vara hyggligt exakta.
+
+Då klassalternativet |grafer| är angett kommer även en del grafer inkluderas.
 
 
 
