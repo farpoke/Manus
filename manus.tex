@@ -9,9 +9,7 @@
 
 \usepackage[pdftex, margin=3cm]{geometry}
 
-\usepackage{etex}
 \usepackage{xifthen}
-\usepackage[warn]{textcomp}
 \usepackage{url}
 \usepackage[bottom,hang]{footmisc}
 \usepackage[babel]{csquotes}
@@ -30,13 +28,15 @@
 	numberstyle=\tiny,
 	language=TeX,
 	keywordstyle=\bfseries,
-	morekeywords={documentclass,definecolor,nyroll,nyhjalproll,begin,gr,rekv,akt,scen,allgr,titel,deltagare,beskrivning,melodi,Namn,Namngr,Namnin,Namnut,Namnsub,Namnsubslut,rekvisitalista,kuplettlista,sammanfattningslista,statistiktabell}
+	morekeywords={documentclass,definecolor,nyroll,nyhjalproll,begin,gr,rekv,akt,scen,allgr,titel,deltagare,beskrivning,melodi,Namn,Namngr,Namnin,Namnut,Namnsub,Namnsubslut,rekvisitalista,kuplettlista,sammanfattningslista,statistiktabell,namnbyte}
 }
 
 \renewcommand\ttdefault{pcr}
 
 \usepackage{makeidx}
 \makeindex
+
+\usepackage{needspace}
 
 \setcounter{secnumdepth}{1} 
 
@@ -108,7 +108,7 @@ För att ge direktiv till manusklassen kan extra klassalternativ anges på följ
 \end{lstlisting}
 
 \noindent
-där |alternativlista| är en komma-separerad lista med alternativ.
+där |alternativlista| är en komma-separerad lista med alternativ (eller tom för den delen).
 
 \subsubsection{Alternativ: \texttt{svartvit}}
 \label{alt:svartvit}
@@ -118,40 +118,37 @@ Som standard är alla repliker samt kupletter markerade med färg. Kupletter med
 \subsubsection{Alternativ: \texttt{sammanfattningar}}
 \label{alt:sammanfattningar}
 \index{sammanfattningar@\texttt{sammanfattningar}}
-När ny scen påbörjas med kommandot |\scen| (se nedan) kan en sammanfattning av scenen anges. I normala sparas den bara undan för att skrivas ut i slutet av dokumentet i sammanfattningslistan (se nedan). Men om detta klassalternativ ges så skrivs sammanfattningen även ut direkt efter scenrubriken.
+När ny scen påbörjas med kommandot |\scen| (se nedan) kan en sammanfattning av scenen anges. I normala fall sparas den bara undan för att skrivas ut i slutet av dokumentet i sammanfattningslistan (se nedan). Men om detta klassalternativ ges så skrivs sammanfattningen även ut direkt efter scenrubriken.
 
 \subsection{Definiera karaktärer/roller}
-\funnybone{Våra tävlande är...}
 \label{sec:nyroll}
 \index{Definiera karaktärer}
 \index{nyroll@\verb#\nyroll#}
 \index{nyhjalproll@\verb#\nyhjalproll#}
-För att kunna använda manusfunktionaliteten behöver man definera vilka karaktärer som finns. Detta kan göras på fyra olika sätt:
+\funnybone{Våra tävlande är...}
+För att kunna använda manusfunktionaliteten behöver man definera vilka karaktärer som finns. Detta görs med två olika kommandon:
 
 \begin{lstlisting}
-\nyroll{namn}            % Ny karaktär med svart text.
-\nyroll[färg]{namn}      % Ny karaktär med färgad text.
-\nyhjalproll{namn}       % Ny hjälpkaraktär med svart text.
-\nyhjalproll[färg]{namn} % Ny hjälpkaraktär med färgad text.
+\nyroll[färg]{namn}      % Ny karaktär.
+\nyhjalproll[färg]{namn} % Ny hjälpkaraktär.
 \end{lstlisting}
 
-De första två varianterna definierar en ny karaktär och ger även denna en närvaroindikator som ritas ut i högermarginalen. Mer om denna indikator i avsnitt \ref{sec:narvaro}.
+De första varianten definierar en ny karaktär och ger även denna en närvaroindikator som ritas ut i högermarginalen. Mer om denna indikator i avsnitt \ref{sec:narvaro}.
 
-De sista två varianterna definierar även de en ny karaktär, men inte \emph{inte} en närvaroindikator eller de kommandon som associeras med en sådan. Detta är användbart för småroller som till exempel en statist som bara finns med i en scen eller en berättare som inte finns på scen.
+Den andra varianten definierar också en ny karaktär, men skapar \emph{inte} en närvaroindikator eller de kommandon som associeras med en sådan. Detta är användbart för småroller som till exempel en statist som bara finns med i en scen eller en berättare som inte finns på scen.
 
 \subsubsection{Färger}
 \label{sec:farger}
 \index{Färger}
-Om parametern färg inkluderas när en roll definieras kommer denna färg användas för repliker och agerande från denna karaktär samt för karaktärens närvaroindikator.
+Parametern |[färg]| är frivillig och om den inkluderas kommer den givna färgen användas för repliker och agerande från denna karaktär samt för karaktärens närvaroindikator och statistik.
 
-Detta är frivilligt, och svart kommer tilldelas som karaktärsfärg om inget annat anges. Undertecknad tycker dock att svart är en tråkig färg.
+Detta är som sagt frivilligt, och svart kommer tilldelas som karaktärsfärg om inget annat anges. Undertecknad tycker dock att svart är en tråkig färg.
 
-Värdet på färgparametern skall vara en färg enligt paketet \pack{xcolor}, som är det paket som \pack{manus.cls} använder för färgläggning. För enkel användning finns ett antal fördefinierade färger som listas i appendix \ref{app:farger}, men man kan även definiera egna färger eller ange en blandning av färger enligt \pack{xcolor}:s format. För detaljer se \pack{xcolor}:s dokumentation, som enklast fås genom att köra ``|texdoc xcolor|'' i en terminal eller genom att googla ``xcolor''.
+Värdet på färgparametern skall vara en färg enligt paketet \pack{xcolor}, som är det paket som \pack{manus.cls} använder för färgläggning. För enkel användning finns ett antal fördefinierade färger som listas i appendix \ref{app:farger}, men man kan även definiera egna färger eller ange en blandning av färger enligt \pack{xcolor}:s format. För detaljer se \pack{xcolor}:s dokumentation, som enklast fås genom att köra ``|texdoc xcolor|'' i en lämplig terminal (en med korrekt \TeX-installation) eller genom att googla ``xcolor''.
 
 
 
-\newpage
-
+\needspace{5em}
 \section{Manus}
 Början på ett exempelmanus:
 
@@ -170,9 +167,9 @@ Början på ett exempelmanus:
 
 
 \subsection{Akter och scener}
+\index{akt@\verb#\akt#}
+\index{scen@\verb#\scen#}
 \funnybone{Nu får scengruppen jobba!}
-\index{akt@\verb#\akt#}%
-\index{scen@\verb#\scen#}%
 Ett manus är indelat i akter och scener, och dessa inleds med följande två kommandon:
 
 \begin{lstlisting}
@@ -184,11 +181,12 @@ Ett manus är indelat i akter och scener, och dessa inleds med följande två ko
 
 \paragraph{Titel} är titel för scenen.
 
-\paragraph{Sammanfattning} är sammanfattning för scenen. Denna används för att generera sammanfattning utav hela manuset (se \ref{subsec:sammanfattning}). Om klassalternativet |sammanfattningar| har angetts skrivs sammanfattningen även ut direkt efter scentiteln.
+\paragraph{Sammanfattning} är sammanfattning för scenen. Denna används för att generera sammanfattning utav hela manuset (se avsnitt \ref{sec:slut-på-manus}). Om klassalternativet \texttt{samman\-fattningar} har angetts skrivs sammanfattningen även ut direkt efter scentiteln.
 
 
 
 \subsection{Repliker och agerande}
+\label{sec:repliker}
 \index{Repliker}
 \index{Agerande}
 \funnybone{Vems replik är det egentligen?}
@@ -196,12 +194,14 @@ Den allmänna formen för att skriva repliker är:
 \index{Namn@\verb#\Namn#}
 \index{Namngr@\verb#\Namngr#}
 \begin{lstlisting}
-\Namn{}
-\Namngr{}
+\Namn{...}
+\Namngr{...}
 \end{lstlisting}
-där ``Namn'' är tidigare definierad i |\nyroll| (se \ref{sec:nyroll}).
+där ``Namn'' är tidigare definierad i |\nyroll| (se \ref{sec:nyroll}) och där |\Namn| skriver ut en vanlig replik från denne karaktären medans |\Namngr| skriver ut ett ``agerande'' från densamme.
 
-Finessen med |\Namngr| är att kunna skriva längre mängd text för att beskriva att någon gör något. För att markera samma sak mitt i en replik används |\gr|. Ifall flera roller är involverade är |\allgr{}|\index{allgr@\verb#\allgr#} rätt kommando.
+Finessen med |\Namngr| är att kunna skriva längre mängd text för att beskriva att någon gör något. För att markera samma sak mitt i en replik används |\gr|.
+
+Ifall flera roller är involverade är |\allgr{}|\index{allgr@\verb#\allgr#} rätt kommando.
 
 
 
@@ -221,9 +221,13 @@ Denna indikator kontrolleras med följande fyra kommandon:
 \Namnsubslut
 \end{lstlisting}
 
-Till exempel: när |\Bobbyin| skrivs kommer Bobby markeras som inne på scen och närvaroindikatorn för Bobby kommer visas i marginalen. När Bobby sedan skall av scen skriver man |\Bobbyut|.
+Till exempel: när |\Bobbyin| skrivs kommer Bobby markeras som inne på scen och närvaroindikatorn för Bobby kommer visas i marginalen. När Bobby sedan skall av scen skriver man |\Bobbyut| och närvaroindikatorn avslutas.
 
 Om Bobby skall vara på scen men i subspel skrivs |\Bobbysub|, vilket gör att Bobbys närvaroindikator blir streckad. När Bobby är klar med vad han än höll på med och återigen skall agera stort skrivs |\Bobbysubslut|.
+
+|\Namnin|- och |\Namnut|-kommandona skriver även ut ett automatiskt agerande som meddelar att karaktären i fråga ``kommer in på scen'' respektive ``går av scen.'' Då detta ej önskas läggs en asterisk till efter kommandot (till exempel |\Bobbyin*|).
+
+Det spelar ingen roll om man inte skriver |\Namnsubslut| innan |\Namnut| (dvs karaktären i fråga går av scen direkt från subspel) men |\Namnin| kommer automatiskt ta karaktären ut ur subspel.
 
 
 
@@ -239,25 +243,66 @@ Kupletter anges på formen:
 	\melodi{...}
 \end{kuplett}
 \end{lstlisting}
-där samtliga kommandon (|\titel| osv...) är frivilliga. Detta skriver ut en ny kuplett i manus och lägger även till samma kuplett i innehållsförteckningen och sammanfattningslistan.
+där samtliga kuplettkommandon (|\titel| osv...) är frivilliga. Detta skriver ut en ny kuplett i manus och lägger även till samma kuplett i innehållsförteckningen och sammanfattningslistan.
+
+Om |\deltagare| ej specificeras antas alla karaktärer som är på scen (inklusive subspel) när kupletten skrivs vara deltagare.
+
+\paragraph{Obs} Det finns ingen speciell begränsning på vad som får skrivas inuti kuplett\-kommandona, men det finns risk att andra delar av kuplettfunktionaliteten (speciellt sammanfattningarna) går sönder då underligare kommandon används inuti till exempel beskrivningen.
 
 
 
-\subsection{Rekvisita}
+\section{Övriga hjälpmedel}
+\funnybone{Ingenjörsmässiga lösningar på problem}
+För att hjälpa manusskrivanded finns även några extra kommandon:
+
+\paragraph{\tt\bfseries\textbackslash berattare\{...\}}
+\index{Berättare}
+\index{berattare@\verb#\berattare#}
+Detta kommandot finns för att berätta något som händer som inte angår någon karaktär direkt. Så som hur kulisserna ser ut eller vilken rekvisita som står på scen. Rekvisita som nämns här kommer markeras annorlunda i listan över rekvisita (se avsnitt \ref{sec:slut-på-manus}). Notera även att detta inte är samma sak som att ha en berättar-roll med repliker.
+
+\paragraph{\tt\bfseries\textbackslash comment\{...\}}
+\index{comment@\verb#\comment#}
+Detta kommando finns ifall man utav någon anledning inte vill kommentera ut resten av en rad med det på \TeX\ sedvanliga sättet med \%. Detta kommando tar helt enkelt bara bort det som befinner sig inom måsvingarna, och kan göra koden mer svårläst.
+
+\paragraph{\tt\bfseries\textbackslash rekv\{...\}}
 \index{Rekvisita}
 \index{rekv@\verb#\rekv#}
-\funnybone{Mer jobb åt scengruppen!}
-När rekvisita refereras till i manus skall den markeras med följande kommando:
+När rekvisita refereras till i manus skall den markeras med detta kommando. Detta markerar rekvisita-texten och indexerar även densamma i sakregistret.
+
+\subsection{Definiera roller, episod II}
+\index{Definiera karaktärer}
+\index{nyroll@\verb#\nyroll#}
+\index{nyhjalproll@\verb#\nyhjalproll#}
+\funnybone{Inte bara för George Lucas}
+I avsnitt \ref{sec:nyroll} beskrevs kommandon för att definiera karaktärer i manuset. Dessa var dock inte helt kompletta. Hur skall man till exempel göra då karaktärens namn innehåller ett å, ä eller ö? Eller om rollen skall byta namn under pågående manus?
+
+De faktiska kommandona som definierar roller ser ut så här:
 
 \begin{lstlisting}
-\rekv{rekvisita}
+\nyroll[färg]{namn-a}[namn-b]      % Ny karaktär.
+\nyhjalproll[färg]{namn-a}[namn-b] % Ny hjälpkaraktär.
 \end{lstlisting}
 
-Detta markerar rekvisita-texten och indexerar även densamma i sakregistret.
+\noindent
+där parametrarna |[färg]| och |{namn-a}| motsvarar de tidigare givna. 
+
+Skillnaderna mellan |namn-a| och |namn-b| är att det första är det namn som används för kommandon, medans det andra är det namn som faktiskt skrivs ut i manus. |[namn-b]| är en frivillig parameter och om den utelämnas kommer |namn-a| användas.
+
+Så, om vi till exempel vill ha en berättarröst som karaktär (inte samma sak som |\berattare| ovan) kan vi göra så här:
+
+\begin{lstlisting}
+\nyroll{Berattare}[Berättare]
+% ... manus ...
+\Berattare{Här säger berättaren någonting.}
+\end{lstlisting}
+
+\vspace{-1em}
+\paragraph{Namnbyte} En annan sak som nämndes var namnbyte, som åstakomms med kommandot |\namnbyte{namn-a}{namn-b}| som ändrar det namn som skrivs ut (|namn-b|) för karaktären med kommandonamn |namn-a|. Detta kan vara användbart då man, så som händer i spex, tar död på en karaktär och skådespelaren skall fortsätta i en ny karaktär med samma färg och indikator.
 
 
 
 \section{Slut på manus}
+\label{sec:slut-på-manus}
 \index{Listor}
 \index{Slut}
 \funnybone{Manusgruppen somnade}
@@ -274,39 +319,37 @@ Efter sista akten kan man tänkas vilja ha med lite finurliga listor som berätt
 \index{Kuplettlista}
 \index{kuplettlista@\verb#\kuplettlista#}
 \addcontentsline{toc}{subsection}{Kuplettlista}
-Skriver ut en lista över alla kupletter som finns nämnda så långt.
+Skriver ut en lista över alla kupletter som finns nämnda så långt. Denna lista är samma som sammanfattningslistan fast med endast kupletterna inkluderade.
 
 \paragraph{\tt\bfseries\textbackslash rekvisitalista}
 \index{Rekvisitalista}
 \index{rekvisitalista@\verb#\rekvisitalista#}
 \addcontentsline{toc}{subsection}{Rekvisitalista}
-Skriver ut en lista över all rekvisita som finns nämnd så långt. Lista är indelad efter akt. Rekvisita som är nämnd i |\berattare| är markerad ty den borde vara rekvisita som skall ligga framme i början av akten.
+Skriver ut en lista över all rekvisita som finns nämnd så långt. Lista är indelad efter akt. Rekvisita som är nämnd i |\berattare| är markerad ty den bör rimligen vara rekvisita som skall ligga framme i början av akten.
 
 \paragraph{\tt\bfseries\textbackslash sammanfattningslista}
 \index{Sammanfattningslista}
 \index{sammanfattningslista@\verb#\sammanfattningslista#}
 \addcontentsline{toc}{subsection}{Sammanfattningslista}
-Skriver ut en sammanfattning som består utav den sammanfattning som angetts intill varje scen.
+Skriver ut en sammanfattning som består utav de sammanfattningar som angetts till varje scen samt de kupletter som finns.
+
+\subsection*{Statistik}
 
 \paragraph{\tt\bfseries\textbackslash statistiktabell}
 \index{Statistiktabell}
 \index{statistiktabell@\verb#\statistiktabell#}
 \addcontentsline{toc}{subsection}{Statistiktabell}
-Skriver ut statistik för varje definierad karaktär men inte för hjälpkaraktärer, dvs. de som definierats via |\nyroll| men inte via |\nyhjalproll|.
+Skriver ut statistik för varje definierad karaktär men inte för hjälpkaraktärer, dvs de som skapats via |\nyroll| men inte via |\nyhjalproll|.
 
-
-
-\section{Övriga hjälpmedel}
-\funnybone{Ingenjörsmässiga lösningar på problem}
-För att hjälpa manusskrivanded finns även några extra kommandon:
-
-\paragraph{\tt\bfseries\textbackslash berattare\{...\}}
-\index{berattare@\verb#\berattare#}
-Detta kommandot finns för att berätta något som händer som inte angår någon karaktär direkt. Så som hur kulisserna ser ut eller vilken rekvisita som står på scen. Rekvisita som nämns här kommer markeras annorlunda i listan över rekvisita, se \ref{sec:sakregister}. Notera även att detta inte är samma sak som att ha en berättar-roll med repliker.
-
-\paragraph{\tt\bfseries\textbackslash comment\{...\}}
-\index{comment@\verb#\comment#}
-Detta kommando finns ifall man utav någon anledning inte vill kommentera ut resten av en rad med det på \TeX\ sedvanliga sättet med \%. Detta kommando tar helt enkelt bara bort det som befinner sig inom måsvingarna, och kan göra koden mer svårläst.
+Inkluderat i statistiken är
+\begin{description}
+	\item[replikantal] --- antal |\Namn|-kommandon,
+	\item[agerandeantal] --- antal |\Namngr|-kommandon,
+	\item[kupletter] --- antal kupletter \emph{då karaktären är på scen}(notera att detta inte har någon koppling till de deltagare som anges i kupletten via |\deltagare|),
+	\item[närvaro] --- antal repliker då karaktären är på scen och ur subspel,
+	\item[subspel] --- antal repliker då karaktären är på scen i subspel
+\end{description}
+samt några totaler och även längduppskattning av några av ovanstående värden. Dvs det finns för repliker, närvaro och subspel även uträknat ungeför hur många centimeter papper dessa värden motsvarar i manus. Dessa värden är avrundade men bör vara hyggligt exakta.
 
 
 
