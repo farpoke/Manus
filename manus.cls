@@ -78,7 +78,7 @@
 \setlength{\manus@indbredd}{10pt}
 \setlength{\manus@radavstand}{5pt}
 \setlength{\manus@kolavstand}{1em}
-\setlength{\manus@stat@kolbredd}{3.2em}
+\setlength{\manus@stat@kolbredd}{3.5em}
 
 %% manus@beraknabredd
 % Räkna ut lämplig bredd på repliksinnehåll.
@@ -137,7 +137,11 @@
 \newcounter{manus@radnummer}
 \setcounter{manus@radnummer}{0}
 
-% Räknare för beräkning av antal rander för subspelsindikatorer.
+% Räkna antal indikatorer.
+\newcounter{manus@indikatorer}
+\setcounter{manus@indikatorer}{0}
+
+% Hjälpräknare för beräkning av antal ränder för subspelsindikatorer.
 \newcounter{manus@randantal}
 
 
@@ -650,6 +654,8 @@
 	\Append#1\To\manus@indikatorer%
 	\Append#2\To\manus@indikatorer%
 	\Append#3\To\manus@indikatorer%
+	% Räkna indikatorer för statistik.
+	\stepcounter{manus@indikatorer}%
 }
 
 %% \manus@ritaind{färg}{overlay}
@@ -741,17 +747,9 @@
 	\newcounter{#1@stat@subspel}%
 	% Skapa längder för statistik.
 	\expandafter\newdimen\csname#1@stat@repliker\endcsname%
+	\expandafter\newdimen\csname#1@stat@kupletter\endcsname%
 	\expandafter\newdimen\csname#1@stat@narvaro\endcsname%
 	\expandafter\newdimen\csname#1@stat@subspel\endcsname%
-	% Sätt alla värden till noll.
-	\setcounter{#1@stat@repliker}{0}%
-	\setcounter{#1@stat@kupletter}{0}%
-	\setcounter{#1@stat@agerande}{0}%
-	\setcounter{#1@stat@narvaro}{0}%
-	\setcounter{#1@stat@subspel}{0}%
-	\setlength{\csname#1@stat@repliker\endcsname}{0pt}%
-	\setlength{\csname#1@stat@narvaro\endcsname}{0pt}%
-	\setlength{\csname#1@stat@subspel\endcsname}{0pt}%
 }
 
 %% \manus@raknastats
@@ -783,9 +781,21 @@
 % Räkna kuplettstatistik.
 \newcommand\manus@raknakuplett{%
 	\begingroup%
-	\def\\##1\\##2\\##3\\##4\\##5{% \\{namn}\\{utskriftnamn}\\{ind}\\{sub}\\{färg}
+	\newcount\tmp@count%
+	\tmp@count=0
+	\def\\##1\\##2\\##3\\##4\\##5{% \\{k.namn}\\{u.namn}\\{ind}\\{sub}\\{färg}
 		\ifthenelse{\boolean{##3}}{%
 			\stepcounter{##1@stat@kupletter}%
+			\tmp@count=\numexpr\tmp@count+1%
+		}{}%
+	}%
+	\manus@statistik%
+	\pgfmathparse{1/\tmp@count}%
+	\def\\##1\\##2\\##3\\##4\\##5{% \\{k.namn}\\{u.namn}\\{ind}\\{sub}\\{färg}
+		\ifthenelse{\boolean{##3}}{%
+			\global\addtolength%
+				{\csname##1@stat@kupletter\endcsname}%
+				{\pgfmathresult pt}%
 		}{}%
 	}%
 	\manus@statistik%
@@ -797,13 +807,22 @@
 
 %% \manus@aktstatistik
 %
-%% Lägg till nuvarande akten i aktstatistiken om aktens längd är positiv.
+% Lägg till nuvarande akten i aktstatistiken om aktens längd är positiv.
 \newcommand\manus@aktstatistik{\ifdim\manus@aktlangd>0pt%
 	\edef\tmp{\theakt}
 	\expandafter\Append\tmp\To\manus@akter%
 	\edef\tmp{\the\manus@aktlangd}%
 	\expandafter\Append\tmp\To\manus@akter%
 \fi}
+
+%% \langd@cm{längd}
+%
+% Längden i cm, utan enhet.
+\newcommand\langd@cm[1]{%
+	\setlength{\manus@stat@tmp}{\csname#1\endcsname}%
+	\pgfmathtruncatemacro\stat@cm{round(0.0351459804*\manus@stat@tmp)}%
+	\stat@cm%
+}
 
 %% \statistiktabell
 %
@@ -817,87 +836,81 @@
 	\addcontentsline{toc}{section}{Statistik}%
 	\vbox%
 	\bgroup%
-	\newcommand\kol@titel[1]{\hbox to \manus@stat@kolbredd{\hfil%
-		\begin{rotate}{30}##1\end{rotate}%
+	\newcommand\kol@titel[2]{\hbox to \manus@stat@kolbredd{\hfil%
+		\begin{rotate}{30}%
+			##1%
+			\ifx&##2&\else\ (##2)\fi%
+		\end{rotate}%
 	\hfil}}%
-	\newcommand\stat@kol[1]{%
-		\vbox to \baselineskip{\vfil%
-			\hbox to \manus@stat@kolbredd{\hfil##1\hfil}}}%
+	\newcommand\stat@kol[2]%
+		{\vbox to 2.5\baselineskip{%
+			\hbox to \manus@stat@kolbredd{\hfil##1\hfil}%
+			\hbox to \manus@stat@kolbredd{\hfil%
+				\ifx&##2&--\else(##2)\fi%
+			\hfil}%
+			\vfil%
+		}}%
 	\renewcommand\vline{%
-		\kern -0.5pt%
-		\raisebox{-3pt}[0pt][0pt]{\rule{1pt}{\baselineskip}}%
-		\kern -0.5pt%
+		\hspace{5pt}%
+		\raisebox{0.25\baselineskip}[0pt][0pt]{\rule{1pt}{2.5\baselineskip}}%
+		\hspace{5pt}%
 	}%
 	% Skriv ut titelrad.
 	\vspace{3em}%
 	\hbox{\bf%
 		\hspace{1.2\manus@namnbredd}%
-		\kol@titel{Repliker}%
-		\kol@titel{Agerande}%
-		\kol@titel{Total}%
-		\kol@titel{Kupletter}%
-		\kol@titel{Närvaro}%
-		\kol@titel{Subspel}%
-		\kol@titel{Total}%
-		\kol@titel{Repliker ({\small $\approx$cm})}%
-		\kol@titel{Närvaro ({\small $\approx$cm})}%
-		\kol@titel{Subspel ({\small $\approx$cm})}%
-		\kol@titel{Total ({\small $\approx$cm})}%
+		\hspace{10pt}%
+		\kol@titel{Repliker}{$\approx$cm}%
+		\kol@titel{Agerande}{}%
+		\kol@titel{Total}{}%
+		\hspace{10pt}%
+		\kol@titel{Kupletter}{balanserat}%
+		\hspace{10pt}%
+		\kol@titel{Närvaro}{$\approx$cm}%
+		\kol@titel{Subspel}{$\approx$cm}%
+		\kol@titel{Total}{$\approx$cm}%
 	}%
+	\vspace{\baselineskip}%
 	% Skriv ut statistikrader.
-	\def\\##1\\##2\\##3\\##4\\##5{% \\{namn}\\{utskriftnamn}\\{ind}\\{sub}\\{färg}
+	\def\\##1\\##2\\##3\\##4\\##5{% \\{k.namn}\\{u.namn}\\{ind}\\{sub}\\{färg}
 		\hbox{%
-			\vbox to \baselineskip{\vfil\hbox to 1.2\manus@namnbredd{%
-				\raisebox{0pt}[\baselineskip][0pt]{%
+			\vbox to 2.5\baselineskip{%
+				\vfil%
+				\hbox to 1.2\manus@namnbredd{%
 					\textbf{\textcolor{##5}{##2}}%
+					\hfil%
 				}%
-			\hfil}}%
+				\vfil%
+				\vspace{0.5\baselineskip}%
+			}%
 			\vline%
-			\stat@kol{\number\value{##1@stat@repliker}}%
-			\stat@kol{\number\value{##1@stat@agerande}}%
-			\stat@kol{%
-				\number\numexpr%
+			\stat@kol%
+				{\number\value{##1@stat@repliker}}%
+				{\langd@cm{##1@stat@repliker}}%
+			\stat@kol%
+				{\number\value{##1@stat@agerande}}%
+				{}%
+			\stat@kol
+				{\number\numexpr%
 					\value{##1@stat@repliker}+%
-					\value{##1@stat@agerande}%
-			}%
+					\value{##1@stat@agerande}}%
+				{}%
 			\vline%
-			\stat@kol{\number\value{##1@stat@kupletter}}%
+			\stat@kol%
+				{\number\value{##1@stat@kupletter}}%
+				{\strip@pt\csname##1@stat@kupletter\endcsname}%
 			\vline%
-			\stat@kol{\number\value{##1@stat@narvaro}}%
-			\stat@kol{\number\value{##1@stat@subspel}}%
-			\stat@kol{%
-				\number\numexpr%
+			\stat@kol%
+				{\number\value{##1@stat@narvaro}}%
+				{\langd@cm{##1@stat@narvaro}}%
+			\stat@kol%
+				{\number\value{##1@stat@subspel}}%
+				{\langd@cm{##1@stat@subspel}}%
+			\stat@kol%
+				{\number\numexpr%
 					\value{##1@stat@narvaro}+%
-					\value{##1@stat@subspel}%
-			}%
-			\vline%
-			\stat@kol{%
-				\setlength%
-					{\manus@stat@tmp}%
-					{\csname##1@stat@repliker\endcsname}%
-				\pgfmathtruncatemacro\stat@cm%
-					{round(0.0351459804*\manus@stat@tmp)}%
-				\stat@cm%
-			}%
-			\vline%
-			\stat@kol{%
-				\setlength%
-					{\manus@stat@tmp}%
-					{\csname##1@stat@narvaro\endcsname}%
-				\pgfmathtruncatemacro\stat@cm%
-					{round(0.0351459804*\manus@stat@tmp)}%
-				\stat@cm%
-			}%
-			\stat@kol{%
-				\setlength%
-					{\manus@stat@tmp}%
-					{\csname##1@stat@subspel\endcsname}%
-				\pgfmathtruncatemacro\stat@cm%
-					{round(0.0351459804*\manus@stat@tmp)}%
-				\stat@cm%
-			}%
-			\stat@kol{%
-				\setlength%
+					\value{##1@stat@subspel}}%
+				{\setlength%
 					{\manus@stat@tmp}%
 					{\csname##1@stat@narvaro\endcsname}%
 				\addtolength%
@@ -905,8 +918,7 @@
 					{\csname##1@stat@subspel\endcsname}%
 				\pgfmathtruncatemacro\stat@cm%
 					{round(0.0351459804*\manus@stat@tmp)}%
-				\stat@cm%
-			}%
+				\stat@cm}%
 		}%
 	}%
 	\manus@statistik%
@@ -1111,3 +1123,11 @@
 
 % Räkna ut den tillåtna bredden på repliktextskolumnen.
 \AtBeginDocument{\manus@beraknabredd}
+
+% Stäng av vissa kommandon som bara skall få förekomma i preamblen.
+\AtBeginDocument{%
+	\global\def\nyroll{\errmessage{%
+		\textbackslash nyroll får bara användas i preamblen.}}%
+	\global\def\nyhjalproll{\errmessage{%
+		\textbackslash nyhjalproll får bara användas i preamblen.}}%
+}
