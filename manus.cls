@@ -490,7 +490,6 @@
 % En kuplettmiljö.
 %
 %% \titel{titel}             : Ange titeln på denna kuplett.
-%% \deltagare{deltagare}     : Ange deltagare i denna kuplett.
 %% \beskrivning{beskrivning} : Ange beskrivning för denna kuplett.
 %% \melodi{melodi}           : Ange melodiförslag för denna kuplett.
 %
@@ -498,14 +497,14 @@
 \newenvironment{kuplett}{%
 	% Deklarera kommandon för kuplettinformation.
 	\newcommand{\titel}[1]{\def\ktitel{##1}}%
-	\newcommand{\deltagare}[1]{\xdef\kdeltagare{##1}}%
+	\newcommand{\@deltagare}[1]{\xdef\kdeltagare{##1}}%
 	\newcommand{\beskrivning}[1]{%
 		\def\kbeskrivning{##1}%
 	}%
 	\newcommand{\melodi}[1]{\def\kmelodi{##1}}%
 	% Sätt alla värden till tomrum.
 	\titel{}%
-	\deltagare{}%
+	\@deltagare{}%
 	\beskrivning{}%
 	\melodi{}%
 	% Om deltagare inte specificeras antags alla som är på scen delta.
@@ -513,9 +512,9 @@
 	\def\\##1\\##2\\##3\\##4\\##5{% \\{namn}\\{utskriftnamn}\\{ind}\\{sub}\\{färg}
 		\ifthenelse{\boolean{##3}}{%
 			\ifx\kdeltagare\empty%
-				\deltagare{##2}%
+				\@deltagare{##2}%
 			\else%
-				\deltagare{\kdeltagare, ##2}%
+				\@deltagare{\kdeltagare, ##2}%
 			\fi%
 		}{}%
 	}%
@@ -533,7 +532,7 @@
 	% Lägg till kuplettbeskrivning i sammanfattningslistan.
 	\manus@sfnykuplett{\ktitel}{\kbeskrivning}{\kdeltagare}%
 	% Skriv ut information om kupletten.
-	\enkelrad{%
+	\enkelrad[true]{%
 		Melodiförslag: \emph{\kmelodi}\\%
 		\texttt{Melodi:}\\%
 		Deltagare: \emph{\kdeltagare}\\%

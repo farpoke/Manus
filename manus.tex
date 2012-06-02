@@ -243,14 +243,13 @@ Kupletter anges på formen:
 \begin{lstlisting}
 \begin{kuplett}
 	\titel{...}
-	\deltagare{...}
 	\beskrivning{...}
 	\melodi{...}
 \end{kuplett}
 \end{lstlisting}
 där samtliga kuplettkommandon (|\titel| osv...) är frivilliga. Detta skriver ut en ny kuplett i manus och lägger även till samma kuplett i innehållsförteckningen och sammanfattningslistan.
 
-Om |\deltagare| ej specificeras antas alla karaktärer som är på scen (inklusive subspel) när kupletten skrivs vara deltagare.
+Alla karaktärer som är på scen (inklusive subspel) när kupletten skrivs antas vara deltagare och deras namn kommer listas som sådana.
 
 \paragraph{Obs} Det finns ingen speciell begränsning på vad som får skrivas inuti kuplett\-kommandona, men det finns risk att andra delar av kuplettfunktionaliteten (speciellt sammanfattningarna) går sönder då underligare kommandon används inuti till exempel beskrivningen.
 
