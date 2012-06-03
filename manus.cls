@@ -501,7 +501,8 @@
 %% \melodi{melodi}           : Ange melodiförslag för denna kuplett.
 %
 %% \end{kuplett}
-\newenvironment{kuplett}{%
+\newenvironment{kuplett}[1][]{%
+	#1%
 	% Deklarera kommandon för kuplettinformation.
 	\newcommand{\titel}[1]{\def\ktitel{##1}}%
 	\newcommand{\@deltagare}[1]{\xdef\kdeltagare{##1}}%
@@ -937,7 +938,8 @@
 			\vline%
 			\stat@kol%
 				{\number\value{##1@stat@kupletter}}%
-				{\strip@pt\csname##1@stat@kupletter\endcsname}%
+				{\pgfmathprintnumber[precision=2]%
+					{\strip@pt\csname##1@stat@kupletter\endcsname}}%
 			\vline%
 			\stat@kol%
 				{\number\value{##1@stat@narvaro}}%
@@ -997,6 +999,7 @@
 \newcommand\manus@graf@kupletter[1]{\value{#1@stat@kupletter}}
 
 \newcommand\manus@graf@repliker@l[1]{\csname#1@stat@repliker\endcsname}
+\newcommand\manus@graf@kupletter@l[1]{\csname#1@stat@kupletter\endcsname}
 \newcommand\manus@graf@narvaro@l[1]{\csname#1@stat@narvaro\endcsname}
 \newcommand\manus@graf@subspel@l[1]{\csname#1@stat@subspel\endcsname}
 \newcommand\manus@graf@total@l[1]{%
@@ -1089,6 +1092,7 @@
 	\manus@graf@num{Repliker+Agerande}{\manus@graf@total}
 	\par\vspace{8pt}
 	\manus@graf@num{Kupletter}{\manus@graf@kupletter}
+	\manus@graf@dim{Kupletter (bal.)}{\manus@graf@kupletter@l}
 	\par\vspace{8pt}
 	\manus@graf@dim{Repliker (cm)}{\manus@graf@repliker@l}
 	\manus@graf@dim{Närvaro (cm)}{\manus@graf@narvaro@l}
