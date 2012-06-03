@@ -521,23 +521,25 @@
 	\manus@statistik%
 	\endgroup%
 }{%
-	% Lägg till ny subsection för kupletten.
-	\subsection*{\hspace{\manus@numbredd}\Large\textcolor{kuplettfarg}{%
-		Kuplett: \MakeUppercase{\ktitel}%
+	% Skriv ut kupletten.
+	\mellanrum{2em}%
+	\enkelrad[true]{\vbox{%
+		\hbox{\textbf{\textcolor{kuplettfarg}{%
+			\Large Kuplett: \MakeUppercase{\ktitel}%
+		}}}%
+		\hbox{Melodiförslag: \emph{\kmelodi}}%
+		\hbox{\texttt{Melodi:}}%
+		\hbox{Deltagare: \emph{\kdeltagare}}%
+		\hbox{Beskrivning: \emph{\kbeskrivning}}%
 	}}%
+	\mellanrum{2em}%
+	% Lägg till kupletten i innehållsförteckningen
 	\addcontentsline{toc}{subsubsection}{%
 		\textcolor{kuplettfarg}{\MakeUppercase{\ktitel}}\\%
 		Deltagare: \emph{\kdeltagare}%
 	}%
 	% Lägg till kuplettbeskrivning i sammanfattningslistan.
 	\manus@sfnykuplett{\ktitel}{\kbeskrivning}{\kdeltagare}%
-	% Skriv ut information om kupletten.
-	\enkelrad[true]{%
-		Melodiförslag: \emph{\kmelodi}\\%
-		\texttt{Melodi:}\\%
-		Deltagare: \emph{\kdeltagare}\\%
-		Beskrivning: \emph{\kbeskrivning}%
-	}\vspace{1em}%
 	% Räkna kuplettstatistik.
 	\manus@raknakuplett%
 }
@@ -635,6 +637,24 @@
 }
 \newcommand\gr[1]{[\textit{#1}]}
 \newcommand\rentext[1]{#1}
+\newcommand\mellanrum[1]{%
+	\setlength{\manus@radstorlek}{#1}%
+	% Skriv ut en rad.
+	\hbox{%
+		% Namn:
+		\vbox to \manus@radstorlek{\hbox to \manus@namnbredd{%
+		\hfil}\vfil}%
+		% Innehåll:
+		\vbox to \manus@radstorlek{\hbox to \manus@textbredd{%
+		\hfil}\vfil}%
+		% Indikatorer:
+		\raisebox{\manus@indskift}[0pt][0pt]{%
+			\hspace{\manus@kolavstand}%
+			\manus@ritainds%
+		}%
+	}%
+	\vspace{\manus@radavstand}% Extra radavstånd.
+}
 
 
 
@@ -665,9 +685,9 @@
 	\color{#1}\rule{\manus@indbredd}{\manus@indhojd}%
 	\ifthenelse{\boolean{#2}}{%
 		\begin{tikzpicture}[overlay,x=15pt,y=15pt]
-			\clip[xshift=1pt,yshift=0.1pt]
+			\clip[xshift=-0.1pt,yshift=0.1pt]
 				(-\manus@indbredd,-0.2pt)
-				rectangle (-2pt,\manus@indhojd) ;
+				rectangle (0.2pt,\manus@indhojd) ;
 			\foreach \i in {0,...,\value{manus@randantal}}
 			{
 				\path [draw,white,line width=5pt]
@@ -691,15 +711,15 @@
 	\setcounter{manus@randantal}{0}%
 	% Lägg till ränder tills vi "täcker" en tänkt indikator.
 	\loop\ifdim\manus@randtmp<\manus@indhojd%
-		\addtolength{\manus@randtmp}{15pt}%
+		\advance \manus@randtmp by 15pt%
 		\stepcounter{manus@randantal}%
 	\repeat%
 	\stepcounter{manus@randantal}% Lägg till en extra för marginal.
 	% Lägg till indikatorhöjden till skiftlängden.
-	\global\addtolength{\manus@randskift}{\manus@indhojd}%
+	\global\advance \manus@randskift by \manus@indhojd%
 	% Räkna ner skiftet tills vi är under eller lika med noll igen.
 	\loop\ifdim\manus@randskift>0pt%
-		\global\addtolength{\manus@randskift}{-15pt}%
+		\global\advance \manus@randskift by -15pt%
 	\repeat%
 }
 
@@ -760,14 +780,14 @@
 		\ifthenelse{\boolean{##3}}{%
 			\ifthenelse{\boolean{##4}}{%
 				\stepcounter{##1@stat@subspel}%
-				\global\addtolength%
-					{\csname##1@stat@subspel\endcsname}%
-					{\manus@indhojd}%
+				\global\advance%
+					\csname##1@stat@subspel\endcsname%
+					by \manus@indhojd%
 			}{%
 				\stepcounter{##1@stat@narvaro}%
-				\global\addtolength%
-					{\csname##1@stat@narvaro\endcsname}%
-					{\manus@indhojd}%
+				\global\advance%
+					\csname##1@stat@narvaro\endcsname%
+					by \manus@indhojd%
 			}%
 		}{}%
 	}%
@@ -792,9 +812,9 @@
 	\pgfmathparse{1/\tmp@count}%
 	\def\\##1\\##2\\##3\\##4\\##5{% \\{k.namn}\\{u.namn}\\{ind}\\{sub}\\{färg}
 		\ifthenelse{\boolean{##3}}{%
-			\global\addtolength%
-				{\csname##1@stat@kupletter\endcsname}%
-				{\pgfmathresult pt}%
+			\global\advance%
+				\csname##1@stat@kupletter\endcsname%
+				by \pgfmathresult pt%
 		}{}%
 	}%
 	\manus@statistik%
@@ -981,10 +1001,17 @@
 		\addtocounter{tmp@count}{##2}
 		\pgfmathparse{360*\value{tmp@count}/\value{tmp@total}}
 		\let\angle@b=\pgfmathresult
-		\pgfmathparse{(\angle@a+\angle@b)/2}
-		\let\angle@c=\pgfmathresult
-		\draw[fill=##3] (0,0) -- (\angle@a:1) arc (\angle@a:\angle@b:1) -- cycle;
-		\node[label=\angle@c:##1,inner sep=0pt,outer sep=0pt] at (\angle@c:1) {};
+		\ifthenelse{\equal{\angle@a}{\angle@b}}{}{
+			\pgfmathparse{(\angle@a+\angle@b)/2}
+			\let\angle@c=\pgfmathresult
+			\draw[fill=##3]
+				(0,0) --
+				(\angle@a:1) arc (\angle@a:\angle@b:1)
+				-- cycle;
+			\node
+				[label=\angle@c:##1,inner sep=0pt,outer sep=0pt]
+				at (\angle@c:1) {};
+		}
 	}%
 	\fbox{\vbox{%
 		\hbox{\bf#1}\vspace{5pt}%
@@ -1017,10 +1044,17 @@
 		\addtolength{\l@tmp@count}{0.001\l@tmp}
 		\pgfmathparse{360*\l@tmp@count/\l@tmp@total}
 		\let\angle@b=\pgfmathresult
-		\pgfmathparse{(\angle@a+\angle@b)/2}
-		\let\angle@c=\pgfmathresult
-		\draw[fill=##3] (0,0) -- (\angle@a:1) arc (\angle@a:\angle@b:1) -- cycle;
-		\node[label=\angle@c:##1,inner sep=0pt,outer sep=0pt] at (\angle@c:1) {};
+		\ifthenelse{\equal{\angle@a}{\angle@b}}{}{
+			\pgfmathparse{(\angle@a+\angle@b)/2}
+			\let\angle@c=\pgfmathresult
+			\draw[fill=##3]
+				(0,0) --
+				(\angle@a:1) arc (\angle@a:\angle@b:1)
+				-- cycle;
+			\node
+				[label=\angle@c:##1,inner sep=0pt,outer sep=0pt]
+				at (\angle@c:1) {};
+		}
 	}%
 	\fbox{\vbox{%
 		\hbox{\bf#1}\vspace{5pt}%
@@ -1063,14 +1097,14 @@
 	% Räkna ny rad.
 	\stepcounter{manus@radnummer}%
 	% Spara tillfälligt undan innehållet i en låda.
-	\savebox{\manus@innehall@tmpbox}{
+	\savebox{\manus@innehall@tmpbox}{%
 		\parbox{\manus@textbredd}{%
 			\manus@hjalpavstand#2\manus@hjalpavstand}}%
 	% Räkna ut längder från innehållsstorleken.
 	\setlength{\manus@radstorlek}{\ht\manus@innehall@tmpbox}%
 	\addtolength{\manus@radstorlek}{\dp\manus@innehall@tmpbox}%
-	\setlength{\manus@indhojd}{\manus@radstorlek}
-	\addtolength{\manus@indhojd}{\manus@radavstand}
+	\setlength{\manus@indhojd}{\manus@radstorlek}%
+	\addtolength{\manus@indhojd}{\manus@radavstand}%
 	% Skriv ut en rad.
 	\hbox{%
 		% Nummer:
@@ -1096,7 +1130,7 @@
 				}%
 		\hfil}\vfil}%
 		% Indikatorer:
-		\ifthenelse{\equal{#4}{true}}{
+		\ifthenelse{\equal{#4}{true}}{%
 			\raisebox{\manus@indskift}[0pt][0pt]{%
 				\hspace{\manus@kolavstand}%
 				\manus@ritainds%
