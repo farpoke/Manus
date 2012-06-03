@@ -71,6 +71,8 @@
 \newlength{\manus@kolavstand} % Avstånd mellan kolumner.
 \newlength{\manus@stat@kolbredd} % Bredden på kolumner i statistiktabellen.
 \newlength{\manus@indkant} % Kantbredd för indikatorer (subspel).
+\newlength{\manus@randsep} % Avstånd mellan ränder för subspelsindikation.
+\newlength{\manus@randbredd} % Bredd på ränder för subspelsindikation.
 
 % Sätt några defaultvärden.
 \setlength{\manus@numbredd}{3em}
@@ -80,6 +82,8 @@
 \setlength{\manus@kolavstand}{1em}
 \setlength{\manus@stat@kolbredd}{3.5em}
 \setlength{\manus@indkant}{2pt}
+\setlength{\manus@randsep}{10pt}
+\setlength{\manus@randbredd}{5pt}
 %
 \setlength{\manus@indskift}{-0.5\manus@radavstand}
 
@@ -700,13 +704,13 @@
 \newcommand\manus@ritaind[2]{%
 	\color{#1}\rule{\manus@indbredd}{\manus@indhojd}%
 	\ifthenelse{\boolean{#2}}{%
-		\begin{tikzpicture}[overlay,x=15pt,y=15pt]
+		\begin{tikzpicture}[overlay,x=\manus@randsep,y=\manus@randsep]
 			\clip[xshift=\manus@indkant,yshift=0.1pt]
 				(-\manus@indbredd,-0.2pt)
 				rectangle (-2\manus@indkant,\manus@indhojd) ;
 			\foreach \i in {0,...,\value{manus@randantal}}
 			{
-				\path [draw,white,line width=5pt]
+				\path [draw,white,line width=\manus@randbredd]
 					(0,\manus@randskift)
 					++(0.2, \i+1) --
 					++(-\manus@indbredd, -\manus@indbredd) --
@@ -727,7 +731,7 @@
 	\setcounter{manus@randantal}{0}%
 	% Lägg till ränder tills vi "täcker" en tänkt indikator.
 	\loop\ifdim\manus@randtmp<\manus@indhojd%
-		\advance \manus@randtmp by 15pt%
+		\advance \manus@randtmp by \manus@randbredd%
 		\stepcounter{manus@randantal}%
 	\repeat%
 	\stepcounter{manus@randantal}% Lägg till en extra för marginal.
@@ -735,7 +739,7 @@
 	\global\advance \manus@randskift by \manus@indhojd%
 	% Räkna ner skiftet tills vi är under eller lika med noll igen.
 	\loop\ifdim\manus@randskift>0pt%
-		\global\advance \manus@randskift by -15pt%
+		\global\advance \manus@randskift by -\manus@randsep%
 	\repeat%
 }
 
