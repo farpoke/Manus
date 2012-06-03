@@ -241,7 +241,7 @@ Det spelar ingen roll om man inte skriver |\Namnsubslut| innan |\Namnut| (dvs ka
 \funnybone{Allsång på Scenen}
 Kupletter anges på formen:
 \begin{lstlisting}
-\begin{kuplett}
+\begin{kuplett}[kommandon]
 	\titel{...}
 	\beskrivning{...}
 	\melodi{...}
@@ -250,6 +250,17 @@ Kupletter anges på formen:
 där samtliga kuplettkommandon (|\titel| osv...) är frivilliga. Detta skriver ut en ny kuplett i manus och lägger även till samma kuplett i innehållsförteckningen och sammanfattningslistan.
 
 Alla karaktärer som är på scen (inklusive subspel) när kupletten skrivs antas vara deltagare och deras namn kommer listas som sådana.
+
+Parametern |[kommandon]| är en frivillig parameter som kan användas för att ange extra kommandon som skall gälla innuti kuplettmiljön. Detta är främst tänkt att användas för att enkelt justera vilka som skall vara på scen under kupletten.
+
+Om till exempel Bobby och Eva är av scen men skall in på scen under en kuplett kan man specificera:
+\needspace{3\baselineskip}
+\begin{lstlisting}
+\begin{kuplett}[\Bobbyin*\Evain*]
+% ...
+\end{kuplett}
+\end{lstlisting}
+Detta gör att Bobby och Eva kommer in under kupletten och markeras som deltagare, och sedan automatiskt går av scen efter kupletten.
 
 \paragraph{Obs} Det finns ingen speciell begränsning på vad som får skrivas inuti kuplett\-kommandona, men det finns risk att andra delar av kuplettfunktionaliteten (speciellt sammanfattningarna) går sönder då underligare kommandon används inuti till exempel beskrivningen.
 
@@ -355,6 +366,8 @@ Inkluderat i statistiken är
 \end{description}
 samt några totaler och även längduppskattning av några av ovanstående värden. Dvs det finns för repliker, närvaro och subspel även uträknat ungeför hur många centimeter papper dessa värden motsvarar i manus. Dessa värden är avrundade men bör vara hyggligt exakta.
 
+För kupletter finns två värden: vanlig räkning av antalet kupletter som varje karaktär deltar i, samt en ``balanserad'' räkning där varje kuplett bidrar med $1/n$ till varje deltagare, där $n$ är antalet deltagare i kupletten.
+
 Då klassalternativet |grafer| är angett kommer även en del grafer inkluderas.
 
 
@@ -367,6 +380,7 @@ Då klassalternativet |grafer| är angett kommer även en del grafer inkluderas.
 
 
 
+\newpage
 \section{Fördefinerade färger}
 \index{Färger!Fördefinerade}
 \label{app:farger}
@@ -448,7 +462,34 @@ Då klassalternativet |grafer| är angett kommer även en del grafer inkluderas.
 
 
 
+\newpage
 \section{Överkurs}
+
+\subsection{Längder}
+\index{Längder}
+Manusklassen definierar en del längder för att kontrollera utseendet och som kan ändras för att justera detta utseende.
+
+\vspace{1em}
+\noindent
+\begin{tabular}{p{0.3\textwidth}p{0.1\textwidth}p{0.5\textwidth}}
+\bf Längd & \bf Default & \bf Beskrivning \\
+\hline
+|\manus@numbredd| & 3em & Bredden på kolonnen för radnummer. \\
+\hline
+|\manus@namnbredd| & --- & Bredden på namnkolonnen. Sätts per default automatiskt till att vara så stor så att det längsta rollnamnet passar. \\
+\hline
+|\manus@indbredd| & 10pt & Bredden på varje närvaroindikator. \\
+\hline
+|\manus@radavstand| & 5pt & Extra avstånd mellan varje rad. \\
+\hline
+|\manus@kolavstand| & 1em & Avstånd mellan replikraders kolonner. \\
+\hline
+|\manus@indkant| & 2pt & Kantbredd på sub\-spels\-indikatorerna. \\
+\hline
+|\manus@randsep| & 10pt & Avstånd mellan ränderna i sub\-spels\-indikatorerna. \\
+\hline
+|\manus@randbredd| & 5pt & Bredd på ränderna i sub\-spels\-indikatorerna. \\
+\end{tabular}
 
 %\paragraph{Omdefiniera färg för kupletter}
 
