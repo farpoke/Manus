@@ -70,15 +70,18 @@
 \newlength{\manus@radavstand} % Extra avstånd mellan varje repliksrad.
 \newlength{\manus@kolavstand} % Avstånd mellan kolumner.
 \newlength{\manus@stat@kolbredd} % Bredden på kolumner i statistiktabellen.
+\newlength{\manus@indkant} % Kantbredd för indikatorer (subspel).
 
 % Sätt några defaultvärden.
 \setlength{\manus@numbredd}{3em}
 \setlength{\manus@namnbredd}{0pt} % Denna längd räknas om senare.
-\setlength{\manus@indskift}{0pt}
 \setlength{\manus@indbredd}{10pt}
 \setlength{\manus@radavstand}{5pt}
 \setlength{\manus@kolavstand}{1em}
 \setlength{\manus@stat@kolbredd}{3.5em}
+\setlength{\manus@indkant}{2pt}
+%
+\setlength{\manus@indskift}{-0.5\manus@radavstand}
 
 %% manus@beraknabredd
 % Räkna ut lämplig bredd på repliksinnehåll.
@@ -524,13 +527,24 @@
 	% Skriv ut kupletten.
 	\mellanrum{2em}%
 	\enkelrad[true]{\vbox{%
-		\hbox{\textbf{\textcolor{kuplettfarg}{%
-			\Large Kuplett: \MakeUppercase{\ktitel}%
-		}}}%
-		\hbox{Melodiförslag: \emph{\kmelodi}}%
-		\hbox{\texttt{Melodi:}}%
-		\hbox{Deltagare: \emph{\kdeltagare}}%
-		\hbox{Beskrivning: \emph{\kbeskrivning}}%
+		\hbox to \manus@textbredd{%
+			\parbox{\manus@textbredd}{\textbf{\textcolor{kuplettfarg}{%
+				\Large Kuplett: \MakeUppercase{\ktitel}%
+			}}}%
+		}%
+		\vspace{5pt}%
+		\hbox to \manus@textbredd{\parbox{\manus@textbredd}{%
+			Melodiförslag: \emph{\kmelodi}%
+		}}%
+		\hbox to \manus@textbredd{\parbox{\manus@textbredd}{%
+			\texttt{Melodi:}%
+		}}%
+		\hbox to \manus@textbredd{\parbox{\manus@textbredd}{%
+			Deltagare: \emph{\kdeltagare}%
+		}}%
+		\hbox to \manus@textbredd{\parbox{\manus@textbredd}{%
+			Beskrivning: \emph{\kbeskrivning}
+		}}%
 	}}%
 	\mellanrum{2em}%
 	% Lägg till kupletten i innehållsförteckningen
@@ -639,6 +653,8 @@
 \newcommand\rentext[1]{#1}
 \newcommand\mellanrum[1]{%
 	\setlength{\manus@radstorlek}{#1}%
+	\setlength{\manus@indhojd}{\manus@radstorlek}%
+	\addtolength{\manus@indhojd}{\manus@radavstand}%
 	% Skriv ut en rad.
 	\hbox{%
 		% Namn:
@@ -685,9 +701,9 @@
 	\color{#1}\rule{\manus@indbredd}{\manus@indhojd}%
 	\ifthenelse{\boolean{#2}}{%
 		\begin{tikzpicture}[overlay,x=15pt,y=15pt]
-			\clip[xshift=-0.1pt,yshift=0.1pt]
+			\clip[xshift=\manus@indkant,yshift=0.1pt]
 				(-\manus@indbredd,-0.2pt)
-				rectangle (0.2pt,\manus@indhojd) ;
+				rectangle (-2\manus@indkant,\manus@indhojd) ;
 			\foreach \i in {0,...,\value{manus@randantal}}
 			{
 				\path [draw,white,line width=5pt]
