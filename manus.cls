@@ -984,7 +984,7 @@
 	\manus@akter%
 	\endgroup%
 	% Lägg till statistikgrafer om klassalternativet är satt.
-	\ifthenelse{\boolean{grafer}}{\vspace{3em}\manus@grafer}{}%
+	\ifthenelse{\boolean{grafer}}{\newpage\manus@grafer}{}%
 }
 
 
@@ -1016,10 +1016,10 @@
 	\def\\##1\\##2\\##3{\addtocounter{tmp@total}{##2}}%
 	\graf@stats%
 	\def\\##1\\##2\\##3{
-		\pgfmathparse{360*\value{tmp@count}/\value{tmp@total}}
+		\pgfmathparse{\value{tmp@count}/\value{tmp@total}*360}
 		\let\angle@a=\pgfmathresult
 		\addtocounter{tmp@count}{##2}
-		\pgfmathparse{360*\value{tmp@count}/\value{tmp@total}}
+		\pgfmathparse{\value{tmp@count}/\value{tmp@total}*360}
 		\let\angle@b=\pgfmathresult
 		\ifthenelse{\equal{\angle@a}{\angle@b}}{}{
 			\pgfmathparse{(\angle@a+\angle@b)/2}
@@ -1058,11 +1058,11 @@
 	}%
 	\graf@stats%
 	\def\\##1\\##2\\##3{
-		\pgfmathparse{360*\l@tmp@count/\l@tmp@total}
+		\pgfmathparse{\l@tmp@count/\l@tmp@total*360}
 		\let\angle@a=\pgfmathresult
 		\l@tmp=##2
 		\addtolength{\l@tmp@count}{0.001\l@tmp}
-		\pgfmathparse{360*\l@tmp@count/\l@tmp@total}
+		\pgfmathparse{\l@tmp@count/\l@tmp@total*360}
 		\let\angle@b=\pgfmathresult
 		\ifthenelse{\equal{\angle@a}{\angle@b}}{}{
 			\pgfmathparse{(\angle@a+\angle@b)/2}
@@ -1087,6 +1087,7 @@
 	\par
 	\manus@graf@num{Repliker}{\manus@graf@repliker}
 	\manus@graf@num{Repliker+Agerande}{\manus@graf@total}
+	\par\vspace{8pt}
 	\manus@graf@num{Kupletter}{\manus@graf@kupletter}
 	\par\vspace{8pt}
 	\manus@graf@dim{Repliker (cm)}{\manus@graf@repliker@l}
