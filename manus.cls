@@ -9,7 +9,7 @@
 %%%%%%%%%% Introduktion %%%%%%%%%%
 
 % Klassen baseras på article med A4 paper.
-\LoadClass[a4paper,10pt]{article}
+\LoadClass[a4paper,10pt,twoside]{article}
 
 % Använd paket för att testa om det är XeLaTeX som körs och ladda olika
 % sätt att hantera unicode beroende på.
@@ -1214,11 +1214,20 @@
 				\else%
 					\expandafter\read\csname ps@#1@read\endcsname to \@sidfot%
 				\fi%
-				\textit{\@sidfot}%
+				\thepage%
+				\hfill%
+				\parbox{0.8\textwidth}{\raggedleft\textit{\@sidfot}}%
+			}%
+			\def\@evenfoot{%
+				\ifeof\csname ps@#1@read\endcsname%
+					\def\@sidfot{}%
+				\else%
+					\expandafter\read\csname ps@#1@read\endcsname to \@sidfot%
+				\fi%
+				\parbox{0.8\textwidth}{\textit{\@sidfot}}%
 				\hfill%
 				\thepage%
 			}%
-			\let\@evenfoot\@oddfoot%
 		}%
 		\pagestyle{#1}%
 	}{%
