@@ -28,12 +28,13 @@
 	numberstyle=\tiny,
 	language=TeX,
 	keywordstyle=\bfseries,
-	morekeywords={documentclass,definecolor,nyroll,nyhjalproll,begin,gr,rekv,akt,scen,allgr,titel,deltagare,beskrivning,melodi,Namn,Namngr,Namnin,Namnut,Namnsub,Namnsubslut,rekvisitalista,kuplettlista,sammanfattningslista,statistiktabell,namnbyte}
+	morekeywords={documentclass,definecolor,nyroll,nyhjalproll,begin,gr,rekv,akt,scen,allgr,titel,deltagare,beskrivning,melodi,Namn,Namngr,Namnin,Namnut,Namnsub,Namnsubslut,rekvisitalista,kuplettlista,sammanfattningslista,statistiktabell,namnbyte,fotfil,pagestyle,thispagestyle,textit,fotstil,fotstil@yttre,textcolor,rule}
 }
 
 \renewcommand\ttdefault{pcr}
 
 \usepackage{makeidx}
+\def\at{@}
 \makeindex
 
 \usepackage{needspace}
@@ -314,6 +315,52 @@ Så, om vi till exempel vill ha en berättarröst som karaktär (inte samma sak 
 \vspace{-1em}
 \paragraph{Namnbyte} En annan sak som nämndes var namnbyte, som åstakomms med kommandot |\namnbyte{namn-a}{namn-b}| som ändrar det namn som skrivs ut (|namn-b|) för karaktären med kommandonamn |namn-a|. Detta kan vara användbart då man, så som händer i spex, tar död på en karaktär och skådespelaren skall fortsätta i en ny karaktär med samma färg och indikator.
 
+\subsection{Sidfötter}
+\index{Sidfötter}
+\index{fotfil@\verb#\fotfil#}
+\funnybone{Fotfil, smakar som ostbågar}
+Manusklassen innehåller ett kommando för att specificera en fil med sidfötter som skall användas:
+
+\begin{lstlisting}
+\fotfil[layoutnamn]{filnamn}
+\end{lstlisting}
+
+Detta kommando skapar en ny sidlayout som för varje sida läser in en rad från den angivna filen och använder den raden som sidfot för den aktuella sidan. Tomrader i filen resulterar i sidor utan sidfotstext (en sida per rad), dock fortfarande med sidnummer på rätt ställe.
+
+Parametern |[layoutnamn]| är frivillig och namnet |fotfil| kommer användas om den utelämnas. Detta namn är det namn som ges den nya sidlayouten och ett fel kommer ges om en sidlayout med det namnet redan finns. Den nya sidlayouten aktiveras sedan direkt.
+
+\paragraph{Layoutändring} Sidlayouter som skapas via detta kommando kan precis som \LaTeX:s vanliga sidlayouter styras via kommandona |\pagestyle| och |\thispagestyle|. Dvs om man vill tillfälligt ändra layout kan man till exempel använda kommandot
+\begin{lstlisting}
+\thispagestyle{plain}
+\end{lstlisting}
+som för just denna sidan ändrar layouten till |plain| (\LaTeX:s defaultlayout).
+
+Om man vill helt gå tillbaka till vanligare layouter kan man exempelvis använda
+\begin{lstlisting}
+\pagestyle{plain}
+\end{lstlisting}
+som ändrar layouten för följande sidor. Om man senare vill ändra tillbaka kan man använda samma kommando men ange en layout som skapats via |\fotfil|. Om layoutnamnet inte angavs explicit så användes |fotfil| som namn, och kommandot för att ändra tillbaka blir då
+\begin{lstlisting}[keywords={pagestyle}]
+\pagestyle{fotfil}
+\end{lstlisting}
+
+Kommandot |\fotfil| kan dessutom användas flera gånger för att skapa olika sidlayouter som läser från olika filer, och man kan sedan fritt växla mellan dem med hjälp av ovan nämnda kommando.
+
+\paragraph{Utseende}\index{fotstil@\verb#\fotstil#} Utseendet på sidfötterna styrs främst av kommandot |\fotstil|. Detta kommando kan defineras till att ta noll eller en parameter och används innan sidfotstexten skrivs ut.
+
+Manusklassens definition av |\fotstil| ser ut så här:
+\begin{lstlisting}
+\let\fotfil\textit
+\end{lstlisting}
+vilket gör att sidfotstexten skrivs ut i kursiv stil.
+
+Andra exempel är:
+\begin{lstlisting}
+\let\fotstil\bf % Fetstil.
+\def\fotstil#1{\textcolor{green}{#1}} % Grön text.
+\def\fotstil{\rule{5pt}{5pt}} % En liten låda innan texten.
+\end{lstlisting}
+
 
 
 \section{Slut på manus}
@@ -471,7 +518,7 @@ Manusklassen definierar en del längder för att kontrollera utseendet och som k
 
 \vspace{1em}
 \noindent
-\begin{tabular}{p{0.3\textwidth}p{0.1\textwidth}p{0.5\textwidth}}
+\begin{tabular}{p{0.3\textwidth}p{0.12\textwidth}p{0.48\textwidth}}
 \bf Längd & \bf Default & \bf Beskrivning \\
 \hline
 |\manus@numbredd| & 3em & Bredden på kolonnen för radnummer. \\
@@ -486,9 +533,9 @@ Manusklassen definierar en del längder för att kontrollera utseendet och som k
 \hline
 |\manus@indkant| & 2pt & Kantbredd på sub\-spels\-indikatorerna. \\
 \hline
-|\manus@randsep| & 10pt & Avstånd mellan ränderna i sub\-spels\-indikatorerna. \\
+|\manus@randsep| & 10pt & Avstånd mellan ränderna i sub\-spels\-indi\-kat\-orerna. \\
 \hline
-|\manus@randbredd| & 5pt & Bredd på ränderna i sub\-spels\-indikatorerna. \\
+|\manus@randbredd| & 5pt & Bredd på ränderna i sub\-spels\-indikat\-orerna. \\
 \end{tabular}
 
 %\paragraph{Omdefiniera färg för kupletter}
@@ -496,6 +543,23 @@ Manusklassen definierar en del längder för att kontrollera utseendet och som k
 %\paragraph{Omdefiniera hur \citat{gör-text} ser ut.}
 
 %\paragraph{Rollnamn som innehåller åäö}
+
+\subsection{Mer om sidfötter}
+\index{Sidfötter}
+\index{fotstilyttre@\texttt{\textbackslash fotstil\at yttre}}
+Om man definierar om |\fotstil| till |\fbox|, |\underline| eller liknande så finner man att radbrytningar i sidfötterna slutar fungera som önskat. Detta är för att kommandon som dessa inte är till för paragrafer och inte stödjer radbrytningar.
+
+För att formattera sidfötter på dessa sätt finns istället kommandot |\fotstil@yttre|. Detta kommandot appliceras på varje \emph{rad} i sidfötterna istället för på hela paragrafen. Därmed kan man definera om kommandot som till exempel
+\begin{lstlisting}
+\let\fotstil@yttre\underline
+\end{lstlisting}
+och få önskat resultat, dvs att varje rad är understruken var för sig istället för hela paragrafen på en lång rad.
+
+Manusklassens definition av |fotstil@yttre| ser ut så här:
+\begin{lstlisting}
+\def\fotstil@yttre#1{#1}
+\end{lstlisting}
+vilket innebär att kommandot i normala fall inte gör någonting utan bara skriver ut varje rad som den är.
 
 
 
