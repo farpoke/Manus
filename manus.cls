@@ -1198,6 +1198,39 @@
 
 %%%%%%%%%% Sidfötter %%%%%%%%%%
 
+%% \fotstil
+%
+% Detta kommando används för att formattera inlästa sidfötter i de sidlayouter
+% som skapas av \fotfil. Detta kommando kan ta en parameter eller ingen alls,
+% men aldrig flera.
+\let\fotstil\textit
+
+%% \fotstil@yttre
+%
+% Detta kommando används för att formattera inlästa sidfötter i de sidlayouter
+% som skapas av \fotfil. Detta kommando kan ta en parameter eller ingen alls,
+% men aldrig flera.
+%
+% Till skillnad från \fotstil som används innan sidfoten expanderas, så
+% appliceras detta kommando på varje rad (se \manus@fotstil nedan).
+\def\fotstil@yttre#1{#1}
+
+%% \manus@fotstil
+%
+% Detta kommando plockar isär en paragrafs rader och applicerar \fotstil@yttre
+% kommandot på varje rad för sig. Detta är till exempel användbart då
+% \fotstil@yttre är satt till \fbox, \underline eller dylikt.
+\def\manus@fotstil{%
+	\setbox0=\lastbox%
+	\ifvoid0%
+		\noindent\ignorespaces%
+	\else%
+		\unskip\unpenalty%
+		\begingroup\manus@fotstil\\\endgroup%
+		\hbox{\fotstil@yttre{\unhbox0}}%
+	\fi%
+}
+
 %% \fotfil[layoutnamn]{filnamn}
 %
 % Skapa en ny sidlayout med givet namn som läser sidfötter från den givna filen.
@@ -1216,7 +1249,11 @@
 				\fi%
 				\thepage%
 				\hfill%
-				\parbox{0.8\textwidth}{\raggedleft\textit{\@sidfot}}%
+				\parbox{0.8\textwidth}{%
+					\raggedleft%
+					\fotstil\@sidfot%
+					\par\manus@fotstil%
+				}%
 			}%
 			\def\@evenfoot{%
 				\ifeof\csname ps@#1@read\endcsname%
@@ -1224,7 +1261,10 @@
 				\else%
 					\expandafter\read\csname ps@#1@read\endcsname to \@sidfot%
 				\fi%
-				\parbox{0.8\textwidth}{\textit{\@sidfot}}%
+				\parbox{0.8\textwidth}{%
+					\fotstil\@sidfot%
+					\par\manus@fotstil%
+				}%
 				\hfill%
 				\thepage%
 			}%
