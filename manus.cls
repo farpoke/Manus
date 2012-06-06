@@ -623,7 +623,10 @@
 \newcommand\rekvisitalista{%
 	\newpage%
 	\addcontentsline{toc}{section}{Sakregister}%
+	\begingroup%
+	\def\thispagestyle##1{}% Tillåt inte \printindex att ändra sidlayouten.
 	\printindex%
+	\endgroup%
 }
 
 
@@ -1189,4 +1192,36 @@
 		\textbackslash nyroll får bara användas i preamblen.}}%
 	\global\def\nyhjalproll{\errmessage{%
 		\textbackslash nyhjalproll får bara användas i preamblen.}}%
+}
+
+
+
+%%%%%%%%%% Sidfötter %%%%%%%%%%
+
+%% \fotfil[layoutnamn]{filnamn}
+%
+% Skapa en ny sidlayout med givet namn som läser sidfötter från den givna filen.
+% Sätt sedan den använda sidlayouten till den nyskapade.
+\newcommand\fotfil[2][fotfil]{%
+	\@ifundefined{ps@#1}{%
+		\expandafter\newread\csname ps@#1@read\endcsname%
+		\expandafter\openin\csname ps@#1@read\endcsname=#2%
+		\def\default@fot{\hfil\thepage}%
+		\expandafter\def\csname ps@#1\endcsname{%
+			\def\@oddfoot{%
+				\ifeof\csname ps@#1@read\endcsname%
+					\def\@sidfot{}%
+				\else%
+					\expandafter\read\csname ps@#1@read\endcsname to \@sidfot%
+				\fi%
+				\textit{\@sidfot}%
+				\hfill%
+				\thepage%
+			}%
+			\let\@evenfoot\@oddfoot%
+		}%
+		\pagestyle{#1}%
+	}{%
+		\errmessage{Detta layoutnamn används redan.}%
+	}%
 }
