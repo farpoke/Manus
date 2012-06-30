@@ -675,6 +675,7 @@
 		}%
 	}%
 	\vspace{\manus@radavstand}% Extra radavstånd.
+	\addtolength{\manus@aktlangd}{\manus@indhojd}% Lägg till höjden till aktlängden.
 }
 
 
