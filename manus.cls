@@ -92,9 +92,16 @@
 
 %% manus@beraknabredd
 % Räkna ut lämplig bredd på repliksinnehåll.
-\newcommand\manus@beraknabredd{%	
-	\setlength{\manus@textbredd}{\textwidth}%
-	\addtolength{\manus@textbredd}{-\manus@namnbredd}%
+\newcommand\manus@beraknabredd{%
+	\begingroup%
+	\newdimen\tmp@dimen
+	\tmp@dimen=\value{manus@indikatorer}\manus@indbredd%
+	\global\manus@textbredd=\textwidth%
+	\global\advance\manus@textbredd by -\manus@numbredd%
+	\global\advance\manus@textbredd by -\manus@namnbredd%
+	\global\advance\manus@textbredd by -\manus@kolavstand%
+	\global\advance\manus@textbredd by -\tmp@dimen%
+	\endgroup%
 }
 
 %% indikatorbredd{bredd}
@@ -397,7 +404,7 @@
 	% Påbörja den nya akten.
 	\newpage%
 	\stepcounter{akt}%
-	\section*{\hspace{\manus@numbredd}\theakt}%
+	{\hspace{\manus@numbredd}\Large\bf\theakt\\[1em]}%
 	\addcontentsline{toc}{section}{\theakt}%
 	% Sätt scenräknaren så att den första scenen får önskat värde.
 	\setcounter{scen}{#1}%
@@ -411,7 +418,7 @@
 	\vspace{1em}%
 	\needspace{10\baselineskip}%
 	\stepcounter{scen}%
-	\subsection*{\hspace{\manus@numbredd}\thescen: #1}%
+	{\hspace{\manus@numbredd}\large\bf\thescen: #1\\[1em]}%
 	\addcontentsline{toc}{subsection}{\thescen: #1}%
 	\scensammanfattning{#2}%
 	\vspace{1em}%
@@ -429,7 +436,7 @@
 \newcommand\scensammanfattning[1]{%
 	% Skriv ut sammanfattningen direkt i texten om så angets.
 	\ifthenelse{\boolean{sammanfattningar}}{%
-		\hbox{\hspace{\manus@namnbredd}\parbox{\manus@textbredd}{#1}}%
+		\hbox{\hspace{\manus@numbredd}\hspace{\manus@namnbredd}\parbox{\manus@textbredd}{#1}}%
 	}{}%
 	% Lägg till sammanfattningen i sammanfattningslistan.
 	\manus@sfnyscen{#1}%
@@ -670,6 +677,9 @@
 	\addtolength{\manus@indhojd}{\manus@radavstand}%
 	% Skriv ut en rad.
 	\hbox{%
+		% Nummer:
+		\vbox to \manus@radstorlek{\hbox to \manus@numbredd{%
+		\hfil}\vfil}%
 		% Namn:
 		\vbox to \manus@radstorlek{\hbox to \manus@namnbredd{%
 		\hfil}\vfil}%
@@ -1142,7 +1152,6 @@
 	% Skriv ut en rad.
 	\hbox{%
 		% Nummer:
-		\hspace{-\manus@numbredd}%
 		\vbox to \manus@radstorlek{\hbox to \manus@numbredd{%
 			\hfil% För högerjustering.
 			\manus@hjalpavstand%
