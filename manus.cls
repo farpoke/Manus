@@ -1299,7 +1299,7 @@
 \newcommand\TODO[1]{%
 	% Skriv ut todo direkt i texten om så angets.
 	\ifthenelse{\boolean{todo}}{%
-		\hbox{\hspace{\manus@namnbredd}\parbox{\manus@textbredd}{\bf TODO: #1}}%
+		\hbox{\hspace{\manus@numbredd}\hspace{\manus@namnbredd}\parbox{\manus@textbredd}{\bf TODO: #1}}%
 	}{}%
 	% Lägg till todo i todoslistan.
 	\manus@todonytodo{#1}%
