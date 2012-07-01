@@ -481,6 +481,7 @@
 			\emph{##3}\newline%
 			##2%
 	}%
+	\def\todon\\##1\\##2{}%
 	\manus@sammanfattningar%
 	\endgroup%
 }
@@ -586,6 +587,7 @@
 			\emph{##3}\newline%
 			##2%
 	}%
+	\def\todon\\##1\\##2{}%
 	\manus@sammanfattningar%
 	\endgroup%
 }
