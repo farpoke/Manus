@@ -49,7 +49,7 @@
 \manus@alternativ{todo}
 
 % Hantera okända klassalternativ.
-\DeclareOption*{\typeout{! Dokumnetklassen Manus känner inte igen \CurrentOption.}}
+\DeclareOption*{\ClassError{manus}{Dokumnetklassen Manus känner inte igen klassalternativet \CurrentOption.}{}}
 
 % Tolka givna alternativ.
 \ProcessOptions
@@ -404,7 +404,8 @@
 	% Påbörja den nya akten.
 	\newpage%
 	\stepcounter{akt}%
-	{\hspace{\manus@numbredd}\Large\bf\theakt\\[1em]}%
+	{\hspace{\manus@numbredd}\Large\bf\theakt}\par%
+	\vspace{\baselineskip}%
 	\addcontentsline{toc}{section}{\theakt}%
 	% Sätt scenräknaren så att den första scenen får önskat värde.
 	\setcounter{scen}{#1}%
@@ -415,13 +416,13 @@
 %
 % Börja på en ny scen.
 \newcommand{\scen}[2]{%
-	\vspace{1em}%
-	\needspace{10\baselineskip}%
+	\vspace{\baselineskip}%
+	\needspace{5\baselineskip}%
 	\stepcounter{scen}%
-	{\hspace{\manus@numbredd}\large\bf\thescen: #1\\[1em]}%
+	{\hspace{\manus@numbredd}\large\bf\thescen: #1}\par%
+	\vspace{\baselineskip}%
 	\addcontentsline{toc}{subsection}{\thescen: #1}%
 	\scensammanfattning{#2}%
-	\vspace{1em}%
 }
 
 
@@ -436,7 +437,8 @@
 \newcommand\scensammanfattning[1]{%
 	% Skriv ut sammanfattningen direkt i texten om så angets.
 	\ifthenelse{\boolean{sammanfattningar}}{%
-		\hbox{\hspace{\manus@numbredd}\hspace{\manus@namnbredd}\parbox{\manus@textbredd}{#1}}%
+		\hbox{\hspace{\manus@numbredd}\hspace{\manus@namnbredd}\parbox{\manus@textbredd}{#1}}\par%
+		\vspace{\baselineskip}%
 	}{}%
 	% Lägg till sammanfattningen i sammanfattningslistan.
 	\manus@sfnyscen{#1}%
@@ -1150,6 +1152,7 @@
 	\setlength{\manus@indhojd}{\manus@radstorlek}%
 	\addtolength{\manus@indhojd}{\manus@radavstand}%
 	% Skriv ut en rad.
+	\ifhmode\ClassWarning{manus}{Rad skapad i hmode!}\fi% Se till att LaTeX är i vmode.
 	\hbox{%
 		% Nummer:
 		\vbox to \manus@radstorlek{\hbox to \manus@numbredd{%
@@ -1166,11 +1169,10 @@
 		\hfil}\vfil}%
 		% Innehåll:
 		\vbox to \manus@radstorlek{\hbox to \manus@textbredd{%
-				\parbox{\manus@textbredd}{%
-					%\raggedright%
-					\color{#3}%
-					\manus@hjalpavstand#2\manus@hjalpavstand%
-				}%
+			\parbox{\manus@textbredd}{%%
+				\color{#3}%
+				\manus@hjalpavstand#2\manus@hjalpavstand%
+			}%
 		\hfil}\vfil}%
 		% Indikatorer:
 		\ifthenelse{\equal{#4}{true}}{%
@@ -1182,6 +1184,7 @@
 	}%
 	\vspace{\manus@radavstand}% Extra radavstånd.
 	\addtolength{\manus@aktlangd}{\manus@indhojd}% Lägg till höjden till aktlängden.
+	\needspace{2\baselineskip}% Hjälp radbrytningarna lite.
 }
 
 
@@ -1299,7 +1302,15 @@
 \newcommand\TODO[1]{%
 	% Skriv ut todo direkt i texten om så angets.
 	\ifthenelse{\boolean{todo}}{%
-		\hbox{\hspace{\manus@numbredd}\hspace{\manus@namnbredd}\parbox{\manus@textbredd}{\bf TODO: #1}}%
+		\hbox{%
+			\hspace{\manus@numbredd}%
+			\hspace{\manus@namnbredd}%
+			\fbox{\parbox{\manus@textbredd}{\bf TODO: #1}}%
+			\hspace{\manus@kolavstand}%
+			\hspace{\value{manus@indikatorer}\manus@indbredd}%
+			\hbox to 1em{\bf$\triangleleft$\hfil}%
+		}%
+		\vspace{\manus@radavstand}%
 	}{}%
 	% Lägg till todo i todoslistan.
 	\manus@todonytodo{#1}%
