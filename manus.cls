@@ -1312,7 +1312,7 @@
 %
 % Lägg till en TODO-notering i TODOlistan.
 \newcommand\manus@todonytodo[1]{%
-	\Append\todon\To\manus@sammanfattningar%
+	\Append\todon\To\manus@todo%
 	\edef\tmp{\themanus@radnummer: }% Expandera repliknummer.
 	\expandafter\Append\tmp\To\manus@todo%
 	\Append#1\To\manus@todo%
