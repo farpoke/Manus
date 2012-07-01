@@ -2,7 +2,7 @@
 % Version 2: Anton Mårtensson, anton.v.martensson@gmail.com
 
 \NeedsTeXFormat{LaTeX2e}[1994/06/01]
-\ProvidesClass{manus}[2012/05/21]
+\ProvidesClass{manus}[2012/06/01]
 
 
 
@@ -44,6 +44,9 @@
 
 % Ett klassalternativ för statistikgrafer.
 \manus@alternativ{grafer}
+
+% Ett klassalternativ för att visa TODO.
+\manus@alternativ{todo}
 
 % Hantera okända klassalternativ.
 \DeclareOption*{\typeout{! Dokumnetklassen Manus känner inte igen \CurrentOption.}}
@@ -1274,3 +1277,52 @@
 		\errmessage{Detta layoutnamn används redan.}%
 	}%
 }
+
+
+%%%%%%%%%% TODO %%%%%%%%%%
+%% \TODO{Beskrivning av sak som man önskar blir gjord senare}
+%
+% Deklarera en TODO-note. Om "todo" gavs som
+% klassalternativ skrivs det ut vid anrop, annars inte. I båda fallen läggs
+% det till i todo-listan.
+\newcommand\TODO[1]{%
+	% Skriv ut todo direkt i texten om så angets.
+	\ifthenelse{\boolean{todo}}{%
+		\hbox{\hspace{\manus@namnbredd}\parbox{\manus@textbredd}{\bf TODO: #1}}%
+	}{}%
+	% Lägg till todo i todoslistan.
+	\manus@todonytodo{#1}%
+}
+
+% Skapa en ny lista för sammanfattningsinformation.
+\NewList\manus@todo
+
+%% \manus@todonytodo{}
+%
+% Lägg till en TODO-notering i TODOlistan.
+\newcommand\manus@todonytodo[1]{%
+	\Append\todon\To\manus@sammanfattningar%
+	\edef\tmp{\themanus@radnummer: }% Expandera repliknummer.
+	\expandafter\Append\tmp\To\manus@todo%
+	\Append#1\To\manus@todo%
+}
+
+
+%% \todolista
+%
+% Skriver ut todolistan.
+\newcommand\todolista{%
+	% Ny sektion på ny sida för todolistan.
+	\newpage%
+	\section*{Saker kvar att göra}%
+	% Skiv ut alla todo.
+	\begingroup%
+	\let\newline\\%
+	\def\\##1{##1}%
+	\def\todon\\##1\\##2{%
+		\paragraph{##1} ##2%
+	}%
+	\manus@todo%
+	\endgroup%
+}
+
