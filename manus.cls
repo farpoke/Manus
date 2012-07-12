@@ -1244,7 +1244,7 @@
 	\else%
 		\unskip\unpenalty%
 		\begingroup\manus@fotstil\\\endgroup%
-		\hbox{\fotstil@yttre{\unhbox0}}%
+		\hbox to 0.8\textwidth{\fotstil@yttre{\unhbox0}}%
 	\fi%
 }
 
@@ -1279,6 +1279,7 @@
 					\expandafter\read\csname ps@#1@read\endcsname to \@sidfot%
 				\fi%
 				\parbox{0.8\textwidth}{%
+					\raggedright%
 					\fotstil\@sidfot%
 					\par\manus@fotstil%
 				}%
