@@ -1136,6 +1136,10 @@
 % Temporär låda för att beräkna storleken på replikinnehållet.
 \newsavebox{\manus@innehall@tmpbox}
 
+% Håll koll på vilket det sista namnet var.
+% Skriv inte ut namnet igen om nästa replik har samma.
+\def\manus@sistanamn{}
+
 %% sl@line{namn}{text}
 %
 % Huvudkommandot som skriver ut en repliksrad.
@@ -1163,10 +1167,14 @@
 			\hspace{\manus@kolavstand}%
 		}\vfil}%
 		% Namn:
+		\def\manus@namn{#1}%
 		\vbox to \manus@radstorlek{\hbox to \manus@namnbredd{%
-			\color{#3}%
-			\manus@hjalpavstand#1\manus@hjalpavstand%
+			\ifx\manus@namn\manus@sistanamn\else%
+				\color{#3}%
+				\manus@hjalpavstand#1\manus@hjalpavstand%
+			\fi%
 		\hfil}\vfil}%
+		\global\let\manus@sistanamn\manus@namn%
 		% Innehåll:
 		\vbox to \manus@radstorlek{\hbox to \manus@textbredd{%
 			\parbox{\manus@textbredd}{%%
