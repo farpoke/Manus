@@ -2,7 +2,7 @@
 % Version 2: Anton Mårtensson, anton.v.martensson@gmail.com
 
 \NeedsTeXFormat{LaTeX2e}[1994/06/01]
-\ProvidesClass{manus}[2012/06/01]
+\ProvidesClass{manus}[2012/07/28]
 
 
 
