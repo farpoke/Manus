@@ -177,7 +177,7 @@
 %% \Append<stuff>\To\lista
 %
 % Lägger <stuff> till slutet av \lista.
-\def\Append#1\To#2{%
+\long\def\Append#1\To#2{%
 	\tmp@toks@a={\\{#1}}%
 	\tmp@toks@b=\expandafter{#2}%
 	\xdef#2{\the\tmp@toks@b\the\tmp@toks@a}%
@@ -1350,7 +1350,7 @@
 	\begingroup%
 	\let\newline\\%
 	\def\\##1{##1}%
-	\def\todon\\##1\\##2{%
+	\long\def\todon\\##1\\##2{%
 		\paragraph{##1} ##2%
 	}%
 	\manus@todo%
