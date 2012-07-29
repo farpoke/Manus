@@ -1140,10 +1140,16 @@
 % Skriv inte ut namnet igen om nästa replik har samma.
 \def\manus@sistanamn{}
 
+% Hjälpdefinition för att hitta fel.
+\let\manus@radfel\relax
+
 %% sl@line{namn}{text}
 %
 % Huvudkommandot som skriver ut en repliksrad.
 \newcommand\manus@skrivrad[4]{%
+	% Testa felaktig användning av rader.
+	\manus@radfel%
+	\def\manus@radfel{\ClassError{manus}{En replikrad har försökts skrivas innuti en annan replikrad!}{}}%
 	% Räkna ny rad.
 	\stepcounter{manus@radnummer}%
 	% Spara tillfälligt undan innehållet i en låda.
@@ -1193,6 +1199,8 @@
 	\vspace{\manus@radavstand}% Extra radavstånd.
 	\addtolength{\manus@aktlangd}{\manus@indhojd}% Lägg till höjden till aktlängden.
 	\needspace{2\baselineskip}% Hjälp radbrytningarna lite.
+	% Återställ feltestet.
+	\let\manus@radfel\relax%
 }
 
 
@@ -1251,7 +1259,7 @@
 		\noindent\ignorespaces%
 	\else%
 		\unskip\unpenalty%
-		\begingroup\manus@fotstil\\\endgroup%
+		\begingroup\manus@fotstil\par\endgroup%
 		\hbox to 0.8\textwidth{\fotstil@yttre{\unhbox0}}%
 	\fi%
 }

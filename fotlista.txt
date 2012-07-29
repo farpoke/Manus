@@ -4,3 +4,4 @@ Lorem\\Lorem 2
 ipsum
 dolor
 sit\\amet.
+Och nu skall vi skriva en längre rad som bör brytas vid något ställe. Detta är för att fotfilen han uppfört sig dåligt.
