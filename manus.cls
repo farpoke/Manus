@@ -161,6 +161,9 @@
 % Hjälpräknare för beräkning av antal ränder för subspelsindikatorer.
 \newcounter{manus@randantal}
 
+% Temporär hjälpräknare.
+\newcounter{manus@tmpcount}
+
 
 
 %%%%%%%%%% Dirty Tricks á la Knuth %%%%%%%%%%
@@ -453,20 +456,27 @@
 \newcommand\manus@sfnyscen[1]{%
 	% Spara sammanfattning av typ "scen".
 	\Append\scen\To\manus@sammanfattningar%
+	% Lägg till nummer för första raden.
+	\setcounter{manus@tmpcount}{\value{manus@radnummer}}%
+	\stepcounter{manus@tmpcount}%
+	\edef\tmp{\themanus@tmpcount}%
+	\expandafter\Append\tmp\To\manus@sammanfattningar%
 	\edef\tmp{\theakt, \thescen:}% Expandera akt- och scennummer.
 	\expandafter\Append\tmp\To\manus@sammanfattningar%
-	\Append#1\To\manus@sammanfattningar%
+	\Append#1\To\manus@sammanfattningar% sammanfattning
 }
 
-%% \manus@sfnykuplett{namn}{beskrivning}
+%% \manus@sfnykuplett{namn}{beskrivning}{deltagare}
 %
 % Lägg till en kuplettsammanfattning i sammanfattningslistan.
 \newcommand\manus@sfnykuplett[3]{%
 	% Spara sammanfattning av typ "kuplett"
 	\Append\kuplett\To\manus@sammanfattningar%
-	\expandafter\Append#1\To\manus@sammanfattningar%
-	\expandafter\Append#2\To\manus@sammanfattningar%
-	\expandafter\Append#3\To\manus@sammanfattningar%
+	\edef\tmp{\themanus@radnummer}% Expandera radnummer.
+	\expandafter\Append\tmp\To\manus@sammanfattningar%
+	\expandafter\Append#1\To\manus@sammanfattningar% titel
+	\expandafter\Append#2\To\manus@sammanfattningar% beskrivning
+	\expandafter\Append#3\To\manus@sammanfattningar% deltagare
 }
 
 %% \sammanfattningslista
@@ -481,16 +491,18 @@
 	\begingroup%
 	\let\newline\\%
 	\def\\##1{##1}%
-	\def\scen\\##1\\##2{%
-		\paragraph{##1} ##2%
+	\def\scen\\##1\\##2\\##3{%
+		\par\vspace{1em}%
+		\hspace{-3em}\hbox to 2em{\hfil##1}\hspace{1em}%
+		\textbf{##2} \ ##3%
 	}%
-	\def\kuplett\\##1\\##2\\##3{%
-			\par\vspace{1em}%
-			\textcolor{kuplettfarg}{\MakeUppercase{##1}}\newline%
-			\emph{##3}\newline%
-			##2%
+	\def\kuplett\\##1\\##2\\##3\\##4{%
+		\par\vspace{1em}%
+		\hspace{-3em}\hbox to 2em{\hfil##1}\hspace{1em}%
+		\textcolor{kuplettfarg}{\MakeUppercase{##2}}\par%
+		\emph{##4}\par%
+		##3%
 	}%
-	\def\todon\\##1\\##2{}%
 	\manus@sammanfattningar%
 	\endgroup%
 }
@@ -589,14 +601,14 @@
 	\begingroup%
 	\let\newline\\%
 	\def\\##1{##1}%
-	\def\scen\\##1\\##2{}%
-	\def\kuplett\\##1\\##2\\##3{%
+	\def\scen\\##1\\##2\\##3{}%
+	\def\kuplett\\##1\\##2\\##3\\##4{%
 			\par\vspace{1em}%
-			\textcolor{kuplettfarg}{\MakeUppercase{##1}}\newline%
-			\emph{##3}\newline%
-			##2%
+			\hspace{-3em}\hbox to 2em{\hfil##1}\hspace{1em}%
+			\textcolor{kuplettfarg}{\MakeUppercase{##2}}\par%
+			\emph{##4}\par%
+			##3%
 	}%
-	\def\todon\\##1\\##2{}%
 	\manus@sammanfattningar%
 	\endgroup%
 }
