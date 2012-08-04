@@ -707,7 +707,7 @@
 		}%
 	}%
 	\vspace{\manus@radavstand}% Extra radavstånd.
-	\addtolength{\manus@aktlangd}{\manus@indhojd}% Lägg till höjden till aktlängden.
+	\addtolength{\manus@aktlangd}{0.01\manus@indhojd}% Lägg till höjden till aktlängden.
 }
 
 
@@ -1010,7 +1010,7 @@
 	\def\\##1\\##2{%
 		\tmp@langd=##2%
 		\tmp@langd=\pgfmathresult\tmp@langd%
-		\pgfmathtruncatemacro\stat@cm{round(0.0351459804*##2)}%
+		\pgfmathtruncatemacro\stat@cm{round(3.51459804*##2)}%
 		\fbox{\parbox{\tmp@langd}{%
 			\textbf{##1}\\%
 			\stat@cm\ cm%%
@@ -1090,14 +1090,14 @@
 	\newdimen\l@tmp@count%
 	\def\\##1\\##2\\##3{%
 		\l@tmp=##2%
-		\addtolength{\l@tmp@total}{0.001\l@tmp}%
+		\addtolength{\l@tmp@total}{0.01\l@tmp}%
 	}%
 	\graf@stats%
 	\def\\##1\\##2\\##3{
 		\pgfmathparse{\l@tmp@count/\l@tmp@total*360}
 		\let\angle@a=\pgfmathresult
 		\l@tmp=##2
-		\addtolength{\l@tmp@count}{0.001\l@tmp}
+		\addtolength{\l@tmp@count}{0.01\l@tmp}
 		\pgfmathparse{\l@tmp@count/\l@tmp@total*360}
 		\let\angle@b=\pgfmathresult
 		\ifthenelse{\equal{\angle@a}{\angle@b}}{}{
@@ -1209,7 +1209,7 @@
 		}{}%
 	}%
 	\vspace{\manus@radavstand}% Extra radavstånd.
-	\addtolength{\manus@aktlangd}{\manus@indhojd}% Lägg till höjden till aktlängden.
+	\addtolength{\manus@aktlangd}{0.01\manus@indhojd}% Lägg till höjden till aktlängden.
 	\needspace{2\baselineskip}% Hjälp radbrytningarna lite.
 	% Återställ feltestet.
 	\let\manus@radfel\relax%
