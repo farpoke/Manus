@@ -289,9 +289,8 @@
 			\@ifstar{}{%
 			\csname#1gr\endcsname{\csname#1@namn\endcsname\ kommer in på scen.}}}%
 		\expandafter\newcommand\csname#1ut\endcsname{%
-			\setboolean{#1@in}{false}%
-			\@ifstar{}{%
-			\csname#1gr\endcsname{\csname#1@namn\endcsname\ går av scen.}}}%
+			\@ifstar{\setboolean{#1@in}{false}}{%
+			\csname#1gr\endcsname{\csname#1@namn\endcsname\ går av scen.}\setboolean{#1@in}{false}}}%
 		\expandafter\newcommand\csname#1sub\endcsname{%
 			\setboolean{#1@sub}{true}}%
 		\expandafter\newcommand\csname#1subslut\endcsname{%
