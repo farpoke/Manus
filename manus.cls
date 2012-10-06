@@ -15,7 +15,7 @@
 % sätt att hantera unicode beroende på.
 \RequirePackage{ifxetex}
 \ifxetex
-	\RequirePackage[T1]{fontenc}
+    \RequirePackage[T1]{fontenc}
 \else
 	\RequirePackage[utf8]{inputenc}
 \fi
@@ -338,10 +338,12 @@
 \newlength{\beskrivningsbredd}
 %
 %
+
+
 \newenvironment{rollbeskrivning}{%
 	% Deklarera kommandon för rollbeskrivning.
-	\newcommand{\namn}[1]{\def\knamn{##1}}%
-	\newcommand{\bild}[1]{\def\kbild{##1}}%
+    \newcommand{\namn}[1]{\def\knamn{##1}}%
+    \newcommand{\bild}[1]{\def\kbild{##1}}%
 	\newcommand{\beskrivning}[1]{\def\kbeskrivning{##1}}%
 	\newcommand{\ner}[1]{\def\kner{##1}}%
 	\newcommand{\hoger}[1]{\def\khoger{##1}}%
@@ -361,12 +363,12 @@
 	}{}%
 	\stepcounter{skrivnaRollBeskrivningar}%
 %
-	\savebox{\bildbox}{\includegraphics[height=\rollbildhojd]{\kbild}}%
+	\savebox{\bildbox}{\kbild}%
 	\setlength{\beskrivningsbredd}{\textwidth}%
 	\addtolength{\beskrivningsbredd}{-\wd\bildbox}%
 	%\the
 	%Vilket håll skall det ligga åt?
-	\ifthenelse{\isodd{\theskrivnaRollBeskrivningar}}{%
+	\ifthenelse{\not\isodd{\theskrivnaRollBeskrivningar}}{%
 			%\vspace{\kner}\hspace{\khoger}%
 			\begin{tabular}{m{\beskrivningsbredd} c}%
 				\vspace{\rollbeskrivningsflytt}\begin{tabular}{m{\beskrivningsbredd}}%
@@ -374,14 +376,16 @@
 					\kbeskrivning%
 				\end{tabular}&%
 				%\fbox{\vbox to \ht\bildbox{\hbox to \wd\bildbox{%
-				\includegraphics[height=\rollbildhojd]{\kbild}%\\
+				\kbild%&%
+				%\includegraphics[height=\rollbildhojd]{\kbild}%\\
 				%\hfil}\vfil}}%
 			\end{tabular}%
 	}{%
 			%\vspace{\kner}\hspace{\khoger}%
 			%\vspace{-0.15\textheight}
 			\begin{tabular}{c m{\beskrivningsbredd}}%
-				\includegraphics[height=\rollbildhojd]{\kbild}&%
+			\kbild&%
+				%\includegraphics[height=\rollbildhojd]{\kbild}&%
 				\vspace{\rollbeskrivningsflytt}\begin{tabular}{m{\beskrivningsbredd}}%
 					{\large\textbf\knamn}\\%
 					\kbeskrivning%
@@ -1376,4 +1380,5 @@
 	\manus@todo%
 	\endgroup%
 }
+
 
