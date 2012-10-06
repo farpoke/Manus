@@ -545,9 +545,9 @@
 	\def\\##1\\##2\\##3\\##4\\##5{% \\{namn}\\{utskriftnamn}\\{ind}\\{sub}\\{färg}
 		\ifthenelse{\boolean{##3}}{%
 			\ifx\kdeltagare\empty%
-				\@deltagare{##2}%
+				\@deltagare{\csname##1@namn\endcsname}%
 			\else%
-				\@deltagare{\kdeltagare, ##2}%
+				\@deltagare{\kdeltagare, \csname##1@namn\endcsname}%
 			\fi%
 		}{}%
 	}%
