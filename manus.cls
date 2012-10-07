@@ -1279,6 +1279,14 @@
 	\fi%
 }
 
+%% \fothar
+%
+% Detta kommando bestämmer sidfotstexten på sidan där kommandot specifierats. Den
+% aktiva fotfilen fortsätter som vanligt på nästa sida, såvida inte detta kommando
+% specifierats där också.
+\newcommand\fothar[1]{\gdef\manus@fothar{#1}}
+\fothar{}
+
 %% \fotfil[layoutnamn]{filnamn}
 %
 % Skapa en ny sidlayout med givet namn som läser sidfötter från den givna filen.
@@ -1290,10 +1298,14 @@
 		\def\default@fot{\hfil\thepage}%
 		\expandafter\def\csname ps@#1\endcsname{%
 			\def\@oddfoot{%
-				\ifeof\csname ps@#1@read\endcsname%
-					\def\@sidfot{}%
+				\ifx\manus@fothar\empty%
+					\ifeof\csname ps@#1@read\endcsname%
+						\def\@sidfot{}%
+					\else%
+						\expandafter\read\csname ps@#1@read\endcsname to \@sidfot%
+					\fi%
 				\else%
-					\expandafter\read\csname ps@#1@read\endcsname to \@sidfot%
+					\def\@sidfot{\manus@fothar}%
 				\fi%
 				\thepage%
 				\hfill%
@@ -1302,12 +1314,17 @@
 					\fotstil\@sidfot%
 					\par\manus@fotstil%
 				}%
+				\fothar{}%
 			}%
 			\def\@evenfoot{%
-				\ifeof\csname ps@#1@read\endcsname%
-					\def\@sidfot{}%
+				\ifx\manus@fothar\empty%
+					\ifeof\csname ps@#1@read\endcsname%
+						\def\@sidfot{}%
+					\else%
+						\expandafter\read\csname ps@#1@read\endcsname to \@sidfot%
+					\fi%
 				\else%
-					\expandafter\read\csname ps@#1@read\endcsname to \@sidfot%
+					\def\@sidfot{\manus@fothar}%
 				\fi%
 				\parbox{0.8\textwidth}{%
 					\raggedright%
@@ -1316,6 +1333,7 @@
 				}%
 				\hfill%
 				\thepage%
+				\fothar{}%
 			}%
 		}%
 		\pagestyle{#1}%
