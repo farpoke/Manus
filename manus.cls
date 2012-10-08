@@ -623,7 +623,7 @@
 %%%%%%%%%% Rekvisita %%%%%%%%%%
 
 % Tillfällig förstadefinition av \rekv.
-\newcommand\rekv[1]{}
+\newcommand\rekv[2][]{}
 
 % Definition som innehåller rekvisitalistan.
 \def\manus@rekvlista{}
@@ -667,12 +667,9 @@
 			\hbox{\large\bf\theakt}%
 			\vspace{5pt}%
 			\begingroup%
-				\def\rekv@sep{&}%
-				\renewcommand*\do[1]{##1\cr}%
-				\halign{%
-					\hspace{2em}##&\hspace{1em}##\cr%
-					\dolistloop\manus@rekvlista%
-				}%
+			\def\rekv@sep{\hspace{1em}\it}%
+			\renewcommand*\do[1]{\hbox{\hspace{2em}##1}}%
+			\dolistloop\manus@rekvlista%
 			\endgroup%
 		\fi%
 	}%
@@ -1196,13 +1193,13 @@
 	% Räkna ny rad.
 	\stepcounter{manus@radnummer}%
 	% Definiera först rekvisita utan indexering.
-	\renewcommand\rekv[1]{\fbox{##1}}%
+	\renewcommand\rekv[2][]{\fbox{##2}}%
 	% Spara tillfälligt undan innehållet i en låda.
 	\savebox{\manus@innehall@tmpbox}{%
 		\parbox{\manus@textbredd}{%
 			\manus@hjalpavstand#2\manus@hjalpavstand}}%
 	% Definiera sedan rekvisitan med indexering.
-	\renewcommand\rekv[1]{\fbox{##1}\manus@addrekv{##1}}%
+	\renewcommand\rekv[2][]{\fbox{##2}\ifstrempty{##1}{\manus@addrekv{##2}}{\manus@addrekv{##1}}}%
 	% Räkna ut längder från innehållsstorleken.
 	\setlength{\manus@radstorlek}{\ht\manus@innehall@tmpbox}%
 	\addtolength{\manus@radstorlek}{\dp\manus@innehall@tmpbox}%
