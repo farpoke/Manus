@@ -22,8 +22,8 @@
 
 % Behöver några fler paket:
 \RequirePackage{array} % För rollbeskrivningar.
+\RequirePackage{etoolbox} % För fancy rekvisitalistning.
 \RequirePackage{ifthen} % För booleaner och \ifthenelse.
-\RequirePackage{makeidx} % För sakregister.
 \RequirePackage{needspace} % För bättre sidbrytning.
 \RequirePackage{rotating} % För rubriker till statistiktabellen.
 \RequirePackage[usenames,dvipsnames]{xcolor} % För färger.
@@ -407,6 +407,8 @@
 	% Räkna aktstatistik för den avslutade akten.
 	\manus@aktstatistik%
 	\setlength{\manus@aktlangd}{0pt}%
+	% Sammanställ rekvisitainformation.
+	\manus@rekv@nyakt%
 	% Påbörja den nya akten.
 	\newpage%
 	\stepcounter{akt}%
@@ -620,42 +622,73 @@
 
 %%%%%%%%%% Rekvisita %%%%%%%%%%
 
-%% \rekv{rekvisita}
-%
-% Markera och indexera rekvisita.
-\newcommand\rekv[1]{%
-	\fbox{#1}%
-	\manus@indexrekv{#1}%
-}
+% Tillfällig förstadefinition av \rekv.
+\newcommand\rekv[1]{}
 
-%% \manus@indexrekv{rekvisita}
-%
-% Indexera rekvisita
-\newcommand\manus@indexrekv[1]{%
-	\index{%
-		\vspace{10pt}\textbf{\theakt}!%
-		\themanus@radnummer @%
-		#1: \themanus@radnummer|textit}%
-}
+% Definition som innehåller rekvisitalistan.
+\def\manus@rekvlista{}
 
-% Använd makeindex för saklista.
-\makeindex
-\renewcommand\indexname{%
-	Sakregister\\% Svenska, tack.
-	{\normalsize Sorterad i ordningen de uppträder}\\%
-	{\normalfont\normalsize Rekvista: repliknummer, \textit{sidnummer}}}%
-% Förklaring av sortering
+% Boolean som håller koll på om vi för tillfället hanterar berättarrekvisita.
+\newbool{berattarrekv}
+
+%% \manus@addrekv{rekvisita}
+%
+% Lägg till rekvisita i vår rekvisitalista.
+\newcommand\manus@addrekv[1]{\begingroup%
+	\def\nummer{\ifbool{berattarrekv}{}{}\themanus@radnummer}%
+	\newbool{iteminlist}%
+	\def\newlist{}%
+	\let\rekv@sep\relax%
+	\def\split##1\rekv@sep##2\@nil{%
+		\ifstrequal{#1}{##1}{%
+			\booltrue{iteminlist}%
+			\listeadd\newlist{##1\rekv@sep##2, \nummer}%
+		}{%
+			\listeadd\newlist{##1\rekv@sep##2}%
+		}%
+	}%
+	\renewcommand*\do[1]{\split##1\@nil}%
+	\dolistloop\manus@rekvlista%
+	\global\let\manus@rekvlista\newlist%
+	\ifbool{iteminlist}{}{%
+		\listxadd\manus@rekvlista{#1\rekv@sep\nummer}%
+	}%
+\endgroup}
+
+% En låda som sparar sakregistret som byggs upp med akterna.
+\newbox\manus@rekvbox
+
+% För in rekvisitalistan i sakregistret och nollställ listan.
+\newcommand\manus@rekv@nyakt{%
+	\setbox\manus@rekvbox=\vbox{%
+		\box\manus@rekvbox%
+		\ifx\manus@rekvlista\empty\else%
+			\vspace{2em}%
+			\hbox{\large\bf\theakt}%
+			\vspace{5pt}%
+			\begingroup%
+				\def\rekv@sep{&}%
+				\renewcommand*\do[1]{##1\cr}%
+				\halign{%
+					\hspace{2em}##&\hspace{1em}##\cr%
+					\dolistloop\manus@rekvlista%
+				}%
+			\endgroup%
+		\fi%
+	}%
+	\gdef\manus@rekvlista{}%
+}
 
 %% \rekvisitalista
 %
 % Skriv ut en fin rekvisitalista.
 \newcommand\rekvisitalista{%
 	\newpage%
+	\ifx\manus@rekvlista\empty\else\manus@rekv@nyakt\fi%
+	\section*{Sakregister}%
 	\addcontentsline{toc}{section}{Sakregister}%
-	\begingroup%
-	\def\thispagestyle##1{}% Tillåt inte \printindex att ändra sidlayouten.
-	\printindex%
-	\endgroup%
+	\textbf{Sorterad i ordningen de dyker upp.}\par
+	\box\manus@rekvbox%
 }
 
 
@@ -673,13 +706,8 @@
 	\fontdimen4\font=0.2em%
 	\fontdimen7\font=0.1em%
 	\hyphenchar\font=`\-%
-	\begingroup%
-	\renewcommand\rekv[1]{%
-		\fbox{##1}%
-		\manus@indexrekv{##1 (B)}%
-	}%
+	\booltrue{berattarrekv}%
 	#1%
-	\endgroup%
 }}
 \newcommand{\citat}[1]{``#1''}
 \newcommand\comment[1]{}
@@ -1167,10 +1195,14 @@
 	\def\manus@radfel{\ClassError{manus}{En replikrad har försökts skrivas innuti en annan replikrad!}{}}%
 	% Räkna ny rad.
 	\stepcounter{manus@radnummer}%
+	% Definiera först rekvisita utan indexering.
+	\renewcommand\rekv[1]{\fbox{##1}}%
 	% Spara tillfälligt undan innehållet i en låda.
 	\savebox{\manus@innehall@tmpbox}{%
 		\parbox{\manus@textbredd}{%
 			\manus@hjalpavstand#2\manus@hjalpavstand}}%
+	% Definiera sedan rekvisitan med indexering.
+	\renewcommand\rekv[1]{\fbox{##1}\manus@addrekv{##1}}%
 	% Räkna ut längder från innehållsstorleken.
 	\setlength{\manus@radstorlek}{\ht\manus@innehall@tmpbox}%
 	\addtolength{\manus@radstorlek}{\dp\manus@innehall@tmpbox}%
