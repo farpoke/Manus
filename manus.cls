@@ -76,6 +76,7 @@
 \newlength{\manus@indkant} % Kantbredd för indikatorer (subspel).
 \newlength{\manus@randsep} % Avstånd mellan ränder för subspelsindikation.
 \newlength{\manus@randbredd} % Bredd på ränder för subspelsindikation.
+\newlength{\manus@kuplettmellanrum} % Mellanrum före och efter kupletter.
 
 % Sätt några defaultvärden.
 \setlength{\manus@numbredd}{3em}
@@ -87,6 +88,7 @@
 \setlength{\manus@indkant}{2pt}
 \setlength{\manus@randsep}{10pt}
 \setlength{\manus@randbredd}{5pt}
+\setlength{\manus@kuplettmellanrum}{2em}
 %
 \setlength{\manus@indskift}{-0.5\manus@radavstand}
 
@@ -326,18 +328,15 @@
 %% \hoger{Förflyttning höger}		: Ange förflyttning i sidled
 %
 %% \end{rollbeskrivning}
-%
+
 \newsavebox{\bildbox}%
 \newcounter{skrivnaRollBeskrivningar}%
-%
+
 \newlength{\rollbildhojd}
 \setlength{\rollbildhojd}{0.5\textheight}
 \newlength{\rollbeskrivningsflytt}
 \setlength{\rollbeskrivningsflytt}{-0.5\textheight}
 \newlength{\beskrivningsbredd}
-%
-%
-
 
 \newenvironment{rollbeskrivning}{%
 	% Deklarera kommandon för rollbeskrivning.
@@ -350,48 +349,39 @@
 	\namn{\ }%
 	\bild{placeholder}%
 	\beskrivning{\ }%
-	\ner{0px}%
-	\hoger{opx}%
-	
-
+	\ner{0pt}%
+	\hoger{0pt}%
 }{%
 	%Skriv ut rubrik om första karaktären
-	\ifthenelse{\theskrivnaRollBeskrivningar=0}{%
+	\ifthenelse{\equal{\theskrivnaRollBeskrivningar}{0}}{%
 		\section*{\Huge Spexkaraktärer}%
 		\addcontentsline{toc}{section}{Karaktärsbeskrivningar}%
 	}{}%
 	\stepcounter{skrivnaRollBeskrivningar}%
-%
 	\savebox{\bildbox}{\kbild}%
 	\setlength{\beskrivningsbredd}{\textwidth}%
 	\addtolength{\beskrivningsbredd}{-\wd\bildbox}%
-	%\the
 	%Vilket håll skall det ligga åt?
 	\ifthenelse{\not\isodd{\theskrivnaRollBeskrivningar}}{%
-			%\vspace{\kner}\hspace{\khoger}%
-			\begin{tabular}{m{\beskrivningsbredd} c}%
-				\vspace{\rollbeskrivningsflytt}\begin{tabular}{m{\beskrivningsbredd}}%
-					{\large\textbf\knamn}\\%
-					\kbeskrivning%
-				\end{tabular}&%
-				%\fbox{\vbox to \ht\bildbox{\hbox to \wd\bildbox{%
-				\kbild%&%
-				%\includegraphics[height=\rollbildhojd]{\kbild}%\\
-				%\hfil}\vfil}}%
-			\end{tabular}%
+		\begin{tabular}{m{\beskrivningsbredd} c}%
+			\vspace{\rollbeskrivningsflytt}%
+			\begin{tabular}{m{\beskrivningsbredd}}%
+				{\large\textbf\knamn}\\%
+				\kbeskrivning%
+			\end{tabular}&%
+			\usebox{\bildbox}%
+		\end{tabular}%
 	}{%
-			%\vspace{\kner}\hspace{\khoger}%
-			%\vspace{-0.15\textheight}
-			\begin{tabular}{c m{\beskrivningsbredd}}%
-			\kbild&%
-				%\includegraphics[height=\rollbildhojd]{\kbild}&%
-				\vspace{\rollbeskrivningsflytt}\begin{tabular}{m{\beskrivningsbredd}}%
-					{\large\textbf\knamn}\\%
-					\kbeskrivning%
-				\end{tabular}%\\
+		\begin{tabular}{c m{\beskrivningsbredd}}%
+			\usebox{\bildbox}&%
+			\vspace{\rollbeskrivningsflytt}%
+			\begin{tabular}{m{\beskrivningsbredd}}%
+				{\large\textbf\knamn}\\%
+				\kbeskrivning%
 			\end{tabular}%
+		\end{tabular}%
 	}%
-}%
+}
 
 
 
@@ -494,19 +484,27 @@
 	\addcontentsline{toc}{section}{Sammanfattning}%
 	% Skiv ut alla sammanfattningar.
 	\begingroup%
+	\newdimen\mptmp@len%
+	\mptmp@len=\dimexpr\textwidth-3em%
 	\let\newline\\%
 	\def\\##1{##1}%
 	\def\scen\\##1\\##2\\##3{%
 		\par\vspace{1em}%
-		\hspace{-3em}\hbox to 2em{\hfil##1}\hspace{1em}%
-		\textbf{##2} \ ##3%
+		\begin{minipage}[t]{2em}\hfill##1\end{minipage}%
+		\hspace{1em}%
+		\begin{minipage}[t]{\mptmp@len}%
+			\textbf{##2} \ ##3%
+		\end{minipage}%
 	}%
 	\def\kuplett\\##1\\##2\\##3\\##4{%
 		\par\vspace{1em}%
-		\hspace{-3em}\hbox to 2em{\hfil##1}\hspace{1em}%
-		\textcolor{kuplettfarg}{\MakeUppercase{##2}}\par%
-		\emph{##4}\par%
-		##3%
+		\begin{minipage}[t]{2em}\hfill##1\end{minipage}%
+		\hspace{1em}%
+		\begin{minipage}[t]{\mptmp@len}%
+			\textcolor{kuplettfarg}{\MakeUppercase{##2}}\par%
+			\emph{##4}\par%
+			##3%
+		\end{minipage}%
 	}%
 	\manus@sammanfattningar%
 	\endgroup%
@@ -560,7 +558,7 @@
 	\endgroup%
 }{%
 	% Skriv ut kupletten.
-	\mellanrum{2em}%
+	\mellanrum{\manus@kuplettmellanrum}%
 	\enkelrad[true]{\vbox{%
 		\hbox to \manus@textbredd{%
 			\parbox{\manus@textbredd}{\textbf{\textcolor{kuplettfarg}{%
@@ -581,7 +579,7 @@
 			Beskrivning: \emph{\kbeskrivning}
 		}}%
 	}}%
-	\mellanrum{2em}%
+	\mellanrum{\manus@kuplettmellanrum}%
 	% Lägg till kupletten i innehållsförteckningen
 	\addcontentsline{toc}{subsubsection}{%
 		\textcolor{kuplettfarg}{\MakeUppercase{\ktitel}}\\%
@@ -604,15 +602,20 @@
 	\addcontentsline{toc}{section}{Kupletter}%
 	% Skiv ut alla kupletter.
 	\begingroup%
+	\newdimen\mptmp@len%
+	\mptmp@len=\dimexpr\textwidth-3em%
 	\let\newline\\%
 	\def\\##1{##1}%
 	\def\scen\\##1\\##2\\##3{}%
 	\def\kuplett\\##1\\##2\\##3\\##4{%
-			\par\vspace{1em}%
-			\hspace{-3em}\hbox to 2em{\hfil##1}\hspace{1em}%
+		\par\vspace{1em}%
+		\begin{minipage}[t]{2em}\hfill##1\end{minipage}%
+		\hspace{1em}%
+		\begin{minipage}[t]{\mptmp@len}%
 			\textcolor{kuplettfarg}{\MakeUppercase{##2}}\par%
 			\emph{##4}\par%
 			##3%
+		\end{minipage}%
 	}%
 	\manus@sammanfattningar%
 	\endgroup%
