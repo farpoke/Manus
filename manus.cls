@@ -17,7 +17,7 @@
 \ifxetex
     \RequirePackage[T1]{fontenc}
 \else
-	\RequirePackage[utf8]{inputenc}
+    \RequirePackage[utf8]{inputenc}
 \fi
 
 % Behöver några fler paket:
@@ -31,7 +31,7 @@
 
 % Lite klassalternativ...
 \newcommand\manus@alternativ[1]{%
-	\newboolean{#1}%
+    \newboolean{#1}%
 	\setboolean{#1}{false}%
 	\DeclareOption{#1}{\setboolean{#1}{true}}%
 }
@@ -47,6 +47,12 @@
 
 % Ett klassalternativ för att visa TODO.
 \manus@alternativ{todo}
+
+% Ett klassalternativ för att visa kommentarer.
+\manus@alternativ{kommentarer}
+
+% Ett klassalternativ för att visa källkodsradnummer.
+\manus@alternativ{kallrad}
 
 % Hantera okända klassalternativ.
 \DeclareOption*{\ClassError{manus}{Dokumnetklassen Manus känner inte igen klassalternativet \CurrentOption.}{}}
@@ -328,15 +334,18 @@
 %% \hoger{Förflyttning höger}		: Ange förflyttning i sidled
 %
 %% \end{rollbeskrivning}
-
+%
 \newsavebox{\bildbox}%
 \newcounter{skrivnaRollBeskrivningar}%
-
+%
 \newlength{\rollbildhojd}
 \setlength{\rollbildhojd}{0.5\textheight}
 \newlength{\rollbeskrivningsflytt}
 \setlength{\rollbeskrivningsflytt}{-0.5\textheight}
 \newlength{\beskrivningsbredd}
+%
+%
+
 
 \newenvironment{rollbeskrivning}{%
 	% Deklarera kommandon för rollbeskrivning.
@@ -347,13 +356,13 @@
 	\newcommand{\hoger}[1]{\def\khoger{##1}}%
 	% Sätt alla värden till tomrum.
 	\namn{\ }%
-	\bild{placeholder}%
+	\bild{\includegraphics[height=\rollbildhojd]{placeholder}}%
 	\beskrivning{\ }%
 	\ner{0pt}%
 	\hoger{0pt}%
 }{%
 	%Skriv ut rubrik om första karaktären
-	\ifthenelse{\equal{\theskrivnaRollBeskrivningar}{0}}{%
+	\ifthenelse{\theskrivnaRollBeskrivningar=0}{%
 		\section*{\Huge Spexkaraktärer}%
 		\addcontentsline{toc}{section}{Karaktärsbeskrivningar}%
 	}{}%
@@ -363,6 +372,7 @@
 	\addtolength{\beskrivningsbredd}{-\wd\bildbox}%
 	%Vilket håll skall det ligga åt?
 	\ifthenelse{\not\isodd{\theskrivnaRollBeskrivningar}}{%
+		\vspace{\kner}\hspace{\khoger}%
 		\begin{tabular}{m{\beskrivningsbredd} c}%
 			\vspace{\rollbeskrivningsflytt}%
 			\begin{tabular}{m{\beskrivningsbredd}}%
@@ -372,6 +382,7 @@
 			\usebox{\bildbox}%
 		\end{tabular}%
 	}{%
+		\vspace{\kner}\hspace{\khoger}%
 		\begin{tabular}{c m{\beskrivningsbredd}}%
 			\usebox{\bildbox}&%
 			\vspace{\rollbeskrivningsflytt}%
@@ -381,7 +392,7 @@
 			\end{tabular}%
 		\end{tabular}%
 	}%
-}
+}%
 
 
 
@@ -404,7 +415,9 @@
 	\stepcounter{akt}%
 	{\hspace{\manus@numbredd}\Large\bf\theakt}\par%
 	\vspace{\baselineskip}%
-	\addcontentsline{toc}{section}{\theakt}%
+    \@ifstar{}{%
+	    \addcontentsline{toc}{section}{\theakt}%
+    }%
 	% Sätt scenräknaren så att den första scenen får önskat värde.
 	\setcounter{scen}{#1}%
 	\addtocounter{scen}{-1}%
@@ -464,7 +477,7 @@
 %% \manus@sfnykuplett{namn}{beskrivning}{deltagare}
 %
 % Lägg till en kuplettsammanfattning i sammanfattningslistan.
-\newcommand\manus@sfnykuplett[3]{%
+\newcommand\manus@sfnykuplett[4]{%
 	% Spara sammanfattning av typ "kuplett"
 	\Append\kuplett\To\manus@sammanfattningar%
 	\edef\tmp{\themanus@radnummer}% Expandera radnummer.
@@ -472,6 +485,7 @@
 	\expandafter\Append#1\To\manus@sammanfattningar% titel
 	\expandafter\Append#2\To\manus@sammanfattningar% beskrivning
 	\expandafter\Append#3\To\manus@sammanfattningar% deltagare
+    \expandafter\Append#4\To\manus@sammanfattningar% Melodi
 }
 
 %% \sammanfattningslista
@@ -485,26 +499,20 @@
 	% Skiv ut alla sammanfattningar.
 	\begingroup%
 	\newdimen\mptmp@len%
-	\mptmp@len=\dimexpr\textwidth-3em%
+	\mptmp@len=\dimexpr\textwidth-3em\relax%
 	\let\newline\\%
 	\def\\##1{##1}%
 	\def\scen\\##1\\##2\\##3{%
 		\par\vspace{1em}%
-		\begin{minipage}[t]{2em}\hfill##1\end{minipage}%
-		\hspace{1em}%
-		\begin{minipage}[t]{\mptmp@len}%
-			\textbf{##2} \ ##3%
-		\end{minipage}%
+		\hspace{-3em}\hbox to 2em{\hfil##1}\hspace{1em}%
+		\textbf{##2} \ ##3%
 	}%
-	\def\kuplett\\##1\\##2\\##3\\##4{%
+	\def\kuplett\\##1\\##2\\##3\\##4\\##5{%
 		\par\vspace{1em}%
-		\begin{minipage}[t]{2em}\hfill##1\end{minipage}%
-		\hspace{1em}%
-		\begin{minipage}[t]{\mptmp@len}%
-			\textcolor{kuplettfarg}{\MakeUppercase{##2}}\par%
-			\emph{##4}\par%
-			##3%
-		\end{minipage}%
+		\hspace{-3em}\hbox to 2em{\hfil##1}\hspace{1em}%
+		\textcolor{kuplettfarg}{\MakeUppercase{##2}}\par%
+		\emph{##4}\par%
+		##3%
 	}%
 	\manus@sammanfattningar%
 	\endgroup%
@@ -586,7 +594,7 @@
 		Deltagare: \emph{\kdeltagare}%
 	}%
 	% Lägg till kuplettbeskrivning i sammanfattningslistan.
-	\manus@sfnykuplett{\ktitel}{\kbeskrivning}{\kdeltagare}%
+	\manus@sfnykuplett{\ktitel}{\kbeskrivning}{\kdeltagare}{\kmelodi}%
 	% Räkna kuplettstatistik.
 	\manus@raknakuplett%
 }
@@ -607,15 +615,37 @@
 	\let\newline\\%
 	\def\\##1{##1}%
 	\def\scen\\##1\\##2\\##3{}%
-	\def\kuplett\\##1\\##2\\##3\\##4{%
-		\par\vspace{1em}%
-		\begin{minipage}[t]{2em}\hfill##1\end{minipage}%
-		\hspace{1em}%
-		\begin{minipage}[t]{\mptmp@len}%
+	\def\kuplett\\##1\\##2\\##3\\##4\\##5{%
+			\par\vspace{1em}%
+			\hspace{-3em}\hbox to 2em{\hfil##1}\hspace{1em}%
 			\textcolor{kuplettfarg}{\MakeUppercase{##2}}\par%
 			\emph{##4}\par%
+%            \texttt{##5}\par%
 			##3%
-		\end{minipage}%
+	}%
+	\manus@sammanfattningar%
+	\endgroup%
+}
+
+%% \melodilista
+%
+% Kuplettlistan skriver ut en lista med kupletter. Egentligen bara en
+% variant av sammanfattningslistan.
+\newcommand\melodilista{%
+    % Ny sektion på ny sida för listan.
+	\newpage%
+	\section*{Melodiförslag}%
+	\addcontentsline{toc}{section}{Melodiförslag}%
+	% Skiv ut alla kupletter.
+	\begingroup%
+	\let\newline\\%
+	\def\\##1{##1}%
+	\def\scen\\##1\\##2\\##3{}%
+	\def\kuplett\\##1\\##2\\##3\\##4\\##5{%
+			\par\vspace{1em}%
+			\hspace{-3em}\hbox to 2em{\hfil##1}\hspace{1em}%
+			\textcolor{kuplettfarg}{\MakeUppercase{##2}}\par%
+            \texttt{##5}\par%
 	}%
 	\manus@sammanfattningar%
 	\endgroup%
@@ -1213,6 +1243,9 @@
 	\hbox{%
 		% Nummer:
 		\vbox to \manus@radstorlek{\hbox to \manus@numbredd{%
+        \ifthenelse{\boolean{kallrad}}{%
+            \hspace{-1.2em}\hbox to 1.2em{\hfil\tiny\the\inputlineno}%
+        }{}%
 			\hfil% För högerjustering.
 			\manus@hjalpavstand%
 			\themanus@radnummer%
@@ -1431,3 +1464,63 @@
 }
 
 
+
+
+%%%%%%%%%% Kommentarer %%%%%%%%%%
+%% \kommentar{Tydliggörande}
+%
+\newcommand\kommentar[1]{%
+    \marginpar{\raisebox{-\baselineskip}{%\rule{5pt}{5pt}
+    \bf$\triangleleft$\hfil}%
+    }%
+    % Skriv ut kommentar direkt i texten om så angets.
+	\ifthenelse{\boolean{kommentarer}}{%
+	\hbox{%
+    		\hspace{\manus@numbredd}%
+			\hspace{\manus@namnbredd}%
+			\fbox{\parbox{\manus@textbredd}{\bf Kommentar: #1}}%
+			\hspace{\manus@kolavstand}%
+			\hspace{\value{manus@indikatorer}\manus@indbredd}%
+			\hbox to 1em{\bf$*$\hfil}%
+		}%
+		\vspace{\manus@radavstand}%	
+	}{}%
+	% Lägg till kommentarlistan.
+	\manus@kommentarnykommentar{#1}%
+    %\ignorespaces%
+}
+
+% Skapa en ny lista för kommentarer.
+\NewList\manus@kommentarer
+
+%% \manus@kommentarnykommentar{}
+%
+% Lägg till en kommentar i kommentarlistan.
+\newcommand\manus@kommentarnykommentar[1]{%
+	\Append\kommentaren\To\manus@kommentarer%
+	\edef\tmp{\themanus@radnummer: }% Expandera repliknummer.
+	\expandafter\Append\tmp\To\manus@kommentarer%
+	\Append#1\To\manus@kommentarer%
+}
+
+%% \kommentarlista
+%
+% Skriver ut kommentarlistan.
+\newcommand\kommentarlista{%
+	% Ny sektion på ny sida för kommentarlistan.
+	\newpage%
+	\section*{Kommentarer}%
+	% Skiv ut alla kommentarer.
+	\begingroup%
+	\let\newline\\%
+	\def\\##1{##1}%
+	\long\def\kommentaren\\##1\\##2{%
+		\paragraph{##1} ##2%
+	}%
+	\manus@kommentarer%
+	\endgroup%
+}
+
+
+\newlength{\manusnumbredd}
+\setlength{\manusnumbredd}{\manus@numbredd}
