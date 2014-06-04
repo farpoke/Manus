@@ -66,6 +66,7 @@
 
 
 
+\newpage
 \tableofcontents
 \newpage
 
@@ -125,6 +126,21 @@ När ny scen påbörjas med kommandot |\scen| (se nedan) kan en sammanfattning a
 \label{alt:grafer}
 \index{grafer@\texttt{grafer}}
 Detta alternativ gör att statistiktabellen (se avsnitt \ref{sec:statistik}) följs av diverse illustrativa grafer. Denna funktionalitet är ännu experimentell, men fungerande.
+
+\subsubsection{Alternativ: \texttt{todo}}
+\label{alt:todo}
+\index{todo@\texttt{todo}}
+Detta alternativ gör att kommentarer skrivna med kommandot |\todo{...}| visas i texten. En lista över kommentarer kan inkluderas med kommandot |\todolista|. Listan fungerar även om |todo|-alternativet inte anges.
+
+\subsubsection{Alternativ: \texttt{kommentarer}}
+\label{alt:kommentarer}
+\index{kommentarer@\texttt{kommentarer}}
+Gör samma sak som |todo| men med kommandot |\kommentar|, samt att utseendet är något annorlunda. En lista över kommentarer kan inkluderas med \\|\kommentarlista|.
+
+\subsubsection{Alternativ: \texttt{kallrad}}
+\label{alt:kallrad}
+\index{kallrad@\texttt{kallrad}}
+Gör att källradsnumret (dvs den rad i |.tex|-filen där repliken är skriven) visas till vänster om varje repliknumer.
 
 \subsection{Definiera karaktärer/roller}
 \label{sec:nyroll}
@@ -209,6 +225,8 @@ Finessen med |\Namngr| är att kunna skriva längre mängd text för att beskriv
 
 Ifall flera roller är involverade är |\allgr{}|\index{allgr@\verb#\allgr#} rätt kommando.
 
+Då flera repliker i rad är från samma karaktär kommer namnet endast skrivas ut för den första raden.
+
 
 
 \subsection{Scennärvaro}
@@ -285,6 +303,16 @@ Detta kommando finns ifall man utav någon anledning inte vill kommentera ut res
 \index{rekv@\verb#\rekv#}
 När rekvisita refereras till i manus skall den markeras med detta kommando. Detta markerar rekvisita-texten och indexerar även densamma i sakregistret.
 
+\paragraph{\tt\bfseries\textbackslash TODO\{...\}}
+\index{TODO}
+\index{todo@\verb#\todo#}
+Detta kommando lägger till en TODO-notering med angiven text. Då klassalternativet |todo| är angivet kommer denna notering skrivas ut direkt vid anrop, annars inte. I båda fallen läggs det till i TODO-listan som kan skrivas ut med kommandot |\todolista|.
+
+\paragraph{\tt\bfseries\textbackslash kommentar\{...\}}
+\index{kommentar}
+\index{kommentar@\verb#\kommentar#}
+Detta kommando lägger till en kommentar på liknande sätt som |\TODO| ovan, med skillnaden att klassalternativet |kommentarer| styr, och att listan över kommentarer ges med |\kommentarlista|.
+
 \subsection{Definiera roller, episod II}
 \index{Definiera karaktärer}
 \index{nyroll@\verb#\nyroll#}
@@ -329,7 +357,7 @@ Detta kommando skapar en ny sidlayout som för varje sida läser in en rad från
 
 Parametern |[layoutnamn]| är frivillig och namnet |fotfil| kommer användas om den utelämnas. Detta namn är det namn som ges den nya sidlayouten och ett fel kommer ges om en sidlayout med det namnet redan finns. Den nya sidlayouten aktiveras sedan direkt.
 
-\paragraph{Layoutändring} Sidlayouter som skapas via detta kommando kan precis som \LaTeX:s vanliga sidlayouter styras via kommandona |\pagestyle| och |\thispagestyle|. Dvs om man vill tillfälligt ändra layout kan man till exempel använda kommandot
+\paragraph{Layoutändring} Sidlayouter som skapas via detta kommando kan precis som \\\LaTeX:s vanliga sidlayouter styras via kommandona |\pagestyle| och \\|\thispagestyle|. Dvs om man vill tillfälligt ändra layout kan man till exempel använda kommandot
 \begin{lstlisting}
 \thispagestyle{plain}
 \end{lstlisting}
@@ -361,6 +389,14 @@ Andra exempel är:
 \def\fotstil{\rule{5pt}{5pt}} % En liten låda innan texten.
 \end{lstlisting}
 
+\paragraph{Finkontroll}\index{forhar@\verb#\fothar#} I vissa fall kan det vara önskvärt att sätta en specifik fotnot på en sida. Istället för att pilla med fot-filen så att rätt sak hamnar på rätt sida finns istället kommandot
+
+\begin{lstlisting}
+\fothar{...}
+\end{lstlisting}
+
+Detta kommando gör att den angivna texten används som fotnot på den nuvarande sidan, istället för texten från fot-filen. Normala fotnötter kommer sedan fortsätta på nästa sida, såvida inte ett |\fothar| kommando finns där också.
+
 
 
 \section{Slut på manus}
@@ -383,17 +419,35 @@ Efter sista akten kan man tänkas vilja ha med lite finurliga listor som berätt
 \addcontentsline{toc}{subsection}{Kuplettlista}
 Skriver ut en lista över alla kupletter som finns nämnda så långt. Denna lista är samma som sammanfattningslistan fast med endast kupletterna inkluderade.
 
+\paragraph{\tt\bfseries\textbackslash melodilista}
+\index{Melodilista}
+\index{melodilista@\verb#\melodilista#}
+\addcontentsline{toc}{subsection}{Melodilista}
+Skriver ut en lista över alla kupletter och melodier. Specialversion av |\kuplettlista|.
+
 \paragraph{\tt\bfseries\textbackslash rekvisitalista}
 \index{Rekvisitalista}
 \index{rekvisitalista@\verb#\rekvisitalista#}
 \addcontentsline{toc}{subsection}{Rekvisitalista}
-Skriver ut en lista över all rekvisita som finns nämnd så långt. Lista är indelad efter akt. Rekvisita som är nämnd i |\berattare| är markerad ty den bör rimligen vara rekvisita som skall ligga framme i början av akten.
+Skriver ut en lista över all rekvisita som finns nämnd så långt. Lista är indelad efter akt. Rekvisita som är nämnd i |\berattare| är markerad ty den bör rimligen vara rekvisita som skall ligga framme i början av akten. Rekvisitan är sorterad i den ordning den först dyker upp.
 
 \paragraph{\tt\bfseries\textbackslash sammanfattningslista}
 \index{Sammanfattningslista}
 \index{sammanfattningslista@\verb#\sammanfattningslista#}
 \addcontentsline{toc}{subsection}{Sammanfattningslista}
 Skriver ut en sammanfattning som består utav de sammanfattningar som angetts till varje scen samt de kupletter som finns.
+
+\paragraph{\tt\bfseries\textbackslash todolista}
+\index{TODO-lista}
+\index{todolista@\verb#\todolista#}
+\addcontentsline{toc}{subsection}{TODO-lista}
+Skriver ut en lista över TODO-noteringar.
+
+\paragraph{\tt\bfseries\textbackslash kommentarlista}
+\index{Kommentarslista}
+\index{kommentarlista@\verb#\kommentarlista#}
+\addcontentsline{toc}{subsection}{Kommentarslista}
+Skriver ut en lista över kommentarer.
 
 \subsection*{Statistik}
 \paragraph{\tt\bfseries\textbackslash statistiktabell}
@@ -518,7 +572,8 @@ Manusklassen definierar en del längder för att kontrollera utseendet och som k
 
 \vspace{1em}
 \noindent
-\begin{tabular}{p{0.3\textwidth}p{0.12\textwidth}p{0.48\textwidth}}
+\begingroup\small
+\begin{tabular}{p{0.36\textwidth}p{0.09\textwidth}p{0.45\textwidth}}
 \bf Längd & \bf Default & \bf Beskrivning \\
 \hline
 |\manus@numbredd| & 3em & Bredden på kolonnen för radnummer. \\
@@ -536,7 +591,10 @@ Manusklassen definierar en del längder för att kontrollera utseendet och som k
 |\manus@randsep| & 10pt & Avstånd mellan ränderna i sub\-spels\-indi\-kat\-orerna. \\
 \hline
 |\manus@randbredd| & 5pt & Bredd på ränderna i sub\-spels\-indikat\-orerna. \\
+\hline
+|\manus@kuplettmellanrum| & 2em & Tomrum före och efter kupletter. \\
 \end{tabular}
+\endgroup
 
 %\paragraph{Omdefiniera färg för kupletter}
 
@@ -549,7 +607,7 @@ Manusklassen definierar en del längder för att kontrollera utseendet och som k
 \index{fotstilyttre@\texttt{\textbackslash fotstil\at yttre}}
 Om man definierar om |\fotstil| till |\fbox|, |\underline| eller liknande så finner man att radbrytningar i sidfötterna slutar fungera som önskat. Detta är för att kommandon som dessa inte är till för paragrafer och inte stödjer radbrytningar.
 
-För att formattera sidfötter på dessa sätt finns istället kommandot |\fotstil@yttre|. Detta kommandot appliceras på varje \emph{rad} i sidfötterna istället för på hela paragrafen. Därmed kan man definera om kommandot som till exempel
+För att formattera sidfötter på dessa sätt finns istället kommandot \\|\fotstil@yttre|. Detta kommandot appliceras på varje \emph{rad} i sidfötterna istället för på hela paragrafen. Därmed kan man definera om kommandot som till exempel
 \begin{lstlisting}
 \let\fotstil@yttre\underline
 \end{lstlisting}
