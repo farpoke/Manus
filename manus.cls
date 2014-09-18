@@ -434,6 +434,8 @@
 	\vspace{\baselineskip}%
 	\addcontentsline{toc}{subsection}{\thescen: #1}%
 	\scensammanfattning{#2}%
+	% Återställ namnkoll.
+	\global\let\manus@sistanamn\relax%
 }
 
 
