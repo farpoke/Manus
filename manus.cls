@@ -359,6 +359,7 @@
 		\setlength{\sl@maxnamewd}{\wd\manus@namn@tmpbox}%
 	\fi%
 	% Skapa grupp-relaterade kommandon.
+	\expandafter\gdef\csname #1@grupp\endcsname{}%
 	\expandafter\newcommand\csname#1grupp\endcsname[1]{%
 		\expandafter\xdef\csname #1@grupp\endcsname{##1}%
 	}%
