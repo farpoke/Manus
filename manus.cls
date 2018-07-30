@@ -2,7 +2,7 @@
 % Version 2: Anton Mårtensson, anton.v.martensson@gmail.com
 
 \NeedsTeXFormat{LaTeX2e}[1994/06/01]
-\ProvidesClass{manus}[2014/06/04]
+\ProvidesClass{manus}[2018/07/30]
 
 
 
@@ -28,6 +28,12 @@
 \RequirePackage{rotating} % För rubriker till statistiktabellen.
 \RequirePackage[usenames,dvipsnames]{xcolor} % För färger.
 \RequirePackage{tikz} % För indikatoreffekter. Måste vara efter xcolor.
+\RequirePackage{xspace}
+\RequirePackage[strict]{changepage}
+
+\RequirePackage{fontspec}
+\newfontfamily\sjungfont{Cinzel-Bold}
+
 
 % Lite klassalternativ...
 \newcommand\manus@alternativ[1]{%
@@ -55,7 +61,7 @@
 \manus@alternativ{kallrad}
 
 % Hantera okända klassalternativ.
-\DeclareOption*{\ClassError{manus}{Dokumnetklassen Manus känner inte igen klassalternativet \CurrentOption.}{}}
+\DeclareOption*{\ClassError{manus}{Dokumentklassen Manus känner inte igen klassalternativet \CurrentOption.}{}}
 
 % Tolka givna alternativ.
 \ProcessOptions
@@ -82,7 +88,7 @@
 \newlength{\manus@indkant} % Kantbredd för indikatorer (subspel).
 \newlength{\manus@randsep} % Avstånd mellan ränder för subspelsindikation.
 \newlength{\manus@randbredd} % Bredd på ränder för subspelsindikation.
-\newlength{\manus@kuplettmellanrum} % Mellanrum före och efter kupletter.
+\newlength{\manus@musikmellanrum} % Mellanrum före och efter musik.
 
 % Sätt några defaultvärden.
 \setlength{\manus@numbredd}{3em}
@@ -94,7 +100,7 @@
 \setlength{\manus@indkant}{2pt}
 \setlength{\manus@randsep}{10pt}
 \setlength{\manus@randbredd}{5pt}
-\setlength{\manus@kuplettmellanrum}{2em}
+\setlength{\manus@musikmellanrum}{2em}
 %
 \setlength{\manus@indskift}{-0.5\manus@radavstand}
 
@@ -279,6 +285,20 @@
 		\ifthenelse{\equal{#5}{true}}{\stepcounter{#1@stat@agerande}}{}%
 		\manus@raknastats%
 	}%
+	% Skapa kommando för att skriva ut sång från karaktären.
+	\expandafter\newcommand\csname#1sj\endcsname[1]{%
+		\manus@skrivrad{\csname#1@namn\endcsname}%
+			{{\sjungfont ##1}}{#3}{true}%
+		% Räkna raden till statistiken.
+		\ifthenelse{\equal{#5}{true}}{%
+		    \stepcounter{#1@stat@sjungande}%
+		}{}%
+		\manus@raknastats%
+	}%
+	% Skapa kommando för att få namnet på karaktären
+	\expandafter\newrobustcmd\csname#1namn\endcsname[1][]{%
+	    \csname#1@namn\endcsname##1\xspace%
+	}%
 	% Lägg till indikator.
 	\ifthenelse{\equal{#5}{true}}{%
 		% Skapa en ny boolean för att hålla reda på karaktärens status.
@@ -286,8 +306,10 @@
 		\setboolean{#1@in}{false}%
 		\newboolean{#1@sub}%
 		\setboolean{#1@sub}{false}%
+		\newboolean{#1@enabled}%
+		\setboolean{#1@enabled}{true}%
 		% Lägg till indikator.
-		\manus@nyind{#1@in}{#1@sub}{#4}%
+		\manus@nyind{#1@in}{#1@sub}{#4}{#1@enabled}%
 		% Lägg till statistik.
 		\manus@nystat{#1}{#2}{#1@in}{#1@sub}{#3}%
 		% Skapa kommandon för att kalla in/ut karaktären.
@@ -303,6 +325,11 @@
 			\setboolean{#1@sub}{true}}%
 		\expandafter\newcommand\csname#1subslut\endcsname{%
 			\setboolean{#1@sub}{false}}%
+		% Skapa kommandon för att stänga av/på indikatorn.
+		\expandafter\newcommand\csname aktivera#1\endcsname{%
+		    \setboolean{#1@enabled}{true}}%
+		\expandafter\newcommand\csname deaktivera#1\endcsname{%
+		    \setboolean{#1@enabled}{false}}%
 	}{}%
 	% Räkna ut största namnbredd.
 	\savebox{\manus@namn@tmpbox}{#2\hspace{\manus@kolavstand}}%
@@ -315,8 +342,12 @@
 %
 % Ändra utskriftsnamnet för karaktären med det angivna kommandonamnet till det
 % angivna, nya, utskriftsnamnet.
-\newcommand\namnbyte[2]{%
-	\expandafter\gdef\csname#1@namn\endcsname{#2}%
+\newcommand\namnbyte[3][]{%
+	\expandafter\gdef\csname#2@namn\endcsname{#3}%
+	% Skapa kommando för att få namnet på karaktären
+	\expandafter\renewcommand\csname#2namn\endcsname[1][]{%
+	    \ifstrempty{#1}{#3}{#1}##1\xspace%
+	}%
 }
 
 
@@ -410,6 +441,8 @@
 	\setlength{\manus@aktlangd}{0pt}%
 	% Sammanställ rekvisitainformation.
 	\manus@rekv@nyakt%
+	% Sammanställ ljudinformation.
+	\manus@ljud@nyakt%
 	% Påbörja den nya akten.
 	\newpage%
 	\stepcounter{akt}%
@@ -476,12 +509,12 @@
 	\Append#1\To\manus@sammanfattningar% sammanfattning
 }
 
-%% \manus@sfnykuplett{namn}{beskrivning}{deltagare}
+%% \manus@sfnymusik{namn}{beskrivning}{deltagare}
 %
-% Lägg till en kuplettsammanfattning i sammanfattningslistan.
-\newcommand\manus@sfnykuplett[4]{%
-	% Spara sammanfattning av typ "kuplett"
-	\Append\kuplett\To\manus@sammanfattningar%
+% Lägg till en musiksammanfattning i sammanfattningslistan.
+\newcommand\manus@sfnymusik[4]{%
+	% Spara sammanfattning av typ "musik"
+	\Append\musik\To\manus@sammanfattningar%
 	\edef\tmp{\themanus@radnummer}% Expandera radnummer.
 	\expandafter\Append\tmp\To\manus@sammanfattningar%
 	\expandafter\Append#1\To\manus@sammanfattningar% titel
@@ -496,12 +529,11 @@
 \newcommand\sammanfattningslista{%
 	% Ny sektion på ny sida för sammanfattningarna.
 	\newpage%
+	\begin{adjustwidth}{3em}{3em}%
 	\section*{Sammanfattning}%
 	\addcontentsline{toc}{section}{Sammanfattning}%
 	% Skiv ut alla sammanfattningar.
 	\begingroup%
-	\newdimen\mptmp@len%
-	\mptmp@len=\dimexpr\textwidth-3em\relax%
 	\let\newline\\%
 	\def\\##1{##1}%
 	\def\scen\\##1\\##2\\##3{%
@@ -509,48 +541,49 @@
 		\hspace{-3em}\hbox to 2em{\hfil##1}\hspace{1em}%
 		\textbf{##2} \ ##3%
 	}%
-	\def\kuplett\\##1\\##2\\##3\\##4\\##5{%
+	\def\musik\\##1\\##2\\##3\\##4\\##5{%
 		\par\vspace{1em}%
 		\hspace{-3em}\hbox to 2em{\hfil##1}\hspace{1em}%
-		\textcolor{kuplettfarg}{\MakeUppercase{##2}}\par%
+		\textcolor{musikfarg}{\MakeUppercase{##2}}\par%
 		\emph{##4}\par%
 		##3%
 	}%
 	\manus@sammanfattningar%
 	\endgroup%
+	\end{adjustwidth}
 }
 
 
 
-%%%%%%%%%% Kupletter %%%%%%%%%%
+%%%%%%%%%% Musik %%%%%%%%%%
 
-% Bestäm färgen på kupletter beroende på om klassalternativet "svartvit"
+% Bestäm färgen på musik beroende på om klassalternativet "svartvit"
 % har angetts eller inte.
 \ifthenelse{\boolean{svartvit}}
-	{\definecolor{kuplettfarg}{rgb}{0,0,0}}
-	{\definecolor{kuplettfarg}{rgb}{0.8,0.51,0}}
+	{\definecolor{musikfarg}{rgb}{0,0,0}}
+	{\definecolor{musikfarg}{rgb}{0.8,0.51,0}}
 
-%% \begin{kuplett}
+%% \begin{musik}
 %
-% En kuplettmiljö.
+% En musikmiljö.
 %
-%% \titel{titel}             : Ange titeln på denna kuplett.
-%% \beskrivning{beskrivning} : Ange beskrivning för denna kuplett.
-%% \melodi{melodi}           : Ange melodiförslag för denna kuplett.
+%% \titel{titel}             : Ange titeln på denna musik.
+%% \beskrivning{beskrivning} : Ange beskrivning för denna musik.
+%% \melodi{melodi}           : Ange melodiförslag för denna musik.
 %
-%% \end{kuplett}
-\newenvironment{kuplett}[1][]{%
+%% \end{musik}
+\newenvironment{musik}[1][]{%
 	#1%
-	% Deklarera kommandon för kuplettinformation.
+	% Deklarera kommandon för musikinformation.
 	\newcommand{\titel}[1]{\def\ktitel{##1}}%
-	\newcommand{\@deltagare}[1]{\xdef\kdeltagare{##1}}%
+	\newcommand{\deltagare}[1]{\xdef\kdeltagare{##1}}%
 	\newcommand{\beskrivning}[1]{%
 		\def\kbeskrivning{##1}%
 	}%
 	\newcommand{\melodi}[1]{\def\kmelodi{##1}}%
 	% Sätt alla värden till tomrum.
 	\titel{}%
-	\@deltagare{}%
+	\deltagare{}%
 	\beskrivning{}%
 	\melodi{}%
 	% Om deltagare inte specificeras antags alla som är på scen delta.
@@ -558,95 +591,101 @@
 	\def\\##1\\##2\\##3\\##4\\##5{% \\{namn}\\{utskriftnamn}\\{ind}\\{sub}\\{färg}
 		\ifthenelse{\boolean{##3}}{%
 			\ifx\kdeltagare\empty%
-				\@deltagare{\csname##1@namn\endcsname}%
+				\deltagare{\csname##1@namn\endcsname}%
 			\else%
-				\@deltagare{\kdeltagare, \csname##1@namn\endcsname}%
+				\deltagare{\kdeltagare, \csname##1@namn\endcsname}%
 			\fi%
 		}{}%
 	}%
 	\manus@statistik%
 	\endgroup%
 }{%
-	% Skriv ut kupletten.
-	\mellanrum{\manus@kuplettmellanrum}%
+	% Skriv ut musiken.
+	\mellanrum{\manus@musikmellanrum}%
 	\enkelrad[true]{\vbox{%
 		\hbox to \manus@textbredd{%
-			\parbox{\manus@textbredd}{\textbf{\textcolor{kuplettfarg}{%
-				\Large Kuplett: \MakeUppercase{\ktitel}%
+			\parbox{\manus@textbredd}{\textbf{\textcolor{musikfarg}{%
+				\Large MUSIK: \MakeUppercase{\ktitel}%
 			}}}%
 		}%
 		\vspace{5pt}%
-		\hbox to \manus@textbredd{\parbox{\manus@textbredd}{%
-			Melodiförslag: \emph{\kmelodi}%
-		}}%
-		\hbox to \manus@textbredd{\parbox{\manus@textbredd}{%
-			\texttt{Melodi:}%
-		}}%
-		\hbox to \manus@textbredd{\parbox{\manus@textbredd}{%
-			Deltagare: \emph{\kdeltagare}%
-		}}%
-		\hbox to \manus@textbredd{\parbox{\manus@textbredd}{%
-			Beskrivning: \emph{\kbeskrivning}
-		}}%
+		\ifx\kmelody\empty\else%
+			\hbox to \manus@textbredd{\parbox{\manus@textbredd}{%
+				Melodiförslag: \emph{\kmelodi}%
+			}}%
+			\hbox to \manus@textbredd{\parbox{\manus@textbredd}{%
+				\texttt{Melodi:}%
+			}}%
+		\fi%
+		\ifx\kdeltagare\empty\else%
+			\hbox to \manus@textbredd{\parbox{\manus@textbredd}{%
+				Deltagare: \emph{\kdeltagare}%
+			}}%
+		\fi%
+		\ifx\kbeskrivning\empty%
+			\hbox to \manus@textbredd{\parbox{\manus@textbredd}{%
+				Beskrivning: \emph{\kbeskrivning}
+			}}%
+		\fi%
 	}}%
-	\mellanrum{\manus@kuplettmellanrum}%
-	% Lägg till kupletten i innehållsförteckningen
+	\mellanrum{\manus@musikmellanrum}%
+	% Lägg till musiken i innehållsförteckningen
 	\addcontentsline{toc}{subsubsection}{%
-		\textcolor{kuplettfarg}{\MakeUppercase{\ktitel}}\\%
+		\textcolor{musikfarg}{\MakeUppercase{\ktitel}}\\%
 		Deltagare: \emph{\kdeltagare}%
 	}%
-	% Lägg till kuplettbeskrivning i sammanfattningslistan.
-	\manus@sfnykuplett{\ktitel}{\kbeskrivning}{\kdeltagare}{\kmelodi}%
-	% Räkna kuplettstatistik.
-	\manus@raknakuplett%
+	% Lägg till musikbeskrivning i sammanfattningslistan.
+	\manus@sfnymusik{\ktitel}{\kbeskrivning}{\kdeltagare}{\kmelodi}%
+	% Räkna musikstatistik.
+	\manus@raknamusik%
 }
 
-%% \kuplettlista
+%% \musiklista
 %
-% Kuplettlistan skriver ut en lista med kupletter. Egentligen bara en
+% musiklistan skriver ut en lista med Musik. Egentligen bara en
 % variant av sammanfattningslistan.
-\newcommand\kuplettlista{%
+\newcommand\musiklista{%
 	% Ny sektion på ny sida för listan.
 	\newpage%
-	\section*{Kupletter}%
-	\addcontentsline{toc}{section}{Kupletter}%
-	% Skiv ut alla kupletter.
+	\begin{adjustwidth}{3em}{3em}%
+	\section*{Musik}%
+	\addcontentsline{toc}{section}{Musik}%
+	% Skiv ut all musik.
 	\begingroup%
-	\newdimen\mptmp@len%
-	\mptmp@len=\dimexpr\textwidth-3em%
 	\let\newline\\%
 	\def\\##1{##1}%
 	\def\scen\\##1\\##2\\##3{}%
-	\def\kuplett\\##1\\##2\\##3\\##4\\##5{%
+	\def\musik\\##1\\##2\\##3\\##4\\##5{%
 			\par\vspace{1em}%
 			\hspace{-3em}\hbox to 2em{\hfil##1}\hspace{1em}%
-			\textcolor{kuplettfarg}{\MakeUppercase{##2}}\par%
+			\textcolor{musikfarg}{\MakeUppercase{##2}}\par%
 			\emph{##4}\par%
 %            \texttt{##5}\par%
 			##3%
 	}%
 	\manus@sammanfattningar%
 	\endgroup%
+	\end{adjustwidth}
 }
 
 %% \melodilista
 %
-% Kuplettlistan skriver ut en lista med kupletter. Egentligen bara en
+% musiklistan skriver ut en lista med Musik. Egentligen bara en
 % variant av sammanfattningslistan.
 \newcommand\melodilista{%
     % Ny sektion på ny sida för listan.
 	\newpage%
 	\section*{Melodiförslag}%
 	\addcontentsline{toc}{section}{Melodiförslag}%
-	% Skiv ut alla kupletter.
+	% Skiv ut alla Musik.
 	\begingroup%
 	\let\newline\\%
 	\def\\##1{##1}%
 	\def\scen\\##1\\##2\\##3{}%
-	\def\kuplett\\##1\\##2\\##3\\##4\\##5{%
+	\def\musik\\##1\\##2\\##3\\##4\\##5{%
 			\par\vspace{1em}%
 			\hspace{-3em}\hbox to 2em{\hfil##1}\hspace{1em}%
-			\textcolor{kuplettfarg}{\MakeUppercase{##2}}\par%
+			\textcolor{musikfarg}{\MakeUppercase{##2}}\par%
             \texttt{##5}\par%
 	}%
 	\manus@sammanfattningar%
@@ -664,13 +703,14 @@
 \def\manus@rekvlista{}
 
 % Boolean som håller koll på om vi för tillfället hanterar berättarrekvisita.
-\newbool{berattarrekv}
+\newbool{scenanvrekv}
+
 
 %% \manus@addrekv{rekvisita}
 %
 % Lägg till rekvisita i vår rekvisitalista.
 \newcommand\manus@addrekv[1]{\begingroup%
-	\def\nummer{\ifbool{berattarrekv}{}{}\themanus@radnummer}%
+	\def\nummer{\ifbool{scenanvrekv}{}{}\themanus@radnummer}%
 	\newbool{iteminlist}%
 	\def\newlist{}%
 	\let\rekv@sep\relax%
@@ -723,6 +763,108 @@
 	\box\manus@rekvbox%
 }
 
+%%%%%%%%%% Ljudeffekter %%%%%%%%%%
+
+% Figur för att markera ljud
+\newcommand{\gklav}[1][]{%
+    \raisebox{-8pt}[0pt][0pt]{%
+        \begin{tikzpicture}[x=0.6ex,y=0.5ex,#1]%
+            \draw[thick] (1.7,5) 
+                .. controls +(0,0.5) and +(-0.5,0) .. (2.3,5.9) 
+                .. controls +(0.5,0) and +(0,0.5) .. (3,5)
+                .. controls +(0,-0.5) and +(0.5,0) .. (2,4)
+                .. controls +(-0.5,0) and +(0,-0.5) .. (1,5) 
+                .. controls +(0,0.8) and +(-0.4,-0.5) .. (2,7)
+                .. controls +(0.8,1) and +(0.4,0) .. (2,10) 
+                .. controls +(-1,0) and +(0.7,0.7) .. (2.5,2) 
+                .. controls +(-0.3,-0.3) and +(0.3,-0.3) .. (1.5,2)
+                .. controls +(-0.3,0.3) and +(-0.3,-0.3) .. (1.5,3)
+            ;
+            \draw[fill] (1.5,3) ++(0.1,-0.3) circle (0.3) ;
+        \end{tikzpicture}%
+    }%
+}
+\newcommand{\note}[1][]{%
+\raisebox{-2pt}{\begin{tikzpicture}[x=1.3ex,y=1.3ex,#1]%
+\draw[thick,fill] (0,0) -- ++(0,1.5) 
+    .. controls +(0.2,-0.1) and +(0.2,0.3) .. +(0.4,-1) 
+    .. controls +(0.2,0.3) and +(0.2,-0.1) .. +(0,-0.2) ;
+\draw[fill,xscale=1.2] (-0.2,0) circle(0.2) ;
+\path (-0.7,-0.4) rectangle ++(1.5,2) ;
+\end{tikzpicture}}%
+}
+
+
+% En liten låda för ljud
+\newcommand\ljudbox[1]{\note #1\note}
+
+% Tillfällig förstadefinition av \ljud.
+\newcommand\ljud[2][]{}
+
+% Definition som innehåller ljudlistan.
+\def\manus@ljudlista{}
+
+% Boolean som håller koll på om vi för tillfället hanterar scenanvisningsljud.
+\newbool{scenanvljud}
+
+%% \manus@addljud{Ljudeffekt}
+%
+% Lägg till i vår ljudeffektslista.
+\newcommand\manus@addljud[1]{\begingroup%
+	\def\nummer{\ifbool{scenanvljud}{}{}\themanus@radnummer}%
+	\newbool{iteminlist}%
+	\def\newlist{}%
+	\let\ljud@sep\relax%
+	\def\split##1\ljud@sep##2\@nil{%
+		\ifstrequal{#1}{##1}{%
+			\booltrue{iteminlist}%
+			\listeadd\newlist{##1\ljud@sep##2, \nummer}%
+		}{%
+			\listeadd\newlist{##1\ljud@sep##2}%
+		}%
+	}%
+	\renewcommand*\do[1]{\split##1\@nil}%
+	\dolistloop\manus@ljudlista%
+	\global\let\manus@ljudlista\newlist%
+	\ifbool{iteminlist}{}{%
+		\listxadd\manus@ljudlista{#1\ljud@sep\nummer}%
+	}%
+\endgroup}
+
+% En låda som sparar ljudsakregistret som byggs upp med akterna.
+\newbox\manus@ljudbox
+
+% För in ljudlistan i sakregistret och nollställ listan.
+\newcommand\manus@ljud@nyakt{%
+	\setbox\manus@ljudbox=\vbox{%
+		\box\manus@ljudbox%
+		\ifx\manus@ljudlista\empty\else%
+			\vspace{2em}%
+			\hbox{\large\bf\theakt}%
+			\vspace{5pt}%
+			\begingroup%
+			\def\ljud@sep{\hspace{1em}\it}%
+			\renewcommand*\do[1]{\hbox{\hspace{2em}##1}}%
+			\dolistloop\manus@ljudlista%
+			\endgroup%
+		\fi%
+	}%
+	\gdef\manus@ljudlista{}%
+}
+
+
+%% \ljudlista
+%
+% Skriv ut en fin ljudlista.
+\newcommand\ljudlista{%
+	\newpage%
+	\ifx\manus@ljudlista\empty\else\manus@ljud@nyakt\fi%
+	\section*{Ljudeffekter}%
+	\addcontentsline{toc}{section}{Ljudeffekter}%
+	\textbf{Sorterad i ordningen de dyker upp.}\par
+	\box\manus@ljudbox%
+}
+
 
 
 %%%%%%%%%% Diverse kommandon %%%%%%%%%%
@@ -731,14 +873,16 @@
 	\manus@skrivrad{* * *}{\bfseries{\textit{#1}}}{black}{true}%
 	\manus@raknastats%
 }
-\newcommand\berattare[1]{\enkelrad[true]{%
+
+\newcommand\scenanv[1]{\enkelrad[true]{%
 	\tt%
 	\fontdimen2\font=0.5em%
 	\fontdimen3\font=0.2em%
 	\fontdimen4\font=0.2em%
 	\fontdimen7\font=0.1em%
 	\hyphenchar\font=`\-%
-	\booltrue{berattarrekv}%
+	\booltrue{scenanvrekv}%
+	\booltrue{scenanvljud}%
 	#1%
 }}
 \newcommand{\citat}[1]{``#1''}
@@ -780,16 +924,18 @@
 % Skapa en ny lista med indikatorinformation.
 \NewList\manus@indikatorer
 
-%% \manus@nyind{ind}{sub}{färg}
+%% \manus@nyind{ind}{sub}{färg}{enable}
 %
 % Lägg till en ny indikator för de angivna booleanerna och den anvigna
 % färgen. ind skall vara namnet på den boolean som styr närvaro, sub skall
-% vara namnet på den boolean som styr subspelsindikatorn.
-\newcommand\manus@nyind[3]{%
+% vara namnet på den boolean som styr subspelsindikatorn, och enable skall
+% vara namnet på den boolean som styr huruvida indikatorn används.
+\newcommand\manus@nyind[4]{%
 	% Spara parametrarna i indikatorlistan.
 	\Append#1\To\manus@indikatorer%
 	\Append#2\To\manus@indikatorer%
 	\Append#3\To\manus@indikatorer%
+	\Append#4\To\manus@indikatorer%
 	% Räkna indikatorer för statistik.
 	\stepcounter{manus@indikatorer}%
 }
@@ -848,10 +994,12 @@
 	\manus@raknarander%
 	% Rita ut indikatorer.
 	\begingroup%
-	\def\\##1\\##2\\##3{%
-		\ifthenelse{\boolean{##1}}%
-			{\manus@ritaind{##3}{##2}}% På scen.
-			{\manus@ritaind{white}{false}}% Av scen.
+	\def\\##1\\##2\\##3\\##4{%
+	    \ifthenelse{\boolean{##4}}{%
+    		\ifthenelse{\boolean{##1}}% enabled
+    			{\manus@ritaind{##3}{##2}}% På scen.
+    			{\manus@ritaind{white}{false}}% Av scen.
+    		}{}% disabled
 	}%
 	\manus@indikatorer%
 	\endgroup%
@@ -877,13 +1025,14 @@
 	\Append#5\To\manus@statistik%
 	% Skapa räknare för statistik.
 	\newcounter{#1@stat@repliker}%
+	\newcounter{#1@stat@sjungande}%
 	\newcounter{#1@stat@agerande}%
-	\newcounter{#1@stat@kupletter}%
+	\newcounter{#1@stat@Musik}%
 	\newcounter{#1@stat@narvaro}%
 	\newcounter{#1@stat@subspel}%
 	% Skapa längder för statistik.
 	\expandafter\newdimen\csname#1@stat@repliker\endcsname%
-	\expandafter\newdimen\csname#1@stat@kupletter\endcsname%
+	\expandafter\newdimen\csname#1@stat@Musik\endcsname%
 	\expandafter\newdimen\csname#1@stat@narvaro\endcsname%
 	\expandafter\newdimen\csname#1@stat@subspel\endcsname%
 }
@@ -912,16 +1061,16 @@
 	\endgroup%
 }
 
-%% \manus@raknakuplett
+%% \manus@raknamusik
 %
-% Räkna kuplettstatistik.
-\newcommand\manus@raknakuplett{%
+% Räkna musikstatistik.
+\newcommand\manus@raknamusik{%
 	\begingroup%
 	\newcount\tmp@count%
 	\tmp@count=0
 	\def\\##1\\##2\\##3\\##4\\##5{% \\{k.namn}\\{u.namn}\\{ind}\\{sub}\\{färg}
 		\ifthenelse{\boolean{##3}}{%
-			\stepcounter{##1@stat@kupletter}%
+			\stepcounter{##1@stat@Musik}%
 			\tmp@count=\numexpr\tmp@count+1%
 		}{}%
 	}%
@@ -930,7 +1079,7 @@
 	\def\\##1\\##2\\##3\\##4\\##5{% \\{k.namn}\\{u.namn}\\{ind}\\{sub}\\{färg}
 		\ifthenelse{\boolean{##3}}{%
 			\global\advance%
-				\csname##1@stat@kupletter\endcsname%
+				\csname##1@stat@Musik\endcsname%
 				by \pgfmathresult pt%
 		}{}%
 	}%
@@ -997,10 +1146,11 @@
 		\hspace{1.2\manus@namnbredd}%
 		\hspace{10pt}%
 		\kol@titel{Repliker}{$\approx$cm}%
+		\kol@titel{Sång}{}%
 		\kol@titel{Agerande}{}%
 		\kol@titel{Total}{}%
 		\hspace{10pt}%
-		\kol@titel{Kupletter}{balanserat}%
+		\kol@titel{Sångnummer}{balanserat}%
 		\hspace{10pt}%
 		\kol@titel{Närvaro}{$\approx$cm}%
 		\kol@titel{Subspel}{$\approx$cm}%
@@ -1024,6 +1174,9 @@
 				{\number\value{##1@stat@repliker}}%
 				{\langd@cm{##1@stat@repliker}}%
 			\stat@kol%
+				{\number\value{##1@stat@sjungande}}%
+				{}%
+			\stat@kol%
 				{\number\value{##1@stat@agerande}}%
 				{}%
 			\stat@kol
@@ -1033,9 +1186,10 @@
 				{}%
 			\vline%
 			\stat@kol%
-				{\number\value{##1@stat@kupletter}}%
+				{\number\value{##1@stat@Musik}}%
 				{\pgfmathprintnumber[precision=2]%
-					{\strip@pt\csname##1@stat@kupletter\endcsname}}%
+				    {\strip@pt\csname##1@stat@Musik\endcsname}
+				}%
 			\vline%
 			\stat@kol%
 				{\number\value{##1@stat@narvaro}}%
@@ -1092,10 +1246,10 @@
 \newcommand\manus@graf@repliker[1]{\value{#1@stat@repliker}}
 \newcommand\manus@graf@total[1]{%
 	\numexpr\value{#1@stat@repliker}+\value{#1@stat@agerande}\relax}
-\newcommand\manus@graf@kupletter[1]{\value{#1@stat@kupletter}}
+\newcommand\manus@graf@Musik[1]{\value{#1@stat@Musik}}
 
 \newcommand\manus@graf@repliker@l[1]{\csname#1@stat@repliker\endcsname}
-\newcommand\manus@graf@kupletter@l[1]{\csname#1@stat@kupletter\endcsname}
+\newcommand\manus@graf@Musik@l[1]{\csname#1@stat@Musik\endcsname}
 \newcommand\manus@graf@narvaro@l[1]{\csname#1@stat@narvaro\endcsname}
 \newcommand\manus@graf@subspel@l[1]{\csname#1@stat@subspel\endcsname}
 \newcommand\manus@graf@total@l[1]{%
@@ -1187,8 +1341,8 @@
 	\manus@graf@num{Repliker}{\manus@graf@repliker}
 	\manus@graf@num{Repliker+Agerande}{\manus@graf@total}
 	\par\vspace{8pt}
-	\manus@graf@num{Kupletter}{\manus@graf@kupletter}
-	\manus@graf@dim{Kupletter (bal.)}{\manus@graf@kupletter@l}
+	\manus@graf@num{Musik}{\manus@graf@Musik}
+	\manus@graf@dim{Musik (bal.)}{\manus@graf@Musik@l}
 	\par\vspace{8pt}
 	\manus@graf@dim{Repliker (cm)}{\manus@graf@repliker@l}
 	\manus@graf@dim{Närvaro (cm)}{\manus@graf@narvaro@l}
@@ -1229,12 +1383,16 @@
 	\stepcounter{manus@radnummer}%
 	% Definiera först rekvisita utan indexering.
 	\renewcommand\rekv[2][]{\fbox{##2}}%
+	% Definiera först ljud utan indexering.
+	\renewcommand\ljud[2][]{\ljudbox{##2}}%
 	% Spara tillfälligt undan innehållet i en låda.
 	\savebox{\manus@innehall@tmpbox}{%
 		\parbox{\manus@textbredd}{%
 			\manus@hjalpavstand#2\manus@hjalpavstand}}%
 	% Definiera sedan rekvisitan med indexering.
 	\renewcommand\rekv[2][]{\fbox{##2}\ifstrempty{##1}{\manus@addrekv{##2}}{\manus@addrekv{##1}}}%
+	% Definiera sedan ljud med indexering.
+	\renewcommand\ljud[2][]{\ljudbox{##2}\ifstrempty{##1}{\manus@addljud{##2}}{\manus@addljud{##1}}}%
 	% Räkna ut längder från innehållsstorleken.
 	\setlength{\manus@radstorlek}{\ht\manus@innehall@tmpbox}%
 	\addtolength{\manus@radstorlek}{\dp\manus@innehall@tmpbox}%
