@@ -1074,7 +1074,7 @@
 		\ifthenelse{\equal{\manus@aktivgrupp}{#1}\or\equal{#1}{}}{}{%
 			\color{\csname manus@grupp#1@farg\endcsname}%
 			\hspace{\dimexpr\manus@gruppkant-\manus@gruppbredd}%
-			\rule{\manus@gruppbredd-2\manus@gruppkant}{\manus@indhojd}%
+			\rule{\dimexpr\manus@gruppbredd-2\manus@gruppkant}{\manus@indhojd}%
 			\hspace{\manus@gruppkant}%
 		}%
 	}%
