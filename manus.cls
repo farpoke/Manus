@@ -31,8 +31,9 @@
 \RequirePackage{xspace}
 \RequirePackage[strict]{changepage}
 
-\RequirePackage{fontspec}
-\newfontfamily\sjungfont{Cinzel-Bold}
+%\RequirePackage{fontspec}
+%\newfontfamily\sjungfont{Cinzel-Bold}
+\newcommand\sjungfont{\sc}
 
 
 % Lite klassalternativ...
@@ -59,6 +60,9 @@
 
 % Ett klassalternativ för att visa källkodsradnummer.
 \manus@alternativ{kallrad}
+
+% Ett klassalternativ för att visa grupp-indikatorn.
+\manus@alternativ{grupper}
 
 % Hantera okända klassalternativ.
 \DeclareOption*{\ClassError{manus}{Dokumentklassen Manus känner inte igen klassalternativet \CurrentOption.}{}}
@@ -89,11 +93,14 @@
 \newlength{\manus@randsep} % Avstånd mellan ränder för subspelsindikation.
 \newlength{\manus@randbredd} % Bredd på ränder för subspelsindikation.
 \newlength{\manus@musikmellanrum} % Mellanrum före och efter musik.
+\newlength{\manus@gruppbredd} % Bredd på grupp-indikatorn.
+\newlength{\manus@gruppmellanrum} % Mellanrum innan grupp-indikatorn.
+\newlength{\manus@gruppkant} % Kantbredd på grupp-indikatorn.
 
 % Sätt några defaultvärden.
 \setlength{\manus@numbredd}{3em}
 \setlength{\manus@namnbredd}{0pt} % Denna längd räknas om senare.
-\setlength{\manus@indbredd}{10pt}
+\setlength{\manus@indbredd}{5pt}
 \setlength{\manus@radavstand}{5pt}
 \setlength{\manus@kolavstand}{1em}
 \setlength{\manus@stat@kolbredd}{3.5em}
@@ -101,6 +108,9 @@
 \setlength{\manus@randsep}{10pt}
 \setlength{\manus@randbredd}{5pt}
 \setlength{\manus@musikmellanrum}{2em}
+\setlength{\manus@gruppbredd}{5pt}
+\setlength{\manus@gruppmellanrum}{5pt}
+\setlength{\manus@gruppkant}{1.5pt}
 %
 \setlength{\manus@indskift}{-0.5\manus@radavstand}
 
@@ -115,6 +125,10 @@
 	\global\advance\manus@textbredd by -\manus@namnbredd%
 	\global\advance\manus@textbredd by -\manus@kolavstand%
 	\global\advance\manus@textbredd by -\tmp@dimen%
+	\ifthenelse{\boolean{grupper}}{%
+		\global\advance\manus@textbredd by -\manus@gruppmellanrum%
+		\global\advance\manus@textbredd by -\manus@gruppbredd%
+	}{}%
 	\endgroup%
 }
 
@@ -123,6 +137,14 @@
 % Ändra bredden på indikatorerna.
 \newcommand\indikatorbredd[1]{%
 	\setlength{\manus@indbredd}{#1}%
+	\manus@beraknabredd%
+}
+
+%% gruppbredd{bredd}
+%
+% Ändra bredden på indikatorerna.
+\newcommand\gruppbredd[1]{%
+	\setlength{\manus@gruppbredd}{#1}%
 	\manus@beraknabredd%
 }
 
@@ -269,7 +291,7 @@
 	\expandafter\gdef\csname#1@namn\endcsname{#2}%
 	% Skapa kommando för att skriva ut en replik från karaktären.
 	\expandafter\newcommand\csname#1\endcsname[1]{%
-		\manus@skrivrad{\csname#1@namn\endcsname}{\bfseries{##1}}{#3}{true}%
+		\manus@skrivrad{\csname#1@namn\endcsname}{\bfseries{##1}}{#3}{true}{\csname#1@grupp\endcsname}%
 		% Räkna raden till statistiken.
 		\ifthenelse{\equal{#5}{true}}{%
 			\stepcounter{#1@stat@repliker}%
@@ -280,7 +302,7 @@
 	% Skapa kommando för att skriva ut agerande från karaktären.
 	\expandafter\newcommand\csname#1gr\endcsname[1]{%
 		\manus@skrivrad{\tiny\csname#1@namn\endcsname}%
-			{\bfseries{\textit{##1}}}{#3}{true}%
+			{\bfseries{\textit{##1}}}{#3}{true}{\csname#1@grupp\endcsname}%
 		% Räkna raden till statistiken.
 		\ifthenelse{\equal{#5}{true}}{\stepcounter{#1@stat@agerande}}{}%
 		\manus@raknastats%
@@ -288,7 +310,7 @@
 	% Skapa kommando för att skriva ut sång från karaktären.
 	\expandafter\newcommand\csname#1sj\endcsname[1]{%
 		\manus@skrivrad{\csname#1@namn\endcsname}%
-			{{\sjungfont ##1}}{#3}{true}%
+			{{\sjungfont ##1}}{#3}{true}{\csname#1@grupp\endcsname}%
 		% Räkna raden till statistiken.
 		\ifthenelse{\equal{#5}{true}}{%
 		    \stepcounter{#1@stat@sjungande}%
@@ -336,6 +358,10 @@
 	\ifdim\wd\manus@namn@tmpbox>\sl@maxnamewd%
 		\setlength{\sl@maxnamewd}{\wd\manus@namn@tmpbox}%
 	\fi%
+	% Skapa grupp-relaterade kommandon.
+	\expandafter\newcommand\csname#1grupp\endcsname[1]{%
+		\expandafter\xdef\csname #1@grupp\endcsname{##1}%
+	}%
 }
 
 %% \namnbyte{kommandonamn}{utskriftsnamn}
@@ -870,7 +896,7 @@
 %%%%%%%%%% Diverse kommandon %%%%%%%%%%
 
 \newcommand\allgr[1]{%
-	\manus@skrivrad{* * *}{\bfseries{\textit{#1}}}{black}{true}%
+	\manus@skrivrad{* * *}{\bfseries{\textit{#1}}}{black}{true}{}%
 	\manus@raknastats%
 }
 
@@ -888,7 +914,7 @@
 \newcommand{\citat}[1]{``#1''}
 \newcommand\comment[1]{}
 \newcommand\enkelrad[2][false]{%
-	\manus@skrivrad{}{#2}{black}{#1}%
+	\manus@skrivrad{}{#2}{black}{#1}{}%
 }
 \newcommand\gr[1]{[\textit{#1}]}
 \newcommand\rentext[1]{#1}
@@ -911,6 +937,7 @@
 		\raisebox{\manus@indskift}[0pt][0pt]{%
 			\hspace{\manus@kolavstand}%
 			\manus@ritainds%
+			\manus@ritagrupp{}%
 		}%
 	}%
 	\vspace{\manus@radavstand}% Extra radavstånd.
@@ -1003,6 +1030,53 @@
 	}%
 	\manus@indikatorer%
 	\endgroup%
+}
+
+
+
+%%%%%%%%%% Grupper %%%%%%%%%%
+
+\def\manus@aktivgrupp{}
+
+%% \nygrupp{namn}{färg}
+%
+%
+\newcommand\nygrupp[2]{%
+	\expandafter\gdef\csname manus@grupp#1@farg\endcsname{#2}%
+}
+
+%% \aktiveragrupp{namn}
+%
+%
+\newcommand\aktiveragrupp[1]{%
+	\ifthenelse{\equal{#1}{}}{%
+		\gdef\manus@aktivgrupp{}%
+	}{%
+		\ifcsname manus@grupp#1@farg\endcsname%
+			\xdef\manus@aktivgrupp{#1}%
+		\else%
+			\errmessage{Grupp #1 känns inte igen.}%
+		\fi%
+	}%
+}
+
+%% \manus@ritagrupp
+%
+%
+\newcommand\manus@ritagrupp[1]{%
+	\hspace{\manus@gruppmellanrum}%
+	\ifthenelse{\equal{\manus@aktivgrupp}{}}{%
+		\hspace{\manus@gruppbredd}%
+	}{%
+		\color{\csname manus@grupp\manus@aktivgrupp @farg\endcsname}%
+		\rule{\manus@gruppbredd}{\manus@indhojd}%
+		\ifthenelse{\equal{\manus@aktivgrupp}{#1}\or\equal{#1}{}}{}{%
+			\color{\csname manus@grupp#1@farg\endcsname}%
+			\hspace{\dimexpr\manus@gruppkant-\manus@gruppbredd}%
+			\rule{\manus@gruppbredd-2\manus@gruppkant}{\manus@indhojd}%
+			\hspace{\manus@gruppkant}%
+		}%
+	}%
 }
 
 
@@ -1372,10 +1446,10 @@
 % Hjälpdefinition för att hitta fel.
 \let\manus@radfel\relax
 
-%% sl@line{namn}{text}
+%% \manus@skrivrad{namn}{text}{färg}{indikator?}{grupp}
 %
 % Huvudkommandot som skriver ut en repliksrad.
-\newcommand\manus@skrivrad[4]{%
+\newcommand\manus@skrivrad[5]{%
 	% Testa felaktig användning av rader.
 	\manus@radfel%
 	\def\manus@radfel{\ClassError{manus}{En replikrad har försökts skrivas innuti en annan replikrad!}{}}%
@@ -1433,6 +1507,7 @@
 			\raisebox{\manus@indskift}[0pt][0pt]{%
 				\hspace{\manus@kolavstand}%
 				\manus@ritainds%
+				\ifthenelse{\boolean{grupper}}{\manus@ritagrupp{#5}}{}%
 			}%
 		}{}%
 	}%

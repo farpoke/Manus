@@ -1,4 +1,4 @@
-\documentclass[sammanfattningar,grafer,todo]{manus}
+\documentclass[sammanfattningar,grafer,todo,grupper]{manus}
 
 \usepackage[left=2cm,right=2cm,top=3cm,bottom=3cm]{geometry}
 \usepackage{lipsum}
@@ -9,6 +9,13 @@
 \nyroll[green!70!black]{Bar}
 \nyroll{Hoy}[SNITM] % Sir Not In This Manus
 \nyroll[blue]{Baz}[Baz!]
+
+\nygrupp{A}{orange}
+\nygrupp{B}{blue}
+
+\Foogrupp{A}
+\Bargrupp{A}
+\Bazgrupp{B}
 
 \fotfil{fotlista.txt}
 
@@ -32,13 +39,15 @@
 
 \scen{Har har har har...}{Någonting händer!}
 
-\berattare{Ljuset släcks och fram genom ridån kikar årets producent och årets matgruppschef. Dessa presenterar spexet och årets mat. Ivriga spexare serverar därefter den underbara förrätten. När publiken har ätit sig belåtna återkommer producenten och ropar in Bandet! Efter Bandet levererat ett makalöst aktintro stiger applåder från publiken.}
+\scenanv{Ljuset släcks och fram genom ridån kikar årets producent och årets matgruppschef. Dessa presenterar spexet och årets mat. Ivriga spexare serverar därefter den underbara förrätten. När publiken har ätit sig belåtna återkommer producenten och ropar in Bandet! Efter Bandet levererat ett makalöst aktintro stiger applåder från publiken.}
+
+\aktiveragrupp{A}
 
 \Fooin
 \Barin*
-\Foo{Bar}
+\Foo{\Foonamn är en del av grupp A}
 \Bar{Lorem ipsum...}
-\berattare{Something is said.}
+\scenanv{Something is said.}
 \Foogr{Aha! I've done it, using \rekv{this}!}
 \Foo{\"Byr}
 \Foout
@@ -46,14 +55,14 @@
 \Baz{Bar Fooy! and stuff. \gr{Lorem ipsum dolor sit amet.} And so on and so on... Foo. Bar!}
 \TODO{Vi borde fixa mer stuff här.}
 
-\begin{kuplett}[\Fooin*]
+\begin{musik}[\Fooin*]
 	\titel{Defaultdeltagare FTW}
-	\beskrivning{
+	\scenanv{
 		Här har vi förhoppningsvis korrekta deltagare per default.
 		Vi ska även ta och se om vi kan få korrekta radbrytningar...
 	}
 	\melodi{Dr Jones}
-\end{kuplett}
+\end{musik}
 
 \Foo{Test?}
 \Bazsub
@@ -68,6 +77,9 @@ Yay!}
 \Foo{Hello again!}
 \allgr{Alla gör något.}
 \Foo{\lipsum[1]\vspace{-\baselineskip}}
+
+\aktiveragrupp{}
+
 \Barin
 \indikatorbredd{1pt}
 \Baz{Haha! Jag ändrar \rekv{indikatorbredden}!}
@@ -78,30 +90,31 @@ Yay!}
 \namnbyte{Bar}{Not-Bar}
 \Bar{Haha! Jag ändrar namn!}
 
-\begin{kuplett}[\Foout*\Bazut*]
+\begin{musik}[\Foout*\Bazut*]
 	\titel{Ur balans}
 	\beskrivning{Så att vi får någon skillnad i balanserade kupletter.}
 	\fothar{Fotnot som tillhör \textsc{Ur Balans}.}
-\end{kuplett}
+\end{musik}
 
+\aktiveragrupp{B}
 \Bar{And... back again! \rekv{ABBA-skivor}}
 \Barut
 \Bazut
 
 \akt
-\berattare{Aktberättare :)}
+\scenanv{Aktberättare :)}
 
 \scen{What?}{How?}
 
-\berattare{Här nämner berättaren lite \rekv{rekvisita}.}
+\scenanv{Här nämner berättaren lite \rekv{rekvisita}.}
 \Foo{Hello again!}
 \Bazin
 \Baz{Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Ut purus elit, vestibulum ut, placerat ac, adipiscing vitae, felis. Curabitur dictum gravida mauris. Nam arcu libero, nonummy eget, consectetuer id, vulputate a, magna. Donec vehicula augue eu neque. Pel- lentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Mauris ut leo. Cras viverra metus rhoncus sem.}
 
-\begin{kuplett}
+\begin{musik}
 	\titel{En annan kuplett}
 	\beskrivning{Allmänt flumm.}
-\end{kuplett}
+\end{musik}
 
 \Baz{Säger någonting direkt igen efter en kuplett.}
 
@@ -113,7 +126,7 @@ Yay!}
 \Foo{Och säger något igen. \gr{Petar på \rekv{rekvisita}}}
 
 \rekvisitalista
-\kuplettlista
+\musiklista
 \sammanfattningslista
 \statistiktabell
 \todolista
