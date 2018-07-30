@@ -31,9 +31,9 @@
 \RequirePackage{xspace}
 \RequirePackage[strict]{changepage}
 
-%\RequirePackage{fontspec}
-%\newfontfamily\sjungfont{Cinzel-Bold}
-\newcommand\sjungfont{\sc}
+\RequirePackage{fontspec}
+\newfontfamily\sjungfont{Cinzel-Bold}
+%\newcommand\sjungfont{\sc}
 
 
 % Lite klassalternativ...
@@ -636,7 +636,7 @@
 			}}}%
 		}%
 		\vspace{5pt}%
-		\ifx\kmelody\empty\else%
+		\ifx\kmelodi\empty\else%
 			\hbox to \manus@textbredd{\parbox{\manus@textbredd}{%
 				Melodiförslag: \emph{\kmelodi}%
 			}}%
@@ -649,7 +649,7 @@
 				Deltagare: \emph{\kdeltagare}%
 			}}%
 		\fi%
-		\ifx\kbeskrivning\empty%
+		\ifx\kbeskrivning\empty\else%
 			\hbox to \manus@textbredd{\parbox{\manus@textbredd}{%
 				Beskrivning: \emph{\kbeskrivning}
 			}}%
