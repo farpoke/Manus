@@ -10,12 +10,18 @@
 \nyroll{Hoy}[SNITM] % Sir Not In This Manus
 \nyroll[blue]{Baz}[Baz!]
 
+%\deaktiveraBar
+\deaktiveraHoy
+
 \nygrupp{A}{orange}
 \nygrupp{B}{blue}
 
 \Foogrupp{A}
 %\Bargrupp{A}
 \Bazgrupp{B}
+
+\indikator{IndA}{magenta}
+\indikator{IndB}{cyan}
 
 \fotfil{fotlista.txt}
 
@@ -43,6 +49,8 @@
 
 \aktiveragrupp{A}
 
+\IndAin
+
 \Fooin
 \Barin*
 \Foo{\Foonamn är en del av grupp A}
@@ -55,6 +63,8 @@
 \Baz{Bar Fooy! and stuff. \gr{Lorem ipsum dolor sit amet.} And so on and so on... Foo. Bar!}
 \TODO{Vi borde fixa mer stuff här.}
 
+\IndBin
+
 \begin{musik}[\Fooin*]
 	\titel{Defaultdeltagare FTW}
 	\scenanv{
@@ -63,6 +73,8 @@
 	}
 	\melodi{Dr Jones}
 \end{musik}
+
+\IndAut
 
 \Foo{Test?}
 \Bazsub
@@ -95,6 +107,8 @@ Yay!}
 %	\beskrivning{Så att vi får någon skillnad i balanserade kupletter.}
 	\fothar{Fotnot som tillhör \textsc{Ur Balans}.}
 \end{musik}
+
+\IndBut
 
 \aktiveragrupp{B}
 \Bar{And... back again! \rekv{ABBA-skivor}}

@@ -118,13 +118,16 @@
 % Räkna ut lämplig bredd på repliksinnehåll.
 \newcommand\manus@beraknabredd{%
 	\begingroup%
-	\newdimen\tmp@dimen
-	\tmp@dimen=\value{manus@indikatorer}\manus@indbredd%
 	\global\manus@textbredd=\textwidth%
 	\global\advance\manus@textbredd by -\manus@numbredd%
 	\global\advance\manus@textbredd by -\manus@namnbredd%
 	\global\advance\manus@textbredd by -\manus@kolavstand%
-	\global\advance\manus@textbredd by -\tmp@dimen%
+	\def\\##1\\##2\\##3\\##4{%
+	    \ifthenelse{\boolean{##4}}{%
+				\global\advance\manus@textbredd by -\manus@indbredd% enabled
+    		}{}% disabled
+	}%
+   	\manus@indikatorer%
 	\ifthenelse{\boolean{grupper}}{%
 		\global\advance\manus@textbredd by -\manus@gruppmellanrum%
 		\global\advance\manus@textbredd by -\manus@gruppbredd%
@@ -349,9 +352,11 @@
 			\setboolean{#1@sub}{false}}%
 		% Skapa kommandon för att stänga av/på indikatorn.
 		\expandafter\newcommand\csname aktivera#1\endcsname{%
-		    \setboolean{#1@enabled}{true}}%
+		    \setboolean{#1@enabled}{true}%
+	    	\manus@beraknabredd}%
 		\expandafter\newcommand\csname deaktivera#1\endcsname{%
-		    \setboolean{#1@enabled}{false}}%
+		    \setboolean{#1@enabled}{false}%
+	    	\manus@beraknabredd}%
 	}{}%
 	% Räkna ut största namnbredd.
 	\savebox{\manus@namn@tmpbox}{#2\hspace{\manus@kolavstand}}%
@@ -951,6 +956,38 @@
 
 % Skapa en ny lista med indikatorinformation.
 \NewList\manus@indikatorer
+
+%% \indikator{namn}{färg}
+%
+% Skapa en ny indikator som om den vore en karaktär.
+\newcommand\indikator[2]{
+	% Skapa en ny boolean för att hålla reda på karaktärens status.
+	\newboolean{#1@in}%
+	\setboolean{#1@in}{false}%
+	\newboolean{#1@sub}%
+	\setboolean{#1@sub}{false}%
+	\newboolean{#1@enabled}%
+	\setboolean{#1@enabled}{true}%
+	% Lägg till indikator.
+	\manus@nyind{#1@in}{#1@sub}{#2}{#1@enabled}%
+	% Skapa kommandon för att kalla in/ut karaktären.
+	\expandafter\newcommand\csname#1in\endcsname{%
+		\setboolean{#1@in}{true}%
+		\setboolean{#1@sub}{false}}%
+	\expandafter\newcommand\csname#1ut\endcsname{%
+		\setboolean{#1@in}{false}}%
+	\expandafter\newcommand\csname#1sub\endcsname{%
+		\setboolean{#1@sub}{true}}%
+	\expandafter\newcommand\csname#1subslut\endcsname{%
+		\setboolean{#1@sub}{false}}%
+	% Skapa kommandon för att stänga av/på indikatorn.
+	\expandafter\newcommand\csname aktivera#1\endcsname{%
+	    \setboolean{#1@enabled}{true}%
+    	\manus@beraknabredd}%
+	\expandafter\newcommand\csname deaktivera#1\endcsname{%
+	    \setboolean{#1@enabled}{false}%
+    	\manus@beraknabredd}%
+}
 
 %% \manus@nyind{ind}{sub}{färg}{enable}
 %
