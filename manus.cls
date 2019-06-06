@@ -943,7 +943,7 @@
 		\raisebox{\manus@indskift}[0pt][0pt]{%
 			\hspace{\manus@kolavstand}%
 			\manus@ritainds%
-			\manus@ritagrupp{}%
+			\ifthenelse{\boolean{grupper}}{\manus@ritagrupp{}}{}%
 		}%
 	}%
 	\vspace{\manus@radavstand}% Extra radavstånd.
