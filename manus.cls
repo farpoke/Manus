@@ -1,5 +1,5 @@
-% Version 1&2: Cecilia Kjellman, cecilia.kjellman@gmail.com
-% Version 2: Anton Mårtensson, anton.v.martensson@gmail.com
+% Cecilia Kjellman, cecilia.kjellman@gmail.com
+% Artemis Mårtensson, anton.v.martensson@gmail.com
 
 \NeedsTeXFormat{LaTeX2e}[1994/06/01]
 \ProvidesClass{manus}[2018/07/30]
@@ -30,6 +30,7 @@
 \RequirePackage{tikz} % För indikatoreffekter. Måste vara efter xcolor.
 \RequirePackage{xspace}
 \RequirePackage[strict]{changepage}
+\RequirePackage{soul} % För underline
 
 \RequirePackage{fontspec}
 \newfontfamily\sjungfont{Cinzel-Bold}
@@ -188,6 +189,10 @@
 % Räkna scener.
 \newcounter{scen}[akt]
 \renewcommand\thescen{Scen \arabic{scen}}
+
+% Räkna sekvenser.
+\newcounter{sekvens}
+\renewcommand\thesekvens{Sekvens \arabic{sekvens}}
 
 % Räkna repliknummer.
 \newcounter{manus@radnummer}
@@ -478,7 +483,7 @@
 	% Påbörja den nya akten.
 	\newpage%
 	\stepcounter{akt}%
-	{\hspace{\manus@numbredd}\Large\bf\theakt}\par%
+	{\hspace{\manus@numbredd}\huge\bf\theakt}\par%
 	\vspace{\baselineskip}%
     \@ifstar{}{%
 	    \addcontentsline{toc}{section}{\theakt}%
@@ -491,17 +496,60 @@
 %% \scen{titel}{sammanfattning}
 %
 % Börja på en ny scen.
-\newcommand{\scen}[2]{%
+\newcommand{\scen}[3][default]{%
 	\vspace{\baselineskip}%
-	\needspace{5\baselineskip}%
+	\needspace{10\baselineskip}%
 	\stepcounter{scen}%
-	{\hspace{\manus@numbredd}\large\bf\thescen: #1}\par%
+	\ifthenelse{\equal{\detokenize{#1}}{\detokenize{default}}}
+    {{\hspace{\manus@numbredd}\Large\bf Scen: #2}\par%
 	\vspace{\baselineskip}%
-	\addcontentsline{toc}{subsection}{\thescen: #1}%
-	\scensammanfattning{#2}%
+	\addcontentsline{toc}{subsection}{Scen: #2}}
+    {{\hspace{\manus@numbredd}\Large\bf Scen #1: #2}\par%
+	\vspace{\baselineskip}%
+	\addcontentsline{toc}{subsection}{Scen #1: #2}}%
+	\scensammanfattning{#3}%
 	% Återställ namnkoll.
 	\global\let\manus@sistanamn\relax%
 }
+
+% Börja på en ny sekvens.
+\newcommand{\sekvens}[1]{%
+	\vspace{\baselineskip}%
+	\needspace{10\baselineskip}%
+    \refstepcounter{sekvens}
+    \label{#1}
+	%\stepcounter{sekvens}%
+{\hspace{\manus@numbredd}\large\bf\thesekvens}\par%
+	\vspace{\baselineskip}%
+	%\addcontentsline{toc}{subsubsection}{\thesekvens}
+	% Återställ namnkoll.
+	\global\let\manus@sistanamn\relax%
+}
+
+\newcommand{\om}[2]{%
+    \flwtext{Om #1, gå till \ref{#2}}%
+}
+
+\newcommand{\gå}[1]{%
+    \flwtext{Gå till \ref{#1}}%
+}
+
+\newcommand{\flöde}[1]{%
+    \flwtext{#1}%
+}
+
+\newcommand{\flwtext}[1]{%
+		\hbox{%
+			\hspace{\manus@numbredd}%
+			\hspace{\manus@namnbredd}%
+			\fbox{\parbox{\manus@textbredd}{\bf #1}}%
+			\hspace{\manus@kolavstand}%
+			\hspace{\value{manus@indikatorer}\manus@indbredd}%
+			%\hbox to 1em{\bf$\triangleleft$\hfil}%
+		}%
+		\vspace{\manus@radavstand}%
+		}%
+
 
 
 
@@ -903,6 +951,11 @@
 
 \newcommand\allgr[1]{%
 	\manus@skrivrad{* * *}{\bfseries{\textit{#1}}}{black}{true}{}%
+	\manus@raknastats%
+}
+
+\newcommand\allsj[1]{%
+	\manus@skrivrad{Alla}{\sjungfont  #1}{black}{true}%
 	\manus@raknastats%
 }
 
