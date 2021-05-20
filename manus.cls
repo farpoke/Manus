@@ -1,8 +1,8 @@
 % Cecilia Kjellman, cecilia.kjellman@gmail.com
-% Artemis Mårtensson, anton.v.martensson@gmail.com
+% Artemis Mårtensson, artemis.martensson@gmail.com
 
 \NeedsTeXFormat{LaTeX2e}[1994/06/01]
-\ProvidesClass{manus}[2018/07/30]
+\ProvidesClass{manus}[2021/05/14]
 
 
 
@@ -66,7 +66,7 @@
 \manus@alternativ{grupper}
 
 % Hantera okända klassalternativ.
-\DeclareOption*{\ClassError{manus}{Dokumentklassen Manus känner inte igen klassalternativet \CurrentOption.}{}}
+\DeclareOption*{\ClassError{manus}{Dokumentklassen Manus känner inte igen klassalternativet \CurrentOption. Du kanske menade något annat alternativ, eller kan ta bort alternativet helt.}{}}
 
 % Tolka givna alternativ.
 \ProcessOptions
@@ -94,6 +94,7 @@
 \newlength{\manus@randsep} % Avstånd mellan ränder för subspelsindikation.
 \newlength{\manus@randbredd} % Bredd på ränder för subspelsindikation.
 \newlength{\manus@musikmellanrum} % Mellanrum före och efter musik.
+\newlength{\manus@kuplettmellanrum} % Mellanrum före och efter kuplett.
 \newlength{\manus@gruppbredd} % Bredd på grupp-indikatorn.
 \newlength{\manus@gruppmellanrum} % Mellanrum innan grupp-indikatorn.
 \newlength{\manus@gruppkant} % Kantbredd på grupp-indikatorn.
@@ -109,6 +110,7 @@
 \setlength{\manus@randsep}{10pt}
 \setlength{\manus@randbredd}{5pt}
 \setlength{\manus@musikmellanrum}{2em}
+\setlength{\manus@kuplettmellanrum}{2em}
 \setlength{\manus@gruppbredd}{5pt}
 \setlength{\manus@gruppmellanrum}{5pt}
 \setlength{\manus@gruppkant}{1.5pt}
@@ -309,6 +311,22 @@
 	}%
 	% Skapa kommando för att skriva ut agerande från karaktären.
 	\expandafter\newcommand\csname#1gr\endcsname[1]{%
+		\manus@skrivrad{\tiny\csname#1@namn\endcsname}%
+			{\bfseries{\textit{##1}}}{#3}{true}{\csname#1@grupp\endcsname}%
+		% Räkna raden till statistiken.
+		\ifthenelse{\equal{#5}{true}}{\stepcounter{#1@stat@agerande}}{}%
+		\manus@raknastats%
+	}%
+	% Skapa alternativt kommando för att skriva ut agerande från karaktären.
+	\expandafter\newcommand\csname#1regi\endcsname[1]{%
+		\manus@skrivrad{\tiny\csname#1@namn\endcsname}%
+			{\bfseries{\textit{##1}}}{#3}{true}{\csname#1@grupp\endcsname}%
+		% Räkna raden till statistiken.
+		\ifthenelse{\equal{#5}{true}}{\stepcounter{#1@stat@agerande}}{}%
+		\manus@raknastats%
+	}%
+	% Skapa alternativt kommando för att skriva ut agerande från karaktären.
+	\expandafter\newcommand\csname#1gör\endcsname[1]{%
 		\manus@skrivrad{\tiny\csname#1@namn\endcsname}%
 			{\bfseries{\textit{##1}}}{#3}{true}{\csname#1@grupp\endcsname}%
 		% Räkna raden till statistiken.
@@ -603,6 +621,20 @@
     \expandafter\Append#4\To\manus@sammanfattningar% Melodi
 }
 
+%% \manus@sfnykuplett{namn}{beskrivning}{deltagare}
+%
+% Lägg till en kuplettsammanfattning i sammanfattningslistan.
+\newcommand\manus@sfnykuplett[4]{%
+	% Spara sammanfattning av typ "kuplett"
+	\Append\kuplett\To\manus@sammanfattningar%
+	\edef\tmp{\themanus@radnummer}% Expandera radnummer.
+	\expandafter\Append\tmp\To\manus@sammanfattningar%
+	\expandafter\Append#1\To\manus@sammanfattningar% titel
+	\expandafter\Append#2\To\manus@sammanfattningar% beskrivning
+	\expandafter\Append#3\To\manus@sammanfattningar% deltagare
+    \expandafter\Append#4\To\manus@sammanfattningar% Melodi
+}
+
 %% \sammanfattningslista
 %
 % Skriver ut sammanfattningslistan.
@@ -628,11 +660,156 @@
 		\emph{##4}\par%
 		##3%
 	}%
+	\def\kuplett\\##1\\##2\\##3\\##4\\##5{%
+		\par\vspace{1em}%
+		\hspace{-3em}\hbox to 2em{\hfil##1}\hspace{1em}%
+		\textcolor{kuplettfarg}{\MakeUppercase{##2}}\par%
+		\emph{##4}\par%
+		##3%
+	}%
 	\manus@sammanfattningar%
 	\endgroup%
 	\end{adjustwidth}
 }
 
+
+
+%%%%%%%%%% Kuplett %%%%%%%%%%
+
+% Bestäm färgen på kuplett beroende på om klassalternativet "svartvit"
+% har angetts eller inte.
+\ifthenelse{\boolean{svartvit}}
+	{\definecolor{kuplettfarg}{rgb}{0,0,0}}
+	{\definecolor{kuplettfarg}{rgb}{0.8,0.51,0}}
+
+%% \begin{kuplett}
+%
+% En kuplettmiljö.
+%
+%% \titel{titel}             : Ange titeln på denna kuplett.
+%% \beskrivning{beskrivning} : Ange beskrivning för denna kuplett.
+%% \melodi{melodi}           : Ange melodiförslag för denna kuplett.
+%
+%% \end{kuplett}
+\newenvironment{kuplett}[1][]{%
+	#1%
+	% Deklarera kommandon för kuplettinformation.
+	\newcommand{\titel}[1]{\def\ktitel{##1}}%
+	\newcommand{\deltagare}[1]{\xdef\kdeltagare{##1}}%
+	\newcommand{\beskrivning}[1]{%
+		\def\kbeskrivning{##1}%
+	}%
+	\newcommand{\melodi}[1]{\def\kmelodi{##1}}%
+	% Sätt alla värden till tomrum.
+	\titel{}%
+	\deltagare{}%
+	\beskrivning{}%
+	\melodi{}%
+	% Om deltagare inte specificeras antags alla som är på scen delta.
+	\begingroup%
+	\def\\##1\\##2\\##3\\##4\\##5{% \\{namn}\\{utskriftnamn}\\{ind}\\{sub}\\{färg}
+		\ifthenelse{\boolean{##3}}{%
+			\ifx\kdeltagare\empty%
+				\deltagare{\csname##1@namn\endcsname}%
+			\else%
+				\deltagare{\kdeltagare, \csname##1@namn\endcsname}%
+			\fi%
+		}{}%
+	}%
+	\manus@statistik%
+	\endgroup%
+}{%
+	% Skriv ut kupletten.
+	\mellanrum{\manus@kuplettmellanrum}%
+	\enkelrad[true]{\vbox{%
+		\hbox to \manus@textbredd{%
+			\parbox{\manus@textbredd}{\textbf{\textcolor{kuplettfarg}{%
+				\Large kuplett: \MakeUppercase{\ktitel}%
+			}}}%
+		}%
+		\vspace{5pt}%
+		\ifx\kmelodi\empty\else%
+			\hbox to \manus@textbredd{\parbox{\manus@textbredd}{%
+				Melodiförslag: \emph{\kmelodi}%
+			}}%
+			\hbox to \manus@textbredd{\parbox{\manus@textbredd}{%
+				\texttt{Melodi:}%
+			}}%
+		\fi%
+		\ifx\kdeltagare\empty\else%
+			\hbox to \manus@textbredd{\parbox{\manus@textbredd}{%
+				Deltagare: \emph{\kdeltagare}%
+			}}%
+		\fi%
+		\ifx\kbeskrivning\empty\else%
+			\hbox to \manus@textbredd{\parbox{\manus@textbredd}{%
+				Beskrivning: \emph{\kbeskrivning}
+			}}%
+		\fi%
+	}}%
+	\mellanrum{\manus@kuplettmellanrum}%
+	% Lägg till kupletten i innehållsförteckningen
+	\addcontentsline{toc}{subsubsection}{%
+		\textcolor{kuplettfarg}{\MakeUppercase{\ktitel}}\\%
+		Deltagare: \emph{\kdeltagare}%
+	}%
+	% Lägg till kuplettbeskrivning i sammanfattningslistan.
+	\manus@sfnykuplett{\ktitel}{\kbeskrivning}{\kdeltagare}{\kmelodi}%
+	% Räkna kuplettstatistik.
+	\manus@raknakuplett%
+}
+
+%% \kuplettlista
+%
+% kuplettlistan skriver ut en lista med kuplett. Egentligen bara en
+% variant av sammanfattningslistan.
+\newcommand\kuplettlista{%
+	% Ny sektion på ny sida för listan.
+	\newpage%
+	\begin{adjustwidth}{3em}{3em}%
+	\section*{kuplett}%
+	\addcontentsline{toc}{section}{kuplett}%
+	% Skiv ut all kuplett.
+	\begingroup%
+	\let\newline\\%
+	\def\\##1{##1}%
+	\def\scen\\##1\\##2\\##3{}%
+	\def\kuplett\\##1\\##2\\##3\\##4\\##5{%
+			\par\vspace{1em}%
+			\hspace{-3em}\hbox to 2em{\hfil##1}\hspace{1em}%
+			\textcolor{kuplettfarg}{\MakeUppercase{##2}}\par%
+			\emph{##4}\par%
+%            \texttt{##5}\par%
+			##3%
+	}%
+	\manus@sammanfattningar%
+	\endgroup%
+	\end{adjustwidth}
+}
+
+%% \melodilista
+%
+% kuplettlistan skriver ut en lista med kuplett. Egentligen bara en
+% variant av sammanfattningslistan.
+\newcommand\melodilista{%
+    % Ny sektion på ny sida för listan.
+	\newpage%
+	\section*{Melodiförslag}%
+	\addcontentsline{toc}{section}{Melodiförslag}%
+	% Skiv ut alla kuplett.
+	\begingroup%
+	\let\newline\\%
+	\def\\##1{##1}%
+	\def\scen\\##1\\##2\\##3{}%
+	\def\kuplett\\##1\\##2\\##3\\##4\\##5{%
+			\par\vspace{1em}%
+			\hspace{-3em}\hbox to 2em{\hfil##1}\hspace{1em}%
+			\textcolor{kuplettfarg}{\MakeUppercase{##2}}\par%
+            \texttt{##5}\par%
+	}%
+	\manus@sammanfattningar%
+	\endgroup%
+}
 
 
 %%%%%%%%%% Musik %%%%%%%%%%
@@ -748,36 +925,13 @@
 	\end{adjustwidth}
 }
 
-%% \melodilista
-%
-% musiklistan skriver ut en lista med Musik. Egentligen bara en
-% variant av sammanfattningslistan.
-\newcommand\melodilista{%
-    % Ny sektion på ny sida för listan.
-	\newpage%
-	\section*{Melodiförslag}%
-	\addcontentsline{toc}{section}{Melodiförslag}%
-	% Skiv ut alla Musik.
-	\begingroup%
-	\let\newline\\%
-	\def\\##1{##1}%
-	\def\scen\\##1\\##2\\##3{}%
-	\def\musik\\##1\\##2\\##3\\##4\\##5{%
-			\par\vspace{1em}%
-			\hspace{-3em}\hbox to 2em{\hfil##1}\hspace{1em}%
-			\textcolor{musikfarg}{\MakeUppercase{##2}}\par%
-            \texttt{##5}\par%
-	}%
-	\manus@sammanfattningar%
-	\endgroup%
-}
-
 
 
 %%%%%%%%%% Rekvisita %%%%%%%%%%
 
 % Tillfällig förstadefinition av \rekv.
 \newcommand\rekv[2][]{}
+\newcommand\rekvisita\rekv
 
 % Definition som innehåller rekvisitalistan.
 \def\manus@rekvlista{}
@@ -959,6 +1113,8 @@
 	\manus@raknastats%
 }
 
+\newcommand\nyhjälproll\nyhjalproll
+
 \newcommand\scenanv[1]{\enkelrad[true]{%
 	\tt%
 	\fontdimen2\font=0.5em%
@@ -970,12 +1126,25 @@
 	\booltrue{scenanvljud}%
 	#1%
 }}
+\newcommand\scenanvisning[1]{\scenanv{#1}}
+\newcommand\berattare[1]{\scenanv{#1}}
 \newcommand{\citat}[1]{``#1''}
 \newcommand\comment[1]{}
 \newcommand\enkelrad[2][false]{%
 	\manus@skrivrad{}{#2}{black}{#1}{}%
 }
 \newcommand\gr[1]{[\textit{#1}]}
+\newcommand\Todo\TODO
+\newcommand\todo\TODO
+
+\newcommand\gör\gr
+\newcommand\regi\gr
+
+\newcommand{\markera}[1]{-#1-}
+
+
+\newcommand{\Avbryts}{....}
+\newcommand{\avbryts}{\Avbryts}
 \newcommand\rentext[1]{#1}
 \newcommand\mellanrum[1]{%
 	\setlength{\manus@radstorlek}{#1}%
@@ -1193,11 +1362,13 @@
 	\newcounter{#1@stat@sjungande}%
 	\newcounter{#1@stat@agerande}%
 	\newcounter{#1@stat@Musik}%
+	\newcounter{#1@stat@kuplett}%
 	\newcounter{#1@stat@narvaro}%
 	\newcounter{#1@stat@subspel}%
 	% Skapa längder för statistik.
 	\expandafter\newdimen\csname#1@stat@repliker\endcsname%
 	\expandafter\newdimen\csname#1@stat@Musik\endcsname%
+	\expandafter\newdimen\csname#1@stat@kuplett\endcsname%
 	\expandafter\newdimen\csname#1@stat@narvaro\endcsname%
 	\expandafter\newdimen\csname#1@stat@subspel\endcsname%
 }
@@ -1230,6 +1401,32 @@
 %
 % Räkna musikstatistik.
 \newcommand\manus@raknamusik{%
+	\begingroup%
+	\newcount\tmp@count%
+	\tmp@count=0
+	\def\\##1\\##2\\##3\\##4\\##5{% \\{k.namn}\\{u.namn}\\{ind}\\{sub}\\{färg}
+		\ifthenelse{\boolean{##3}}{%
+			\stepcounter{##1@stat@Musik}%
+			\tmp@count=\numexpr\tmp@count+1%
+		}{}%
+	}%
+	\manus@statistik%
+	\pgfmathparse{1/\tmp@count}%
+	\def\\##1\\##2\\##3\\##4\\##5{% \\{k.namn}\\{u.namn}\\{ind}\\{sub}\\{färg}
+		\ifthenelse{\boolean{##3}}{%
+			\global\advance%
+				\csname##1@stat@Musik\endcsname%
+				by \pgfmathresult pt%
+		}{}%
+	}%
+	\manus@statistik%
+	\endgroup%
+}
+
+%% \manus@raknakuplett
+%
+% Räkna kuplettstatistik.
+\newcommand\manus@raknakuplett{%
 	\begingroup%
 	\newcount\tmp@count%
 	\tmp@count=0
@@ -1677,6 +1874,7 @@
 % specifierats där också.
 \newcommand\fothar[1]{\gdef\manus@fothar{#1}}
 \fothar{}
+\newcommand\fothär\fothar
 
 %% \fotfil[layoutnamn]{filnamn}
 %

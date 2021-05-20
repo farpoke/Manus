@@ -6,9 +6,12 @@
 \usepackage{pdfpages}
 
 \nyroll[red]{Foo}[Fåå]
+\nyroll[green!70!black]{Bär}
 \nyroll[green!70!black]{Bar}
 \nyroll{Hoy}[SNITM] % Sir Not In This Manus
 \nyroll[blue]{Baz}[Baz!]
+
+\nyhjälproll{Alla}
 
 %\deaktiveraBar
 \deaktiveraHoy
@@ -78,7 +81,7 @@
 
 \Foo{Test?}
 \Bazsub
-\Bar{Hej, nu går jag in i subspel.}
+\Bar{Hejsan, nu går jag in i subspel.}
 \TODO{En TODO med
 
 flera paragrafer.
@@ -97,6 +100,7 @@ Yay!}
 \Baz{Haha! Jag ändrar \rekv{indikatorbredden}!}
 \indikatorbredd{1em}
 \Foo{\citat{Foo} Hejsan}
+\Bär{Test}
 
 \Barsubslut
 \namnbyte{Bar}{Not-Bar}
@@ -120,10 +124,11 @@ Yay!}
 
 \scen{What?}{How?}
 
-\scenanv{Här nämner berättaren lite \rekv{rekvisita}.}
+\scenanv{Här nämner berättaren lite \rekv{rekvisita}, \rekvisita[ab]{stuff}, \rekv[stuffs]{stuffies}.}
 \Foo{Hello again!}
 \Bazin
 \Baz{Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Ut purus elit, vestibulum ut, placerat ac, adipiscing vitae, felis. Curabitur dictum gravida mauris. Nam arcu libero, nonummy eget, consectetuer id, vulputate a, magna. Donec vehicula augue eu neque. Pel- lentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Mauris ut leo. Cras viverra metus rhoncus sem.}
+\Alla{Wow!}
 
 \begin{musik}
 	\titel{En annan kuplett}
@@ -137,7 +142,9 @@ Yay!}
 \scen{Ny scen!}{}
 \Foo{Replik 3}
 \Foogr{Gör något. Möjligen involverande \rekv{rekvisita}...}
-\Foo{Och säger något igen. \gr{Petar på \rekv{rekvisita}}}
+\Foogör{Gör något mer.}
+\Fooregi{Gör något till.}
+\Foo{Och säger något igen. \gr{\Foonamn petar på \rekv{rekvisita}}}
 
 \rekvisitalista
 \musiklista
