@@ -1,4 +1,4 @@
-% Cecilia Kjellman, cecilia.kjellman@gmail.com
+% Mica Kjellman, mica.skogkatt@gmail.com
 % Artemis Mårtensson, artemis.martensson@gmail.com
 
 \NeedsTeXFormat{LaTeX2e}[1994/06/01]
@@ -33,8 +33,8 @@
 \RequirePackage{soul} % För underline
 
 \RequirePackage{fontspec}
-\newfontfamily\sjungfont{Cinzel-Bold}
-%\newcommand\sjungfont{\sc}
+%\newfontfamily\sjungfont{Cinzel-Bold}
+\newcommand\sjungfont{\sc}
 
 
 % Lite klassalternativ...
